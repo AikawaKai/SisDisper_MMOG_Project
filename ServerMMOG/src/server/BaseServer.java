@@ -21,19 +21,19 @@ public class BaseServer {
 	
 	static Map<String, Game> games = new HashMap<String, Game>();
 	
-	@GET
-	@Produces(MediaType.APPLICATION_XML)
-	@Path("/allgames")
-	public Map<String, Game> getGames(){
-		return games;
-	}
-	
 	@POST
 	@Consumes(MediaType.APPLICATION_XML)
 	@Path("/creategame")
 	public Response setGame(Game g){
 		games.put(g.getGame_name(), g);
 		return Response.ok(g.toString()).build();
+	}
+	
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	@Path("/allgames")
+	public Response getGames(){
+		return Response.ok(games.toString()).build();
 	}
 	
 	@GET
