@@ -1,8 +1,6 @@
 package server;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -15,33 +13,38 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import server.objects.Game;
+import server.objects.GamesMap;
 
 @Path("/game")
 public class BaseServer {
 	
-	static Map<String, Game> games = new HashMap<String, Game>();
+	static GamesMap games = new GamesMap();
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_XML)
 	@Path("/creategame")
 	public Response setGame(Game g){
+		if(games.containsKey(g.getGame_name()))
+			return Response.noContent().build();
 		games.put(g.getGame_name(), g);
-		return Response.ok(g.toString()).build();
+		return Response.created(null).build();
 	}
 	
 	@GET
-	@Produces(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_XML)
 	@Path("/allgames")
 	public Response getGames(){
-		return Response.ok(games.toString()).build();
+		return Response.ok(games).build();
 	}
 	
 	@GET
 	@Path("/getgame/{game}")
 	@Produces(MediaType.APPLICATION_XML)
 	public Response getGame(@PathParam("game") String game){
-		return Response.ok(games.get(game)).build();
+		if(games.containsKey(game)){
+			return Response.ok(games.get(game)).build();
+		}
+		return Response.noContent().build();
 	}
 	
-
 }

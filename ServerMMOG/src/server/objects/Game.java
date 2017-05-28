@@ -39,6 +39,14 @@ public class Game {
 		max_point = points;
 	}
 	
+	public Map<String, Player> getPlayers(){
+		return players;
+	}
+	
+	public void setPlayers(Map<String, Player> pl){
+		players = pl;
+	}
+	
 	public boolean insertPlayer(Player pl){
 		if(players.containsKey(pl.getName()))
 			return false;
@@ -50,5 +58,6 @@ public class Game {
 		return "Size: "+size_x+"\nMax_point: "+max_point+"\nName: "+game_name;
 	}
 	
-
 }
+
+
