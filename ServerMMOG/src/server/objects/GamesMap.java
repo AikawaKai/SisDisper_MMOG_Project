@@ -31,5 +31,12 @@ public class GamesMap {
 	public Game get(String name){
 		return games.get(name);
 	}
+	
+	public boolean remove(String name){
+		if(games.remove(name)!=null){
+			return true;
+		}
+		return false;
+	}
 
 }

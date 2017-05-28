@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Game {
 	private int size_x;
 	private int max_point;
+	private int max_players;
 	private String game_name;
 	private Map<String, Player> players = new HashMap<String, Player>();
 	
@@ -47,6 +48,14 @@ public class Game {
 		players = pl;
 	}
 	
+	public int getMax_Players(){
+		return max_players;
+	}
+	
+	public void setMax_Players(int max){
+		max_players = max;
+	}
+	
 	public boolean insertPlayer(Player pl){
 		if(players.containsKey(pl.getName()))
 			return false;
@@ -54,9 +63,21 @@ public class Game {
 		return true;
 	}
 	
+	public boolean containsPlayer(String pl){
+		if(players.containsKey(pl))
+			return true;
+		return false;
+	}
+	
+	public void removePlayer(String pl) {
+		players.remove(pl);
+	}
+	
 	public String toString(){
 		return "Size: "+size_x+"\nMax_point: "+max_point+"\nName: "+game_name;
 	}
+
+	
 	
 }
 

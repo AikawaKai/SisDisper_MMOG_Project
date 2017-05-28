@@ -1,9 +1,8 @@
 package server;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -14,6 +13,7 @@ import javax.ws.rs.core.Response;
 
 import server.objects.Game;
 import server.objects.GamesMap;
+import server.objects.Player;
 
 @Path("/game")
 public class BaseServer {
@@ -25,7 +25,7 @@ public class BaseServer {
 	@Path("/creategame")
 	public Response setGame(Game g){
 		if(games.containsKey(g.getGame_name()))
-			return Response.noContent().build();
+			return Response.status(HttpServletResponse.SC_CONFLICT).build();
 		games.put(g.getGame_name(), g);
 		return Response.created(null).build();
 	}
@@ -44,7 +44,48 @@ public class BaseServer {
 		if(games.containsKey(game)){
 			return Response.ok(games.get(game)).build();
 		}
-		return Response.noContent().build();
+		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 	}
+	
+	@DELETE
+	@Path("/deletegame/{game}")
+	public Response deleteGame(@PathParam("game") String game){
+		if(games.remove(game)){
+			return Response.ok().build();
+		}
+		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
+	}
+	
+	@POST
+	@Path("/addplayer/{game}")
+	@Consumes(MediaType.APPLICATION_XML)
+	public Response addPlayer(@PathParam("game") String game, Player pl){
+		if(games.containsKey(game)){
+			Game g = games.get(game);
+			if(!g.containsPlayer(pl.getName())){
+				g.insertPlayer(pl);
+				return Response.ok().build();
+			}
+			return Response.status(HttpServletResponse.SC_CONFLICT).build();
+		}
+		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
+	}
+	
+	@DELETE
+	@Path("/deleteplayer/{game}/{pl}")
+	public Response deletePLayer(@PathParam("game") String game, @PathParam("pl") String pl){
+		if(games.containsKey(game)){
+			Game g = games.get(game);
+			if(g.containsPlayer(pl))
+			{
+				g.removePlayer(pl);
+				return Response.ok().build();
+			}
+			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
+		}
+		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
+	}
+	
+	
 	
 }
