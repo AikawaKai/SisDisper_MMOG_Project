@@ -20,6 +20,13 @@ public class BaseServer {
 	
 	static GamesMap games = new GamesMap();
 	
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	@Path("/")
+	public Response checkConnect(){
+		return Response.ok("connesso").build();
+	}
+	
 	@POST
 	@Consumes(MediaType.APPLICATION_XML)
 	@Path("/creategame")
