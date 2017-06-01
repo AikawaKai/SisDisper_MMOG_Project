@@ -3,14 +3,17 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.net.Socket;
 import java.net.URI;
-
+import peer.objects.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 
 import org.glassfish.jersey.client.ClientConfig;
 
@@ -99,8 +102,15 @@ public class Main {
 		}
 	}
 	private static void gamesList(WebTarget target) {
-		String serverResponse;
-		serverResponse = target.path("allgames").request().get(String.class);
-		System.out.println(serverResponse);
+		try {
+			GamesMap map = new GamesMap();
+			JAXBContext ctx = JAXBContext.newInstance(GamesMap.class);
+			String serverResponse = target.path("allgames").request().get(String.class);
+			map = (GamesMap)ctx.createUnmarshaller().unmarshal(new StringReader(serverResponse));
+			map.prettyPrint();
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+		
 	}
 }
