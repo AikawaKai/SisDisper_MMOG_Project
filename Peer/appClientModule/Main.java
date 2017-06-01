@@ -28,6 +28,7 @@ public class Main {
 		Client client = ClientBuilder.newClient(config);
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 		URI basepath = null;
+		WebTarget target = null;
 
 		// handler della connessione
 		while(!serverResponse.equals("connesso"))
@@ -41,8 +42,9 @@ public class Main {
 				baseuri = "http://"+indirizzo_ip+":"+porta;
 				System.out.println("Server: "+baseuri);
 				basepath = UriBuilder.fromUri(baseuri).build();
-				WebTarget target = client.target(basepath);
+				target = client.target(basepath);
 				serverResponse = target.path("ServerMMOG").path("rest").path("game").request().get(String.class);
+				target = target.path("ServerMMOG").path("rest").path("game");
 				System.out.println(serverResponse);
 			}catch(Exception e){
 				System.out.println("Dati non corretti / Server non attivo");
@@ -74,10 +76,31 @@ public class Main {
 				scelta = Integer.parseInt(input);
 				if(scelta < 1 || scelta > 5){
 					System.out.println("Selezione errata");
+				}else if(scelta!=5){
+					menuHandler(scelta, target);
 				}
 			}
 		} catch (Exception e) {
 			System.out.println("Selezione errata");
 		}
+	}
+	private static void menuHandler(int scelta, WebTarget target){
+		switch(scelta){
+		case 1:
+			gamesList(target);
+			break;
+		case 2:
+			break;
+		case 3:
+			break;
+		case 4:
+			break;
+		default:
+		}
+	}
+	private static void gamesList(WebTarget target) {
+		String serverResponse;
+		serverResponse = target.path("allgames").request().get(String.class);
+		System.out.println(serverResponse);
 	}
 }
