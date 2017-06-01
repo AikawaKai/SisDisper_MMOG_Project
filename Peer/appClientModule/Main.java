@@ -20,41 +20,64 @@ public class Main {
 		String indirizzo_ip = null;
 		String input = null;
 		String nickname = null;
-		int porta = 0;
+		String baseuri = null;
 		String serverResponse = "non connesso";
+		int porta = 0;
+		int scelta = 1;
 		ClientConfig config = new ClientConfig();
 		Client client = ClientBuilder.newClient(config);
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-		UriBuilder.fromUri("http://localhost:8080/com.vogella.jersey.first").build();
-		String baseuri = null;
 		URI basepath = null;
 
 		// handler della connessione
 		while(!serverResponse.equals("connesso"))
 		{
 			try{
-				System.out.println("Indirizzo ip: ");
+				System.out.print("Indirizzo ip: ");
 				indirizzo_ip = bufferedReader.readLine();
-				System.out.println("Porta in ascolto: ");
+				System.out.print("Porta in ascolto: ");
 				input = bufferedReader.readLine();
 				porta = Integer.parseInt(input);
-				System.out.println("Indirizzo ip: "+indirizzo_ip + "| porta: "+porta);
 				baseuri = "http://"+indirizzo_ip+":"+porta;
+				System.out.println("Server: "+baseuri);
 				basepath = UriBuilder.fromUri(baseuri).build();
 				WebTarget target = client.target(basepath);
 				serverResponse = target.path("ServerMMOG").path("rest").path("game").request().get(String.class);
 				System.out.println(serverResponse);
 			}catch(Exception e){
-				e.printStackTrace();
-				System.out.println("Dati non corretti");
+				System.out.println("Dati non corretti / Server non attivo");
 			}
 		}
-
+		
+		// scelta nickname
 		try {
 			System.out.print("Inserisci il tuo nickname: ");
 			nickname = bufferedReader.readLine();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		
+		// menu
+		try {
+			while(scelta != 5){
+				System.out.println("");
+				System.out.println("###########################################");
+				System.out.println("#                  Menu                   #");
+				System.out.println("# 1 - Elenco partite in corso             #");
+				System.out.println("# 2 - Visualizza dettaglio di una partita #");
+				System.out.println("# 3 - Crea nuova partita                  #");
+				System.out.println("# 4 - Aggiungiti ad una partita esistente #");
+				System.out.println("# 5 - Exit");
+				System.out.println("###########################################");
+				System.out.println("Scegli: ");
+				input = bufferedReader.readLine();
+				scelta = Integer.parseInt(input);
+				if(scelta < 1 || scelta > 5){
+					System.out.println("Selezione errata");
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Selezione errata");
 		}
 	}
 }
