@@ -51,5 +51,20 @@ public class GamesMap {
 		}
 		
 	}
+	
+	public void gamesList(){
+		int i = 1;
+		System.out.println("Partite in corso:");
+		for (Map.Entry<String, Game> entry : games.entrySet()) {
+		    System.out.println(i+": "+entry.getValue().getGame_name());
+		    i++;
+		}
+	}
+	
+	public void gameDetails(String name){
+		Game game = games.get(name);
+		System.out.println(game);
+		
+	}
 
 }

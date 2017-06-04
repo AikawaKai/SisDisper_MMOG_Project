@@ -1,5 +1,8 @@
 package server;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -19,12 +22,25 @@ import server.objects.Player;
 public class BaseServer {
 	
 	static GamesMap games = new GamesMap();
+	static Set<String> nicknames = new HashSet<String>();
 	
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("/")
 	public Response checkConnect(){
 		return Response.ok("connesso").build();
+	}
+	
+	@GET
+	@Path("/checknickname/{nickname}")
+	public Response checkNickname(@PathParam("nickname") String name){
+		if(!nicknames.contains(name))
+		{
+			nicknames.add(name);
+			return Response.ok().build();
+		}
+			
+		return Response.status(HttpServletResponse.SC_CONFLICT).build();
 	}
 	
 	@POST
@@ -92,7 +108,5 @@ public class BaseServer {
 		}
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 	}
-	
-	
 	
 }
