@@ -59,11 +59,10 @@ public class Main {
 				if(status == 200)
 					System.out.println(serverResponse.readEntity(String.class));
 				else
-					System.out.println("Dati non corretti / Server non attivo");
+					System.out.println("Dati non corretti / Server non attivo.");
 				
 			}catch(Exception e){
-				e.printStackTrace();
-				System.out.println("Dati non corretti / Server non attivo");
+				System.out.println("Dati non corretti / Server non attivo.");
 			}
 		}
 		
@@ -89,7 +88,7 @@ public class Main {
 			try {
 				System.out.println("");
 				System.out.println("###########################################");
-				System.out.println("#                  Menu                   #");
+				System.out.println("#                  [MENU]                 #");
 				System.out.println("# 1 - Elenco partite in corso             #");
 				System.out.println("# 2 - Visualizza dettaglio di una partita #");
 				System.out.println("# 3 - Crea nuova partita                  #");
@@ -100,12 +99,12 @@ public class Main {
 				input = bufferedReader.readLine();
 				scelta = Integer.parseInt(input);
 				if(scelta < 1 || scelta > 5){
-					System.out.println("Selezione errata");
+					System.out.println("Selezione errata.");
 				}else if(scelta!=5){
 					menuHandler(scelta, target);
 				}
 			} catch (Exception e) {
-				System.out.println("Selezione errata");
+				System.out.println("Selezione errata.");
 			}
 		}
 		
@@ -144,7 +143,7 @@ public class Main {
 	private static void gameDetails(WebTarget target) {
 		try{
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-			System.out.println("Nome partita:");
+			System.out.print("Nome partita: ");
 			String name = bufferedReader.readLine();
 			Game game = new Game();
 			Invocation.Builder invocationBuilder =  target.path("getgame").path(name).request(MediaType.APPLICATION_XML);
@@ -154,7 +153,7 @@ public class Main {
 				game = serverResponse.readEntity(Game.class);
 				System.out.println(game);
 			}else{
-				System.out.println("Partita inesistente");
+				System.out.println("Partita inesistente.");
 			}
 		}catch (IOException e){
 			e.printStackTrace();
@@ -162,24 +161,34 @@ public class Main {
 	}
 	
 	private static void createGame(WebTarget target) {
-		try{
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-			System.out.print("Inserisci il nome della partita:");
-			String GameName = bufferedReader.readLine();
-			System.out.print("Inserisci la larghezza del quadrato di gioco:");
-			int N = integerReaderHandler(bufferedReader);
-			System.out.print("Inserisci il numero di punti della partita:");
-			int points = integerReaderHandler(bufferedReader);
-			Game game = new Game();
-			game.setGame_name(GameName);
-			game.setMax_point(points);
-			game.setSize_x(N);
-	
-			Invocation.Builder invocationBuilder =  target.path("creategame").request(MediaType.APPLICATION_XML);
-			Response response = invocationBuilder.post(Entity.entity(game, MediaType.APPLICATION_XML));
-			
-		}catch(IOException e){
-			e.printStackTrace();
+		int status = 0;
+		while(status!=201)
+		{
+			try{
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+				System.out.print("Inserisci il nome della partita: ");
+				String GameName = bufferedReader.readLine();
+				System.out.print("Inserisci la larghezza del quadrato di gioco: ");
+				int N = integerReaderHandler(bufferedReader);
+				System.out.print("Inserisci il numero di punti della partita: ");
+				int points = integerReaderHandler(bufferedReader);
+				Game game = new Game();
+				game.setGame_name(GameName);
+				game.setMax_point(points);
+				game.setSize_x(N);
+				Invocation.Builder invocationBuilder =  target.path("creategame").request(MediaType.APPLICATION_XML);
+				Response response = invocationBuilder.post(Entity.entity(game, MediaType.APPLICATION_XML));
+				status = response.getStatus();
+				if(status==409)
+					System.out.println("Nome partita già presente.");
+				else if(status==201)
+					System.out.println("Creazione avvenuta con successo.");
+				else
+					System.out.println("Creazione partita fallita.");
+				
+			}catch(IOException e){
+				e.printStackTrace();
+			}
 		}
 	}
 	
