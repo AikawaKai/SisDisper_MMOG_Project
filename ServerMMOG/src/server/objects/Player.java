@@ -9,7 +9,7 @@ public class Player {
 	private int points;
 	private String ip;
 	private int port;
-	private Game game;
+	private String gamename;
 	
 	public Player(){
 	}
@@ -30,12 +30,12 @@ public class Player {
 		pos = p;
 	}
 	
-	public Game getGame(){
-		return game;
+	public String getGameName(){
+		return gamename;
 	}
 	
-	public void setGame(Game g){
-		game = g;
+	public void setGameName(String g){
+		gamename = g;
 	}
 	
 	public int getPoints(){
