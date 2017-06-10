@@ -31,9 +31,8 @@ public class BaseServer {
 	@Consumes(MediaType.APPLICATION_XML)
 	@Path("/creategame")
 	public Response setGame(Game g){
-		if(games.containsKey(g.getGame_name()))
+		if(!games.put(g.getGame_name(), g))
 			return Response.status(HttpServletResponse.SC_CONFLICT).build();
-		games.put(g.getGame_name(), g);
 		return Response.created(null).build();
 	}
 	
@@ -41,15 +40,26 @@ public class BaseServer {
 	@Produces(MediaType.APPLICATION_XML)
 	@Path("/allgames")
 	public Response getGames(){
-		return Response.ok(games).build();
+		synchronized(games){
+			/*
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			*/
+			return Response.ok(games).build();
+		}
+			
 	}
 	
 	@GET
 	@Path("/getgame/{game}")
 	@Produces(MediaType.APPLICATION_XML)
 	public Response getGame(@PathParam("game") String game){
-		if(games.containsKey(game)){
-			return Response.ok(games.get(game)).build();
+		Game g = games.get(game);
+		if(g!=null){
+			return Response.ok(g).build();
 		}
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 	}
@@ -67,12 +77,10 @@ public class BaseServer {
 	@Path("/addplayer/{game}")
 	@Consumes(MediaType.APPLICATION_XML)
 	public Response addPlayer(@PathParam("game") String game, Player pl){
-		if(games.containsKey(game)){
-			Game g = games.get(game);
-			if(!g.containsPlayer(pl.getName())){
-				g.insertPlayer(pl);
+		Game g = games.get(game);
+		if(g!=null){
+			if(g.insertPlayer(pl))
 				return Response.ok().build();
-			}
 			return Response.status(HttpServletResponse.SC_CONFLICT).build();
 		}
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
@@ -81,11 +89,10 @@ public class BaseServer {
 	@DELETE
 	@Path("/deleteplayer/{game}/{pl}")
 	public Response deletePLayer(@PathParam("game") String game, @PathParam("pl") String pl){
-		if(games.containsKey(game)){
-			Game g = games.get(game);
-			if(g.containsPlayer(pl))
+		Game g = games.get(game);
+		if(g!=null){
+			if(g.removePlayer(pl))
 			{
-				g.removePlayer(pl);
 				return Response.ok().build();
 			}
 			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();

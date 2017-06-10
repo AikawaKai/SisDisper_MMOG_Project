@@ -21,49 +21,65 @@ public class GamesMap {
 		return games;
 	}
 	
-	public boolean containsKey(Object value){
-		return games.containsKey(value);
+	public synchronized boolean put(String name, Game game){
+		if(!games.containsKey(name)){
+			/*
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			*/
+			games.put(name, game);
+			return true;
+		}
+		return false;
+			
 	}
 	
-	public void put(String name, Game game){
-		games.put(name, game);
+	public synchronized Game get(String name){
+		if(games.containsKey(name)){
+			/*
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			*/
+			return games.get(name);
+		}
+		else
+			return null;
 	}
 	
-	public Game get(String name){
-		return games.get(name);
-	}
-	
-	public boolean remove(String name){
+	public synchronized boolean remove(String name){
 		if(games.remove(name)!=null){
+			/*
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			*/
 			return true;
 		}
 		return false;
 	}
 
-	public void prettyPrint() {
-		int i = 1;
-		for (Map.Entry<String, Game> entry : games.entrySet()) {
-			System.out.println("\n____________________\n");
-		    System.out.println("nr: "+i);
-		    System.out.println("Dettagli partita");
-		    System.out.println(entry.getValue());
-		    i++;
+	public synchronized void gamesList() {
+		/*
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
-		
-	}
-	
-	public void gamesList(){
+		*/
 		int i = 1;
 		System.out.println("Partite in corso:");
 		for (Map.Entry<String, Game> entry : games.entrySet()) {
 		    System.out.println(i+": "+entry.getValue().getGame_name());
 		    i++;
 		}
-	}
-	
-	public void gameDetails(String name){
-		Game game = games.get(name);
-		System.out.println(game);
 		
 	}
 

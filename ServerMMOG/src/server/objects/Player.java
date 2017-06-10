@@ -46,6 +46,10 @@ public class Player {
 		points = pnt;
 	}
 	
+	public void addPoints(int pnt){
+		points = points + pnt;
+	}
+	
 	public void setIp(String host){
 		ip = host;
 	}
