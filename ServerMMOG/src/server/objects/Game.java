@@ -115,15 +115,15 @@ public class Game {
 			e.printStackTrace();
 		}
 		*/
-		String players_string = "";
+		String players_string = "[Players]\n";
 		String player_str = "";
 		int i = 1;
 		for (Player pl : players) {
-			player_str = "Player"+i+": "+ pl.getName();
+			player_str = i+")Player: "+ pl.getName();
 		    players_string = players_string + player_str + "\n";
 		    i++;
 		}
-		return "Size: "+size_x+"\nMax_point: "+max_point+"\nName: "+game_name+"\n"+players_string;
+		return "Game name: "+game_name+"\n"+"Size: "+size_x+"\nMax_point: "+max_point+"\n"+players_string;
 	}
 	
 }

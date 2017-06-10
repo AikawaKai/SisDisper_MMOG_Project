@@ -146,6 +146,7 @@ public class Main {
 			if(serverResponse.getStatus()==200)
 			{
 				game = serverResponse.readEntity(Game.class);
+				System.out.println("----Dettaglio Partita----");
 				System.out.println(game);
 			}else{
 				System.out.println("Partita inesistente.");
