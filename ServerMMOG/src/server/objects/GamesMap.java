@@ -65,6 +65,33 @@ public class GamesMap {
 		}
 		return false;
 	}
+	
+	public synchronized int addPlayer(String game, Player pl) {
+		// TODO Auto-generated method stub
+		Game g = games.get(game);
+		if(g!=null)
+		{
+			if(g.insertPlayer(pl))
+			{
+				return 1;
+			}
+			return 0;
+		}
+		return -1;
+	}
+	
+	public synchronized int removePlayer(String game, String pl) {
+		Game g = games.get(game);
+		if(g!=null)
+		{
+			if(g.removePlayer(pl))
+			{
+				return 1;
+			}
+			return 0;
+		}
+		return -1;
+	}
 
 	public synchronized void gamesList() {
 		/*
@@ -79,8 +106,6 @@ public class GamesMap {
 		for (Map.Entry<String, Game> entry : games.entrySet()) {
 		    System.out.println(i+": "+entry.getValue().getGame_name());
 		    i++;
-		}
-		
+		}	
 	}
-
 }

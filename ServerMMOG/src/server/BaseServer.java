@@ -77,26 +77,22 @@ public class BaseServer {
 	@Path("/addplayer/{game}")
 	@Consumes(MediaType.APPLICATION_XML)
 	public Response addPlayer(@PathParam("game") String game, Player pl){
-		Game g = games.get(game);
-		if(g!=null){
-			if(g.insertPlayer(pl))
-				return Response.ok().build();
+		int res = games.addPlayer(game, pl);
+		if(res==1)
+			return Response.ok().build();
+		if(res==0)
 			return Response.status(HttpServletResponse.SC_CONFLICT).build();
-		}
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 	}
 	
 	@DELETE
 	@Path("/deleteplayer/{game}/{pl}")
 	public Response deletePLayer(@PathParam("game") String game, @PathParam("pl") String pl){
-		Game g = games.get(game);
-		if(g!=null){
-			if(g.removePlayer(pl))
-			{
-				return Response.ok().build();
-			}
-			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
-		}
+		int res = games.removePlayer(game, pl);
+		if(res==1)
+			return Response.ok().build();
+		if(res==0)
+			return Response.status(HttpServletResponse.SC_CONFLICT).build();
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 	}
 	
