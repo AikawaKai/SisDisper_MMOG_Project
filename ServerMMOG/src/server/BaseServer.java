@@ -94,8 +94,9 @@ public class BaseServer {
 			}
 			*/
 			g = games.get(game);
+			players = g.getPlayers();
 			if(res==1){
-				ThreadAddPlayerNotify notifyPlayers = new ThreadAddPlayerNotify(players, pl);
+				ThreadAddPlayerNotify notifyPlayers = new ThreadAddPlayerNotify(players, pl, g);
 				notifyPlayers.start();
 				return Response.ok(g).build();
 			}

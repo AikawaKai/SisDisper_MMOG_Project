@@ -2,7 +2,10 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ServerSocket;
 import java.net.URI;
+import java.util.Random;
+
 import peer.objects.*;
 
 import javax.ws.rs.client.Client;
@@ -28,6 +31,8 @@ public class Main {
 		int status = 0;
 		int porta = 0;
 		int scelta = 1;
+		int porta_peer = 0;
+		ServerSocket welcomeSocket = null;
 		ClientConfig config = new ClientConfig();
 		Client client = ClientBuilder.newClient(config);
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
@@ -73,8 +78,20 @@ public class Main {
 				System.out.println("Errore inserimento. ");
 			}
 		}
+		val = true;
+		while(val){
+			// 49152-65535
+			try {
+				porta_peer = randInt(49152, 65535);
+				welcomeSocket = new ServerSocket(porta_peer);
+				val = false;
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+		}
 		player.setIp("localhost");
-		player.setPort(20);
+		player.setPort(porta_peer);
 		player.setName(nickname);
 		
 		// menu
@@ -95,7 +112,7 @@ public class Main {
 				if(scelta < 1 || scelta > 5){
 					System.out.println("Selezione errata.");
 				}else if(scelta!=5){
-					menuHandler(scelta, target, player, game);
+					menuHandler(scelta, target, player, game, welcomeSocket);
 				}
 			} catch (Exception e) {
 				System.out.println("Selezione errata.");
@@ -103,7 +120,7 @@ public class Main {
 		}
 		
 	}
-	private static void menuHandler(int scelta, WebTarget target, Player player, String game){
+	private static void menuHandler(int scelta, WebTarget target, Player player, String game, ServerSocket welcomeSocket){
 		switch(scelta){
 		case 1:
 			gamesList(target);
@@ -112,10 +129,10 @@ public class Main {
 			gameDetails(target);
 			break;
 		case 3:
-			createGame(target, player);
+			createGame(target, player, welcomeSocket);
 			break;
 		case 4:
-			addPlayerToGame(target, player, game, 0);
+			addPlayerToGame(target, player, game, 0, welcomeSocket);
 		default:
 		}
 	}
@@ -156,7 +173,7 @@ public class Main {
 		}
 	}
 	
-	private static void createGame(WebTarget target, Player player) {
+	private static void createGame(WebTarget target, Player player, ServerSocket welcomeSocket) {
 		Game game = null;
 		int status = 0;
 		Invocation.Builder invocationBuilder;
@@ -192,16 +209,10 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
-		ThreadPlayingGame playing = new ThreadPlayingGame(game);
-		try {
-			playing.start();
-			playing.join();
-		} catch (InterruptedException e) {
-			System.out.println("Processo game interrotto.");
-		}
+		play(game, welcomeSocket);
 	}
 	
-	private static void addPlayerToGame(WebTarget target, Player player, String game_name, int type)
+	private static void addPlayerToGame(WebTarget target, Player player, String game_name, int type, ServerSocket welcomeSocket)
 	{
 		Game game;
 		if(type==0){
@@ -223,13 +234,7 @@ public class Main {
 		if(status==200){
 			System.out.println("Giocatore "+player.getName()+" aggiunto alla partita "+game_name);
 			game = response.readEntity(Game.class);
-			ThreadPlayingGame playing = new ThreadPlayingGame(game);
-			try {
-				playing.start();
-				playing.join();
-			} catch (InterruptedException e) {
-				System.out.println("Processo game interrotto.");
-			}
+			play(game, welcomeSocket);
 		}else if(status==406){
 			System.out.println("Partita inesistente. Impossibile aggiungere il giocatore. ");
 		}else if(status==409){
@@ -254,5 +259,33 @@ public class Main {
 		}
 		return number;
 		
+	}
+	
+	private static void play(Game game, ServerSocket welcomeSocket) {
+		ThreadPlayingGame playing = new ThreadPlayingGame(game, welcomeSocket);
+		try {
+			playing.start();
+			playing.join();
+		} catch (InterruptedException e) {
+			System.out.println("Processo game interrotto.");
+		}
+		
+	}
+	
+	private static int randInt(int min, int max) {
+
+	    // NOTE: This will (intentionally) not run as written so that folks
+	    // copy-pasting have to think about how to initialize their
+	    // Random instance.  Initialization of the Random instance is outside
+	    // the main scope of the question, but some decent options are to have
+	    // a field that is initialized once and then re-used as needed or to
+	    // use ThreadLocalRandom (if using at least Java 1.7).
+	    Random rand = new Random();;
+
+	    // nextInt is normally exclusive of the top value,
+	    // so add 1 to make it inclusive
+	    int randomNum = rand.nextInt((max - min) + 1) + min;
+
+	    return randomNum;
 	}
 }

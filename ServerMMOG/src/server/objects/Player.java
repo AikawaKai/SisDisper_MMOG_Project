@@ -35,9 +35,4 @@ public class Player {
 		return port;
 	}
 
-	public void messageNewPlayer(Player pl) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }
