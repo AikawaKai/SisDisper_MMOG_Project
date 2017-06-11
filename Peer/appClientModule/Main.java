@@ -157,7 +157,7 @@ public class Main {
 	}
 	
 	private static void createGame(WebTarget target, Player player) {
-		Game game;
+		Game game = null;
 		int status = 0;
 		Invocation.Builder invocationBuilder;
 		Response response;
@@ -176,6 +176,7 @@ public class Main {
 				game.setGame_name(GameName);
 				game.setMax_point(points);
 				game.setSize_x(N);
+				game.insertPlayer(player);
 				invocationBuilder =  target.path("creategame").request(MediaType.APPLICATION_XML);
 				response = invocationBuilder.post(Entity.entity(game, MediaType.APPLICATION_XML));
 				status = response.getStatus();
@@ -191,7 +192,13 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
-		addPlayerToGame(target, player, GameName, 1);
+		ThreadPlayingGame playing = new ThreadPlayingGame(game);
+		try {
+			playing.start();
+			playing.join();
+		} catch (InterruptedException e) {
+			System.out.println("Processo game interrotto.");
+		}
 	}
 	
 	private static void addPlayerToGame(WebTarget target, Player player, String game_name, int type)
@@ -217,7 +224,12 @@ public class Main {
 			System.out.println("Giocatore "+player.getName()+" aggiunto alla partita "+game_name);
 			game = response.readEntity(Game.class);
 			ThreadPlayingGame playing = new ThreadPlayingGame(game);
-			playing.run();
+			try {
+				playing.start();
+				playing.join();
+			} catch (InterruptedException e) {
+				System.out.println("Processo game interrotto.");
+			}
 		}else if(status==406){
 			System.out.println("Partita inesistente. Impossibile aggiungere il giocatore. ");
 		}else if(status==409){

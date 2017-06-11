@@ -50,7 +50,7 @@ public class Game {
 		players = pl;
 	}
 	
-	public HashSet<String> getPlayer_Names(){
+	public HashSet<String> getPlayer_names(){
 		return player_names;
 	}
 	

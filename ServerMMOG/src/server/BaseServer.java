@@ -1,5 +1,7 @@
 package server;
 
+import java.util.ArrayList;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -29,6 +31,7 @@ public class BaseServer {
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_XML)
+	@Produces(MediaType.APPLICATION_XML)
 	@Path("/creategame")
 	public Response setGame(Game g){
 		if(!games.put(g.getGame_name(), g))
@@ -80,6 +83,7 @@ public class BaseServer {
 	public Response addPlayer(@PathParam("game") String game, Player pl){
 		int res = -1;
 		Game g;
+		ArrayList<Player> players = null;
 		synchronized(games){
 			res = games.addPlayer(game, pl);
 			/*
@@ -90,12 +94,16 @@ public class BaseServer {
 			}
 			*/
 			g = games.get(game);
+			if(res==1){
+				ThreadAddPlayerNotify notifyPlayers = new ThreadAddPlayerNotify(players, pl);
+				notifyPlayers.start();
+				return Response.ok(g).build();
+			}
+			if(res==0)
+				return Response.status(HttpServletResponse.SC_CONFLICT).build();
+			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 		}
-		if(res==1)
-			return Response.ok(g).build();
-		if(res==0)
-			return Response.status(HttpServletResponse.SC_CONFLICT).build();
-		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
+		
 	}
 	
 	@DELETE
