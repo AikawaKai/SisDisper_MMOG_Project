@@ -43,10 +43,13 @@ public class ThreadAddPlayerNotify extends Thread{
 			e.printStackTrace();
 		}
 		synchronized(g){
-			for(Player pl_i: players){
+			int lenght = players.size();
+			for(int i=0; i<lenght-1;i++){
 				while(!response.equals("ok"))
 				{
 					try {
+						Player pl_i = players.get(i);
+						System.out.println("dati"+pl_i.getName()+pl_i.getPort());
 						peerSocket = new Socket(pl_i.getIp(), pl_i.getPort());
 						outToPeer = new DataOutputStream(peerSocket.getOutputStream());
 						inFromPeer = new BufferedReader(new InputStreamReader(peerSocket.getInputStream()));
@@ -66,6 +69,7 @@ public class ThreadAddPlayerNotify extends Thread{
 						System.out.println("Errore nella lettura");
 					}
 				}
+				response="";
 
 			}
 		}
