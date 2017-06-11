@@ -189,8 +189,6 @@ public class Main {
 			}catch(IOException e){
 				e.printStackTrace();
 			}
-			
-			player.setGameName(GameName);
 			addPlayerToGame(target, player, GameName, 1);
 		}
 	}

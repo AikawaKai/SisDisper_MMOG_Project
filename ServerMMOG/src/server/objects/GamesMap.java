@@ -38,14 +38,14 @@ public class GamesMap {
 	}
 	
 	public synchronized Game get(String name){
+		/*
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		*/
 		if(games.containsKey(name)){
-			/*
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			*/
 			return games.get(name);
 		}
 		else
@@ -53,21 +53,25 @@ public class GamesMap {
 	}
 	
 	public synchronized boolean remove(String name){
-		if(games.remove(name)!=null){
-			/*
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			*/
-			return true;
+		/*
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+		*/
+		if(games.remove(name)!=null)
+			return true;
 		return false;
 	}
 	
 	public synchronized int addPlayer(String game, Player pl) {
-		// TODO Auto-generated method stub
+		/*
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}*/
 		Game g = games.get(game);
 		if(g!=null)
 		{
@@ -81,6 +85,12 @@ public class GamesMap {
 	}
 	
 	public synchronized int removePlayer(String game, String pl) {
+		/*
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}*/
 		Game g = games.get(game);
 		if(g!=null)
 		{

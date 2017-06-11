@@ -38,14 +38,14 @@ public class GamesMap {
 	}
 	
 	public synchronized Game get(String name){
+		/*
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		*/
 		if(games.containsKey(name)){
-			/*
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			*/
 			return games.get(name);
 		}
 		else
@@ -53,17 +53,54 @@ public class GamesMap {
 	}
 	
 	public synchronized boolean remove(String name){
-		if(games.remove(name)!=null){
-			/*
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			*/
-			return true;
+		/*
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
+		*/
+		if(games.remove(name)!=null)
+			return true;
 		return false;
+	}
+	
+	public synchronized int addPlayer(String game, Player pl) {
+		/*
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}*/
+		Game g = games.get(game);
+		if(g!=null)
+		{
+			if(g.insertPlayer(pl))
+			{
+				return 1;
+			}
+			return 0;
+		}
+		return -1;
+	}
+	
+	public synchronized int removePlayer(String game, String pl) {
+		/*
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}*/
+		Game g = games.get(game);
+		if(g!=null)
+		{
+			if(g.removePlayer(pl))
+			{
+				return 1;
+			}
+			return 0;
+		}
+		return -1;
 	}
 
 	public synchronized void gamesList() {
@@ -79,8 +116,6 @@ public class GamesMap {
 		for (Map.Entry<String, Game> entry : games.entrySet()) {
 		    System.out.println(i+": "+entry.getValue().getGame_name());
 		    i++;
-		}
-		
+		}	
 	}
-
 }

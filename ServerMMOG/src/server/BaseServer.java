@@ -76,10 +76,23 @@ public class BaseServer {
 	@POST
 	@Path("/addplayer/{game}")
 	@Consumes(MediaType.APPLICATION_XML)
+	@Produces(MediaType.APPLICATION_XML)
 	public Response addPlayer(@PathParam("game") String game, Player pl){
-		int res = games.addPlayer(game, pl);
+		int res = -1;
+		Game g;
+		synchronized(games){
+			res = games.addPlayer(game, pl);
+			/*
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			*/
+			g = games.get(game);
+		}
 		if(res==1)
-			return Response.ok().build();
+			return Response.ok(g).build();
 		if(res==0)
 			return Response.status(HttpServletResponse.SC_CONFLICT).build();
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
@@ -92,7 +105,7 @@ public class BaseServer {
 		if(res==1)
 			return Response.ok().build();
 		if(res==0)
-			return Response.status(HttpServletResponse.SC_CONFLICT).build();
+			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 	}
 	
