@@ -157,6 +157,7 @@ public class Main {
 	}
 	
 	private static void createGame(WebTarget target, Player player) {
+		Game game;
 		int status = 0;
 		Invocation.Builder invocationBuilder;
 		Response response;
@@ -171,7 +172,7 @@ public class Main {
 				int N = integerReaderHandler(bufferedReader);
 				System.out.print("Inserisci il numero di punti della partita: ");
 				int points = integerReaderHandler(bufferedReader);
-				Game game = new Game();
+				game = new Game();
 				game.setGame_name(GameName);
 				game.setMax_point(points);
 				game.setSize_x(N);
@@ -189,17 +190,18 @@ public class Main {
 			}catch(IOException e){
 				e.printStackTrace();
 			}
-			addPlayerToGame(target, player, GameName, 1);
 		}
+		addPlayerToGame(target, player, GameName, 1);
 	}
 	
-	private static void addPlayerToGame(WebTarget target, Player player, String game, int type)
+	private static void addPlayerToGame(WebTarget target, Player player, String game_name, int type)
 	{
+		Game game;
 		if(type==0){
 			try {
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 				System.out.print("Inserisci il nome della partita a cui vuoi unirti: ");
-				game = bufferedReader.readLine();
+				game_name = bufferedReader.readLine();
 			} catch (IOException e) {
 				System.out.println("Aggiunta giocatore alla partita fallita. ");
 				return;
@@ -208,11 +210,14 @@ public class Main {
 		int status = 0;
 		Invocation.Builder invocationBuilder;
 		Response response;
-		invocationBuilder = target.path("addplayer").path(game).request(MediaType.APPLICATION_XML);
+		invocationBuilder = target.path("addplayer").path(game_name).request(MediaType.APPLICATION_XML);
 		response = invocationBuilder.post(Entity.entity(player, MediaType.APPLICATION_XML));
 		status = response.getStatus();
 		if(status==200){
-			System.out.println("Giocatore "+player.getName()+" aggiunto alla partita "+game);
+			System.out.println("Giocatore "+player.getName()+" aggiunto alla partita "+game_name);
+			game = response.readEntity(Game.class);
+			ThreadPlayingGame playing = new ThreadPlayingGame(game);
+			playing.run();
 		}else if(status==406){
 			System.out.println("Partita inesistente. Impossibile aggiungere il giocatore. ");
 		}else if(status==409){
