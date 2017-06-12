@@ -13,6 +13,8 @@ public class Game {
 	private String game_name;
 	private HashSet<String>player_names = new HashSet<String>();
 	private ArrayList<Player> players = new ArrayList<Player>(); //token ring
+	private ArrayList<ArrayList<Player>> toAdd = new ArrayList<ArrayList<Player>>();
+	private ArrayList<DeletePlayer> toDelete = new ArrayList<DeletePlayer>();
 	
 	public Game(){
 
@@ -71,41 +73,46 @@ public class Game {
 		{
 			return false;
 		}
-		/*
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		*/
 		player_names.add(pl.getName());
+		ArrayList<Player> list;
 		players.add(pl);
+		list = new ArrayList<Player>(players);
+
+		synchronized(toAdd){
+			toAdd.add(list);
+			toAdd.notify();
+		}
+
 		return true;
 	}
 	
 	public synchronized boolean removePlayer(String pl_name) {
-		if(player_names.contains(pl_name)){
-			/*
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			*/
-			player_names.remove(pl_name);
-			int i = 0;
-			for(Player pl: players){
-				if(pl.getName().equals(pl_name))
-				{
-					players.remove(i);
-					break;
-				}
-				i++;
-			}
-			return true;
+		if(!player_names.contains(pl_name)){
+			return false;
 		}
-		return false;
+		player_names.remove(pl_name);
+		DeletePlayer dp = null;
+		ArrayList<Player> list;
+		Player player_to_delete;
+		int i = 0;
+		for(Player pl: players){
+			if(pl.getName().equals(pl_name))
+			{
+				player_to_delete = players.remove(i);
+				list = new ArrayList<Player>(players);
+				dp = new DeletePlayer(list, player_to_delete);
+				break;
+			}
+			i++;
+		}
+
+		synchronized(toDelete){
+			toDelete.add(dp);
+			toDelete.notify();
+		}
+		return true;		
 	}
+
 	
 	public synchronized String toString(){
 		/*
@@ -124,6 +131,10 @@ public class Game {
 		    i++;
 		}
 		return "Game name: "+game_name+"\n"+"Size: "+size_x+"\nMax_point: "+max_point+"\n"+players_string;
+	}
+
+	public synchronized ArrayList<ArrayList<Player>> getToAddList() {
+		return toAdd;
 	}
 	
 }

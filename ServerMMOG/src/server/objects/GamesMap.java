@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class GamesMap {
-	HashMap <String, Game> games = new HashMap <String, Game>();
+	private HashMap <String, Game> games = new HashMap <String, Game>();
 	
 	public GamesMap(){
 		

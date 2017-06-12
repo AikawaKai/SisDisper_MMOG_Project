@@ -13,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import server.objects.DeletePlayer;
 import server.objects.Game;
 import server.objects.GamesMap;
 import server.objects.Player;
@@ -34,9 +35,23 @@ public class BaseServer {
 	@Produces(MediaType.APPLICATION_XML)
 	@Path("/creategame")
 	public Response setGame(Game g){
-		if(!games.put(g.getGame_name(), g))
-			return Response.status(HttpServletResponse.SC_CONFLICT).build();
-		return Response.created(null).build();
+		boolean res;
+		ArrayList<ArrayList<Player>> toaddplayers;
+		ArrayList<DeletePlayer> todeleteplayers;
+		ThreadConsumerAddPlayer addPlayer;
+		ThreadConsumerDeletePlayer delPlayer;
+		synchronized(games){
+			res = games.put(g.getGame_name(), g);
+			if(!res)
+				return Response.status(HttpServletResponse.SC_CONFLICT).build();
+			toaddplayers = g.getToAddList();
+			todeleteplayers = g.getToDelList();
+			addPlayer = new ThreadConsumerAddPlayer(toaddplayers);
+			addPlayer.start();
+			delPlayer = new ThreadConsumerDeletePlayer(todeleteplayers);
+			delPlayer.start();
+			return Response.created(null).build();
+		}
 	}
 	
 	@GET
@@ -44,13 +59,6 @@ public class BaseServer {
 	@Path("/allgames")
 	public Response getGames(){
 		synchronized(games){
-			/*
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			*/
 			return Response.ok(games).build();
 		}
 			
@@ -81,31 +89,18 @@ public class BaseServer {
 	@Consumes(MediaType.APPLICATION_XML)
 	@Produces(MediaType.APPLICATION_XML)
 	public Response addPlayer(@PathParam("game") String game, Player pl){
-		int res = -1;
-		Game g;
-		ArrayList<Player> players = null;
-		synchronized(games){
-			res = games.addPlayer(game, pl);
-			/*
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			int res;
+			Game g;
+			synchronized(games){
+				res = games.addPlayer(game, pl);
+				g = games.get(game);
 			}
-			*/
-			g = games.get(game);
-			players = g.getPlayers();
-			System.out.println(players);
 			if(res==1){
-				ThreadAddPlayerNotify notifyPlayers = new ThreadAddPlayerNotify(players, pl, g);
-				notifyPlayers.start();
 				return Response.ok(g).build();
 			}
 			if(res==0)
 				return Response.status(HttpServletResponse.SC_CONFLICT).build();
 			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
-		}
-		
 	}
 	
 	@DELETE

@@ -43,9 +43,36 @@ public class ThreadRequestsHandler extends Thread{
 			System.out.println("Notifica nuovo giocatore!");
 			playersUpdate();
 			break;
+		case "deleteplayer":
+			System.out.println("Notifica cancellazione giocatore!");
+			playersUpdateDelete();
 		default:
 		}
 		
+	}
+
+	private void playersUpdateDelete() {
+		String response = "";
+		JAXBContext jaxbContext;
+		StringReader reader;
+		Player pl;
+		Unmarshaller unmarshaller;
+		try {
+			jaxbContext = JAXBContext.newInstance(Player.class);
+			unmarshaller = jaxbContext.createUnmarshaller();
+			outToClient.writeBytes("ack\n");
+			response = inFromClient.readLine();
+			System.out.println(response);
+			reader = new StringReader(response);
+			pl = (Player) unmarshaller.unmarshal(reader);
+			outToClient.writeBytes("ok\n");
+			g.removePlayer(pl.getName());
+		} catch (JAXBException e1) {
+			e1.printStackTrace();
+		}catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
 	}
 
 	private void playersUpdate() {
