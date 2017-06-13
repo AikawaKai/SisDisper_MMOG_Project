@@ -90,7 +90,7 @@ public class ThreadRequestsHandler extends Thread{
 			reader = new StringReader(response);
 			pl = (Player) unmarshaller.unmarshal(reader);
 			outToClient.writeBytes("ok\n");
-			g.getPlayers().add(pl);
+			g.addPlayer(pl); // metodo sincronizzato
 		} catch (JAXBException e1) {
 			e1.printStackTrace();
 		}catch (IOException e) {

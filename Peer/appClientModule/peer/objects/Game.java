@@ -68,16 +68,19 @@ public class Game {
 		max_players = max;
 	}
 	
-	public synchronized boolean addPlayer(Player pl){
-		if(player_names.contains(pl.getName()))
-		{
-			return false;
+	public boolean addPlayer(Player pl){
+		synchronized(player_names){
+			if(player_names.contains(pl.getName()))
+			{
+				return false;
+			}
+			player_names.add(pl.getName());
 		}
-		player_names.add(pl.getName());
 		ArrayList<Player> list;
-		players.add(pl);
-		list = new ArrayList<Player>(players);
-
+		synchronized(players){
+			players.add(pl);
+			list = new ArrayList<Player>(players);
+		}
 		synchronized(toAdd){
 			toAdd.add(list);
 			toAdd.notify();
@@ -85,26 +88,31 @@ public class Game {
 		return true;
 	}
 	
-	public synchronized boolean removePlayer(String pl_name) {
-		if(!player_names.contains(pl_name)){
-			return false;
+	public boolean removePlayer(String pl_name) {
+		synchronized(player_names)
+		{
+			if(!player_names.contains(pl_name)){
+				return false;
+			}
+			player_names.remove(pl_name);
 		}
-		player_names.remove(pl_name);
 		DeletePlayer dp = null;
 		ArrayList<Player> list;
 		Player player_to_delete;
 		int i = 0;
-		for(Player pl: players){
-			if(pl.getName().equals(pl_name))
-			{
-				player_to_delete = players.remove(i);
-				list = new ArrayList<Player>(players);
-				dp = new DeletePlayer(list, player_to_delete);
-				break;
+		synchronized(players)
+		{
+			for(Player pl: players){
+				if(pl.getName().equals(pl_name))
+				{
+					player_to_delete = players.remove(i);
+					list = new ArrayList<Player>(players);
+					dp = new DeletePlayer(list, player_to_delete);
+					break;
+				}
+				i++;
 			}
-			i++;
 		}
-
 		synchronized(toDelete){
 			toDelete.add(dp);
 			toDelete.notify();
@@ -113,14 +121,17 @@ public class Game {
 	}
 
 	
-	public synchronized String toString(){
+	public String toString(){
 		String players_string = "[Players]\n";
 		String player_str = "";
 		int i = 1;
-		for (Player pl : players) {
-			player_str = i+")Player: "+ pl.getName();
-		    players_string = players_string + player_str + "\n";
-		    i++;
+		synchronized(players)
+		{
+			for (Player pl : players) {
+				player_str = i+")Player: "+ pl.getName();
+			    players_string = players_string + player_str + "\n";
+			    i++;
+			}
 		}
 		return "Game name: "+game_name+"\n"+"Size: "+size_x+"\nMax_point: "+max_point+"\n"+players_string;
 	}
