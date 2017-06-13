@@ -41,7 +41,7 @@ public class BaseServer {
 		ThreadConsumerAddPlayer addPlayer;
 		ThreadConsumerDeletePlayer delPlayer;
 		synchronized(g){ //blocco l'istanza game finché non preparo i suoi thread 
-			res = games.put(g.getGame_name(), g);
+			res = games.put(g.getGame_name(), g); //metodo sincronizzato
 			if(!res)
 				return Response.status(HttpServletResponse.SC_CONFLICT).build();
 			toaddplayers = g.getToAddList();
@@ -94,6 +94,7 @@ public class BaseServer {
 			int res;
 			Game g;
 			res = games.addPlayer(game, pl); //metodo sincronizzato
+			
 			g = games.get(game); // metodo sincronizzato
 			if(g!=null)
 			{

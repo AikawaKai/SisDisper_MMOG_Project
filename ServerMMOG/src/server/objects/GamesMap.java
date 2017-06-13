@@ -21,30 +21,34 @@ public class GamesMap {
 		return games;
 	}
 	
-	public synchronized boolean put(String name, Game game){
-		if(!games.containsKey(name)){
-			games.put(name, game);
-			return true;
+	public boolean put(String name, Game game){
+		synchronized(games){
+			if(!games.containsKey(name)){
+				games.put(name, game);
+				return true;
+			}
 		}
 		return false;
 			
 	}
 	
-	public synchronized Game get(String name){
-		if(games.containsKey(name)){
-			return games.get(name);
+	public Game get(String name){
+		synchronized(games){
+			if(games.containsKey(name))
+				return games.get(name);
 		}
-		else
-			return null;
+		return null;
 	}
 	
-	public synchronized boolean remove(String name){
-		if(games.remove(name)!=null)
-			return true;
+	public boolean remove(String name){
+		synchronized(games){
+			if(games.remove(name)!=null)
+				return true;
+		}
 		return false;
 	}
 	
-	public int addPlayer(String game, Player pl) {  //non sincronizzo per massimizzare interleaving
+	public int addPlayer(String game, Player pl) {  //non sincronizzo intero oggetto per massimizzare interleaving
 		Game g;
 		synchronized(games){
 			g = games.get(game);
@@ -58,7 +62,7 @@ public class GamesMap {
 		return -1;
 	}
 	
-	public int removePlayer(String game, String pl) { //non sincronizzo per massimizzare interleaving
+	public int removePlayer(String game, String pl) { //non sincronizzo intero oggetto per massimizzare interleaving
 		Game g;
 		synchronized(games){
 			g = games.get(game);
