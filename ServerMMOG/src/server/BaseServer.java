@@ -40,7 +40,7 @@ public class BaseServer {
 		ArrayList<DeletePlayer> todeleteplayers;
 		ThreadConsumerAddPlayer addPlayer;
 		ThreadConsumerDeletePlayer delPlayer;
-		synchronized(games){
+		synchronized(g){ //blocco l'istanza game finché non preparo i suoi thread 
 			res = games.put(g.getGame_name(), g);
 			if(!res)
 				return Response.status(HttpServletResponse.SC_CONFLICT).build();
@@ -50,15 +50,15 @@ public class BaseServer {
 			addPlayer.start();
 			delPlayer = new ThreadConsumerDeletePlayer(todeleteplayers);
 			delPlayer.start();
-			return Response.created(null).build();
 		}
+		return Response.created(null).build();
 	}
 	
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
 	@Path("/allgames")
 	public Response getGames(){
-		synchronized(games){
+		synchronized(games){ //blocco l'istanza games finché non costruisco il messaggio
 			return Response.ok(games).build();
 		}
 			
@@ -70,7 +70,9 @@ public class BaseServer {
 	public Response getGame(@PathParam("game") String game){
 		Game g = games.get(game);
 		if(g!=null){
-			return Response.ok(g).build();
+			synchronized(g){
+				return Response.ok(g).build();
+			}
 		}
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 	}
@@ -78,7 +80,7 @@ public class BaseServer {
 	@DELETE
 	@Path("/deletegame/{game}")
 	public Response deleteGame(@PathParam("game") String game){
-		if(games.remove(game)){
+		if(games.remove(game)){ //metodo sincronizzato
 			return Response.ok().build();
 		}
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
@@ -91,16 +93,22 @@ public class BaseServer {
 	public Response addPlayer(@PathParam("game") String game, Player pl){
 			int res;
 			Game g;
-			synchronized(games){
-				res = games.addPlayer(game, pl);
-				g = games.get(game);
-			}
-			if(res==1){
-				return Response.ok(g).build();
+			res = games.addPlayer(game, pl); //metodo sincronizzato
+			g = games.get(game); // metodo sincronizzato
+			if(g!=null)
+			{
+				synchronized(g) // sincronizzo per evitare modifiche mentre sto inviando il dato
+				{
+					if(res==1){
+						return Response.ok(g).build();
+					}
+					
+				}
 			}
 			if(res==0)
 				return Response.status(HttpServletResponse.SC_CONFLICT).build();
 			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
+			
 	}
 	
 	@DELETE

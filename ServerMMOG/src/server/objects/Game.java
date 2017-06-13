@@ -28,7 +28,7 @@ public class Game {
 		return max_point;
 	}
 	
-	public String getGame_name(){
+	public synchronized String getGame_name(){
 		return game_name;
 	}
 	
@@ -68,7 +68,7 @@ public class Game {
 		max_players = max;
 	}
 	
-	public synchronized boolean insertPlayer(Player pl){
+	public synchronized boolean addPlayer(Player pl){
 		if(player_names.contains(pl.getName()))
 		{
 			return false;
@@ -82,7 +82,6 @@ public class Game {
 			toAdd.add(list);
 			toAdd.notify();
 		}
-
 		return true;
 	}
 	
@@ -115,13 +114,6 @@ public class Game {
 
 	
 	public synchronized String toString(){
-		/*
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		*/
 		String players_string = "[Players]\n";
 		String player_str = "";
 		int i = 1;
@@ -137,7 +129,7 @@ public class Game {
 		return toAdd;
 	}
 
-	public ArrayList<DeletePlayer> getToDelList() {
+	public synchronized ArrayList<DeletePlayer> getToDelList() {
 		// TODO Auto-generated method stub
 		return toDelete;
 	}

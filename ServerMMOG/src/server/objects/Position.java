@@ -26,12 +26,12 @@ public class Position {
 		pos_y = y;
 	}
 	
-	public synchronized void changePos(int x, int y){
+	public void changePos(int x, int y){
 		pos_x = x;
 		pos_y = y;
 	}
 
-	public synchronized boolean samePos(Position position) {
+	public boolean samePos(Position position) {
 		if (pos_x == position.getPos_x() && pos_y == position.getPos_y()){
 			return true;
 		}

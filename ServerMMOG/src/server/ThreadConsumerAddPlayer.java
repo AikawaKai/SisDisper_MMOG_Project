@@ -33,7 +33,6 @@ public class ThreadConsumerAddPlayer extends Thread{
 		try {
 			jaxbContext = JAXBContext.newInstance(Player.class);
 		} catch (JAXBException e2) {
-			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
 		String player_s = null;
@@ -45,7 +44,6 @@ public class ThreadConsumerAddPlayer extends Thread{
 					try {
 						players_to_add.wait();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -55,7 +53,6 @@ public class ThreadConsumerAddPlayer extends Thread{
 				try {
 					player_s = asString(jaxbContext, last);
 				} catch (JAXBException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				int i = 0;
@@ -71,7 +68,6 @@ public class ThreadConsumerAddPlayer extends Thread{
 							outToPeer.writeBytes("newplayer\n");
 							response = inFromPeer.readLine();
 							if(response.equals("ack")){
-
 								outToPeer.writeBytes(player_s+"\n");
 							}
 							response = inFromPeer.readLine();
@@ -84,7 +80,6 @@ public class ThreadConsumerAddPlayer extends Thread{
 							e.printStackTrace();
 							System.out.println("Errore nella lettura");
 						}
-						
 					}
 					response="";
 				}
@@ -93,14 +88,10 @@ public class ThreadConsumerAddPlayer extends Thread{
 	}
 
 	public String asString(JAXBContext pContext, Object pObject) throws JAXBException {
-
 		StringWriter sw = new StringWriter();
-
 		Marshaller marshaller = pContext.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
 		marshaller.marshal(pObject, sw);
-
 		return sw.toString();
 	}
-
 }

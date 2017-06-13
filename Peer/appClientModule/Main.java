@@ -193,7 +193,7 @@ public class Main {
 				game.setGame_name(GameName);
 				game.setMax_point(points);
 				game.setSize_x(N);
-				game.insertPlayer(player);
+				game.addPlayer(player);
 				invocationBuilder =  target.path("creategame").request(MediaType.APPLICATION_XML);
 				response = invocationBuilder.post(Entity.entity(game, MediaType.APPLICATION_XML));
 				status = response.getStatus();

@@ -47,7 +47,6 @@ public class ThreadConsumerDeletePlayer extends Thread{
 					try {
 						players_to_delete.wait();
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -58,7 +57,6 @@ public class ThreadConsumerDeletePlayer extends Thread{
 				try {
 					player_s = asString(jaxbContext, to_delete);
 				} catch (JAXBException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				for(int i=0; i<lenght;i++){
@@ -73,7 +71,6 @@ public class ThreadConsumerDeletePlayer extends Thread{
 							outToPeer.writeBytes("deleteplayer\n");
 							response = inFromPeer.readLine();
 							if(response.equals("ack")){
-
 								outToPeer.writeBytes(player_s+"\n");
 							}
 							response = inFromPeer.readLine();
@@ -94,13 +91,10 @@ public class ThreadConsumerDeletePlayer extends Thread{
 	}
 
 	public String asString(JAXBContext pContext, Object pObject) throws JAXBException {
-
 		StringWriter sw = new StringWriter();
-
 		Marshaller marshaller = pContext.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
 		marshaller.marshal(pObject, sw);
-
 		return sw.toString();
 	}
 
