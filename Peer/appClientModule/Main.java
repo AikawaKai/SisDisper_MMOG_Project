@@ -96,26 +96,21 @@ public class Main {
 		
 		// menu
 		while(scelta != 5){
-			try {
-				System.out.println("");
-				System.out.println("###########################################");
-				System.out.println("#                  [MENU]                 #");
-				System.out.println("# 1 - Elenco partite in corso             #");
-				System.out.println("# 2 - Visualizza dettaglio di una partita #");
-				System.out.println("# 3 - Crea nuova partita                  #");
-				System.out.println("# 4 - Aggiungiti ad una partita esistente #");
-				System.out.println("# 5 - Exit                                #");
-				System.out.println("###########################################");
-				System.out.print("Scegli: ");
-				input = bufferedReader.readLine();
-				scelta = Integer.parseInt(input);
-				if(scelta < 1 || scelta > 5){
-					System.out.println("Selezione errata.");
-				}else if(scelta!=5){
-					menuHandler(scelta, target, player, game, welcomeSocket);
-				}
-			} catch (Exception e) {
+			System.out.println("");
+			System.out.println("###########################################");
+			System.out.println("#                  [MENU]                 #");
+			System.out.println("# 1 - Elenco partite in corso             #");
+			System.out.println("# 2 - Visualizza dettaglio di una partita #");
+			System.out.println("# 3 - Crea nuova partita                  #");
+			System.out.println("# 4 - Aggiungiti ad una partita esistente #");
+			System.out.println("# 5 - Exit                                #");
+			System.out.println("###########################################");
+			System.out.print("Scegli: ");
+			scelta = integerReaderHandler(bufferedReader);
+			if(scelta < 1 || scelta > 5){
 				System.out.println("Selezione errata.");
+			}else if(scelta!=5){
+				menuHandler(scelta, target, player, game, welcomeSocket);
 			}
 		}
 		
@@ -245,7 +240,7 @@ public class Main {
 		
 	}
 	
-	private static int integerReaderHandler(BufferedReader bufferedReader) throws IOException {
+	private static int integerReaderHandler(BufferedReader bufferedReader){
 		int number = 0;
 		boolean val = true;
 		while(val){
@@ -255,6 +250,8 @@ public class Main {
 			} catch (NumberFormatException e) {
 				System.out.println("Dato errato.");
 				System.out.print("Riprova: ");
+			}catch(IOException e){
+				e.printStackTrace();
 			}
 		}
 		return number;

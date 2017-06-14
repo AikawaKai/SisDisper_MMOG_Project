@@ -53,14 +53,16 @@ public class ThreadRequestsHandler extends Thread{
 			doMove();
 		default:
 		}
-		
 	}
 
 	private void doMove() {
+		int scelta;
 		System.out.println("Scegli cosa fare:");
-		System.out.println("1) muoviti in una direzione");
-		System.out.println("2) Usa una bomba (se ne possiedi una)");
-		
+		System.out.println("1 - muoviti in una direzione");
+		System.out.println("2 - Usa una bomba (se ne possiedi una)");
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+		System.out.print("Scelta: ");
+		scelta = integerReaderHandler(bufferedReader);
 	}
 
 	private void playersUpdateDelete() {
@@ -111,6 +113,24 @@ public class ThreadRequestsHandler extends Thread{
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+	}
+	
+	private static int integerReaderHandler(BufferedReader bufferedReader){
+		int number = 0;
+		boolean val = true;
+		while(val){
+			try {
+				number = Integer.parseInt(bufferedReader.readLine());
+				val = false;
+			} catch (NumberFormatException e) {
+				System.out.println("Dato errato.");
+				System.out.print("Riprova: ");
+			} catch (IOException e){
+				e.printStackTrace();
+			}
+		}
+		return number;
 		
 	}
 
