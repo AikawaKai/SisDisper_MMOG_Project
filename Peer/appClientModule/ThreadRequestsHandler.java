@@ -56,21 +56,22 @@ public class ThreadRequestsHandler extends Thread{
 		JAXBContext jaxbContext;
 		StringReader reader;
 		Player pl;
+		String pl_name;
 		Unmarshaller unmarshaller;
 		try {
 			jaxbContext = JAXBContext.newInstance(Player.class);
 			unmarshaller = jaxbContext.createUnmarshaller();
 			outToClient.writeBytes("ack\n");
 			response = inFromClient.readLine();
-			System.out.println(response);
 			reader = new StringReader(response);
 			pl = (Player) unmarshaller.unmarshal(reader);
 			outToClient.writeBytes("ok\n");
-			g.removePlayer(pl.getName());
+			pl_name = pl.getName();
+			g.removePlayer(pl_name);
+			System.out.println("["+pl_name+"]");
 		} catch (JAXBException e1) {
 			e1.printStackTrace();
 		}catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}	
 	}
@@ -80,21 +81,22 @@ public class ThreadRequestsHandler extends Thread{
 		JAXBContext jaxbContext;
 		StringReader reader;
 		Player pl;
+		String pl_name;
 		Unmarshaller unmarshaller;
 		try {
 			jaxbContext = JAXBContext.newInstance(Player.class);
 			unmarshaller = jaxbContext.createUnmarshaller();
 			outToClient.writeBytes("ack\n");
 			response = inFromClient.readLine();
-			System.out.println(response);
 			reader = new StringReader(response);
 			pl = (Player) unmarshaller.unmarshal(reader);
 			outToClient.writeBytes("ok\n");
+			pl_name = pl.getName();
 			g.addPlayer(pl); // metodo sincronizzato
+			System.out.println("["+pl_name+"]");
 		} catch (JAXBException e1) {
 			e1.printStackTrace();
 		}catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

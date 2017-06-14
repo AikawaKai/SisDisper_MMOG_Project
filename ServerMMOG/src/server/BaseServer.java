@@ -103,7 +103,6 @@ public class BaseServer {
 					if(res==1){
 						return Response.ok(g).build();
 					}
-					
 				}
 			}
 			if(res==0)
@@ -122,5 +121,4 @@ public class BaseServer {
 			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 	}
-	
 }
