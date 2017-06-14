@@ -68,6 +68,7 @@ public class Game {
 		max_players = max;
 	}
 	
+	// metodo per l'aggiunta di un giocatore alla parita
 	public synchronized boolean addPlayer(Player pl){
 		if(player_names.contains(pl.getName()))
 		{
@@ -77,13 +78,14 @@ public class Game {
 		ArrayList<Player> list;
 		players.add(pl);
 		list = new ArrayList<Player>(players);
-		synchronized(toAdd){
+		synchronized(toAdd){ //sincronizzazione per la notify al thread che si occupa di aggiornare i giocatori
 			toAdd.add(list);
 			toAdd.notify();
 		}
 		return true;
 	}
 	
+	// metodo per la rimozione di un giocatore di nome pl_name dalla partita
 	public synchronized boolean removePlayer(String pl_name) {
 		if(!player_names.contains(pl_name)){
 			return false;
@@ -103,14 +105,14 @@ public class Game {
 			}
 			i++;
 		}
-		synchronized(toDelete){
+		synchronized(toDelete){ //sincronizzazione per la notify al thread che si occupa di cancellare
 			toDelete.add(dp);
 			toDelete.notify();
 		}
 		return true;		
 	}
 
-	
+	// metodo toString della partita
 	public synchronized String toString(){
 		String players_string = "[Players]\n";
 		String player_str = "";
@@ -122,14 +124,20 @@ public class Game {
 		}
 		return "Game name: "+game_name+"\n"+"Size: "+size_x+"\nMax_point: "+max_point+"\n"+players_string;
 	}
-
+	
+	// metodo che restituisce il rif. alla lista di giocatori da aggiungere
 	public synchronized ArrayList<ArrayList<Player>> getToAddList() {
 		return toAdd;
 	}
-
+	
+	// metodo che restituisce il rif. alla lista di giocatori da cancellare
 	public synchronized ArrayList<DeletePlayer> getToDelList() {
-		// TODO Auto-generated method stub
 		return toDelete;
+	}
+	
+	// metodo per il conteggio dei giocatori attualmente presenti in parita
+	public synchronized int numPlayers() {
+		return players.size();
 	}
 	
 }

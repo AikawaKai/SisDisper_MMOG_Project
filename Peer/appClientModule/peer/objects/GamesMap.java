@@ -21,6 +21,7 @@ public class GamesMap {
 		return games;
 	}
 	
+	//metodo per l'inserimento di una partita nella mappa delle partite
 	public boolean put(String name, Game game){
 		synchronized(games){ //sincronizzo per evitare che qualcuno scriva mentre aggiungo un nuovo riferimento alla mappa
 			if(!games.containsKey(name)){
@@ -71,7 +72,13 @@ public class GamesMap {
 		if(g!=null) //controllo che l'istanza esista
 		{
 			if(g.removePlayer(pl)) //metodo sincronizzato sull'istanza game
+			{
+				synchronized(g){ //sincronizzo per evitare che qualcuno stia aggiungendo giocatori mentre controllo
+					if(g.numPlayers()==0) 
+							this.remove(game); //metodo sincronizzato su games
+				}
 				return 1; //ho rimosso il giocatore "pl"
+			}
 			return 0; //il giocatore nella partita non esiste
 		}
 		return -1; //la partita non esiste
@@ -87,6 +94,5 @@ public class GamesMap {
 				i++;
 			}	
 		}
-		
 	}
 }

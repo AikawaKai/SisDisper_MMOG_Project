@@ -23,6 +23,7 @@ public class BaseServer {
 	
 	static GamesMap games = new GamesMap();
 	
+	// metodo REST per la verifica dei dati per le REST request
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("/")
@@ -30,6 +31,7 @@ public class BaseServer {
 		return Response.ok("connesso").build();
 	}
 	
+	// metodo REST per la creazione di una martita
 	@POST
 	@Consumes(MediaType.APPLICATION_XML)
 	@Produces(MediaType.APPLICATION_XML)
@@ -54,6 +56,8 @@ public class BaseServer {
 		return Response.created(null).build();
 	}
 	
+	
+	// metodo REST per la restituzione di tutte le partite in corso
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
 	@Path("/allgames")
@@ -64,6 +68,7 @@ public class BaseServer {
 			
 	}
 	
+	// metodo REST per la restituzione dell'istanza di una partita
 	@GET
 	@Path("/getgame/{game}")
 	@Produces(MediaType.APPLICATION_XML)
@@ -77,6 +82,7 @@ public class BaseServer {
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 	}
 	
+	// metodo REST per la cancellazione di una partita
 	@DELETE
 	@Path("/deletegame/{game}")
 	public Response deleteGame(@PathParam("game") String game){
@@ -86,6 +92,7 @@ public class BaseServer {
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 	}
 	
+	// metodo REST per l'aggiunta di un giocatore
 	@POST
 	@Path("/addplayer/{game}")
 	@Consumes(MediaType.APPLICATION_XML)
@@ -107,10 +114,10 @@ public class BaseServer {
 			}
 			if(res==0)
 				return Response.status(HttpServletResponse.SC_CONFLICT).build();
-			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
-			
+			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();		
 	}
 	
+	// metodo REST per la cancellazione di un giocatore
 	@DELETE
 	@Path("/deleteplayer/{game}/{pl}")
 	public Response deletePLayer(@PathParam("game") String game, @PathParam("pl") String pl){

@@ -21,6 +21,7 @@ public class GamesMap {
 		return games;
 	}
 	
+	//metodo per l'inserimento di una partita nella mappa delle partite
 	public boolean put(String name, Game game){
 		synchronized(games){ //sincronizzo per evitare che qualcuno scriva mentre aggiungo un nuovo riferimento alla mappa
 			if(!games.containsKey(name)){
