@@ -139,6 +139,14 @@ public class Game {
 	public synchronized int numPlayers() {
 		return players.size();
 	}
+
+	public synchronized Player getFirstPlayer() {
+		if(players.size()>0){
+			return players.get(0);
+		}
+		return null;
+		
+	}
 	
 }
 

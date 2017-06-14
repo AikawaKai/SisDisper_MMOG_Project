@@ -209,7 +209,7 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
-		play(game, welcomeSocket);
+		play(player.getName(), game, welcomeSocket);
 	}
 	
 	private static void addPlayerToGame(WebTarget target, Player player, String game_name, int type, ServerSocket welcomeSocket)
@@ -234,7 +234,7 @@ public class Main {
 		if(status==200){
 			System.out.println("Giocatore "+player.getName()+" aggiunto alla partita "+game_name);
 			game = response.readEntity(Game.class);
-			play(game, welcomeSocket);
+			play(player.getName(), game, welcomeSocket);
 		}else if(status==406){
 			System.out.println("Partita inesistente. Impossibile aggiungere il giocatore. ");
 		}else if(status==409){
@@ -261,8 +261,8 @@ public class Main {
 		
 	}
 	
-	private static void play(Game game, ServerSocket welcomeSocket) {
-		ThreadPlayingGame playing = new ThreadPlayingGame(game, welcomeSocket);
+	private static void play(String my_name, Game game, ServerSocket welcomeSocket) {
+		ThreadPlayingGame playing = new ThreadPlayingGame(my_name, game, welcomeSocket);
 		try {
 			playing.start();
 			playing.join();
@@ -273,17 +273,7 @@ public class Main {
 	}
 	
 	private static int randInt(int min, int max) {
-
-	    // NOTE: This will (intentionally) not run as written so that folks
-	    // copy-pasting have to think about how to initialize their
-	    // Random instance.  Initialization of the Random instance is outside
-	    // the main scope of the question, but some decent options are to have
-	    // a field that is initialized once and then re-used as needed or to
-	    // use ThreadLocalRandom (if using at least Java 1.7).
-	    Random rand = new Random();;
-
-	    // nextInt is normally exclusive of the top value,
-	    // so add 1 to make it inclusive
+	    Random rand = new Random();
 	    int randomNum = rand.nextInt((max - min) + 1) + min;
 
 	    return randomNum;

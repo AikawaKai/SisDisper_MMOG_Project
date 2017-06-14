@@ -15,13 +15,15 @@ import peer.objects.Player;
 public class ThreadRequestsHandler extends Thread{
 	
 	private Game g;
+	private String player_name;
 	private Socket conn;
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
 	
-	public ThreadRequestsHandler(Socket connection, Game game){
+	public ThreadRequestsHandler(Socket connection, String my_name, Game game){
 		conn = connection;
 		g = game;
+		player_name = my_name;
 	}
 	
 	public void run(){
@@ -46,8 +48,18 @@ public class ThreadRequestsHandler extends Thread{
 		case "deleteplayer":
 			System.out.println("Notifica cancellazione giocatore!");
 			playersUpdateDelete();
+		case "token":
+			System.out.println("È il tuo turno! Fai una mossa!");
+			doMove();
 		default:
 		}
+		
+	}
+
+	private void doMove() {
+		System.out.println("Scegli cosa fare:");
+		System.out.println("1) muoviti in una direzione");
+		System.out.println("2) Usa una bomba (se ne possiedi una)");
 		
 	}
 

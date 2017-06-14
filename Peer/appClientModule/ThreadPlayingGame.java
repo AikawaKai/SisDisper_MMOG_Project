@@ -6,12 +6,14 @@ import peer.objects.Game;
 
 public class ThreadPlayingGame extends Thread {
 	private Game g;
+	private String player_name;
 	private ServerSocket ws;
 	private Socket connectionSocket;
 	
-	public ThreadPlayingGame(Game game, ServerSocket welcomeSocket){
+	public ThreadPlayingGame(String my_name, Game game, ServerSocket welcomeSocket){
 		g = game;
 		ws = welcomeSocket;
+		player_name = my_name;
 		
 	}
 	
@@ -21,7 +23,7 @@ public class ThreadPlayingGame extends Thread {
 		while(true){
 			try {
 				connectionSocket = ws.accept();
-				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(connectionSocket, g);
+				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(connectionSocket, player_name, g);
 				clientHandler.start();
 			} catch (IOException e) {
 				e.printStackTrace();

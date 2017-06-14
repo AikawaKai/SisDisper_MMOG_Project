@@ -1,5 +1,10 @@
 package server;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletResponse;
@@ -52,11 +57,31 @@ public class BaseServer {
 			addPlayer.start();
 			delPlayer = new ThreadConsumerDeletePlayer(todeleteplayers);
 			delPlayer.start();
+			sendToken(g);
 		}
 		return Response.created(null).build();
 	}
 	
 	
+	private void sendToken(Game g) {
+		if(g!=null)
+		{
+			synchronized(g){
+				Player first = g.getFirstPlayer();
+				if(first!=null){
+					try {
+						Socket peerSocket = new Socket(first.getIp(), first.getPort());
+						DataOutputStream outToServer = new DataOutputStream(peerSocket.getOutputStream());
+						outToServer.writeBytes("token\n");
+				        peerSocket.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+
 	// metodo REST per la restituzione di tutte le partite in corso
 	@GET
 	@Produces(MediaType.APPLICATION_XML)

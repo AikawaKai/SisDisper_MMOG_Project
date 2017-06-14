@@ -23,7 +23,7 @@ public class Player {
 		ip = host;
 	}
 	
-	public String getIp(){
+	public synchronized String getIp(){
 		return ip;
 	}
 	
@@ -31,7 +31,7 @@ public class Player {
 		port = p;
 	}
 	
-	public int getPort(){
+	public synchronized int getPort(){
 		return port;
 	}
 
