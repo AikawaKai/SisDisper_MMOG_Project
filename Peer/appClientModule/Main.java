@@ -58,10 +58,10 @@ public class Main {
 				if(status == 200)
 					System.out.println(serverResponse.readEntity(String.class));
 				else
-					System.out.println("Dati non corretti / Server non attivo.");
+					System.out.println("[INFO] Dati non corretti / Server non attivo.");
 				
 			}catch(Exception e){
-				System.out.println("Dati non corretti / Server non attivo.");
+				System.out.println("[INFO] Dati non corretti / Server non attivo.");
 			}
 		}
 		
@@ -74,7 +74,7 @@ public class Main {
 				nickname = bufferedReader.readLine();
 				val= false;
 			} catch (IOException e1) {
-				System.out.println("Errore inserimento. ");
+				System.out.println("[INFO] Errore inserimento. ");
 			}
 		}
 		val = true;
@@ -106,7 +106,7 @@ public class Main {
 			System.out.print("Scegli: ");
 			scelta = integerReaderHandler(bufferedReader);
 			if(scelta < 1 || scelta > 5){
-				System.out.println("Selezione errata.");
+				System.out.println("[INFO] Selezione errata.");
 			}else if(scelta!=5){
 				menuHandler(scelta, target, player, game, welcomeSocket);
 			}
@@ -140,7 +140,7 @@ public class Main {
 			map.gamesList();
 		}else
 		{
-			System.out.println("Problemi di connessione.");
+			System.out.println("[INFO] Problemi di connessione.");
 		}
 		
 	}
@@ -159,7 +159,7 @@ public class Main {
 				System.out.println("----Dettaglio Partita----");
 				System.out.println(game);
 			}else{
-				System.out.println("Partita inesistente.");
+				System.out.println("[INFO] Partita inesistente.");
 			}
 		}catch (IOException e){
 			e.printStackTrace();
@@ -191,12 +191,12 @@ public class Main {
 				response = invocationBuilder.post(Entity.entity(game, MediaType.APPLICATION_XML));
 				status = response.getStatus();
 				if(status==201)
-					System.out.println("Creazione avvenuta con successo.");
+					System.out.println("[INFO] Creazione avvenuta con successo.");
 				else if(status==409){
-					System.out.println("Nome partita già presente.");
+					System.out.println("[INFO] Nome partita già presente.");
 					return;
 				}else
-					System.out.println("Creazione partita fallita.");
+					System.out.println("[INFO] Creazione partita fallita.");
 				
 			}catch(IOException e){
 				e.printStackTrace();
@@ -214,7 +214,7 @@ public class Main {
 				System.out.print("Inserisci il nome della partita a cui vuoi unirti: ");
 				game_name = bufferedReader.readLine();
 			} catch (IOException e) {
-				System.out.println("Aggiunta giocatore alla partita fallita. ");
+				System.out.println("[INFO] Aggiunta giocatore alla partita fallita. ");
 				return;
 			}
 		}
@@ -229,11 +229,11 @@ public class Main {
 			game = response.readEntity(Game.class);
 			play(player.getName(), game, welcomeSocket);
 		}else if(status==406){
-			System.out.println("Partita inesistente. Impossibile aggiungere il giocatore. ");
+			System.out.println("[INFO] Partita inesistente. Impossibile aggiungere il giocatore. ");
 		}else if(status==409){
-			System.out.println("Giocatore con medesimo nickname già presente in partita. ");
+			System.out.println("[INFO] Giocatore con medesimo nickname già presente in partita. ");
 		}else{
-			System.out.println("Aggiunta giocatore alla partita fallita. ");
+			System.out.println("[INFO] Aggiunta giocatore alla partita fallita. ");
 		}
 		
 	}
@@ -246,8 +246,7 @@ public class Main {
 				number = Integer.parseInt(bufferedReader.readLine());
 				val = false;
 			} catch (NumberFormatException e) {
-				System.out.println("Dato errato.");
-				System.out.print("Riprova: ");
+				System.out.println("[INFO] Dato errato, riprova.");
 			}catch(IOException e){
 				e.printStackTrace();
 			}
@@ -262,7 +261,7 @@ public class Main {
 			playing.start();
 			playing.join();
 		} catch (InterruptedException e) {
-			System.out.println("Processo game interrotto.");
+			System.out.println("[INFO] Processo game interrotto.");
 		}
 		
 	}

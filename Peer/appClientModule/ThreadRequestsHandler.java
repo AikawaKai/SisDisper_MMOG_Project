@@ -43,14 +43,14 @@ public class ThreadRequestsHandler extends Thread{
 	private void requestsHandler(String response) {
 		switch(response){
 		case "newplayer":
-			System.out.println("Notifica nuovo giocatore!");
+			System.out.println("[INFO] Notifica nuovo giocatore!");
 			playersUpdate();
 			break;
 		case "deleteplayer":
-			System.out.println("Notifica cancellazione giocatore!");
+			System.out.println("[INFO] Notifica cancellazione giocatore!");
 			playersUpdateDelete();
 		case "token":
-			System.out.println("È il tuo turno! Fai una mossa!");
+			System.out.println("[INFO] È il tuo turno! Fai una mossa!");
 			doMove();
 		default:
 		}
@@ -117,7 +117,7 @@ public class ThreadRequestsHandler extends Thread{
 						pos.setPos_x(old_x-1);
 						check = false;
 					}else{
-						System.out.println("Mossa non consentita");
+						System.out.println("[INFO] Mossa non consentita");
 					}
 					break;
 				case "x":
@@ -126,7 +126,7 @@ public class ThreadRequestsHandler extends Thread{
 						pos.setPos_x(old_x+1);
 						check = false;
 					}else{
-						System.out.println("Mossa non consentita");
+						System.out.println("[INFO] Mossa non consentita");
 					}
 					break;
 				case "a":
@@ -135,7 +135,7 @@ public class ThreadRequestsHandler extends Thread{
 						pos.setPos_y(old_y-1);
 						check = false;
 					}else{
-						System.out.println("Mossa non consentita");
+						System.out.println("[INFO] Mossa non consentita");
 					}
 					break;
 				case "d":
@@ -144,7 +144,7 @@ public class ThreadRequestsHandler extends Thread{
 						pos.setPos_y(old_y+1);
 						check = false;
 					}else{
-						System.out.println("Mossa non consentita");
+						System.out.println("[INFO] Mossa non consentita");
 					}
 					break;
 			}
@@ -213,8 +213,7 @@ public class ThreadRequestsHandler extends Thread{
 				number = Integer.parseInt(bufferedReader.readLine());
 				val = false;
 			} catch (NumberFormatException e) {
-				System.out.println("Dato errato.");
-				System.out.print("Riprova: ");
+				System.out.println("[INFO] Dato errato, riprova.");
 			} catch (IOException e){
 				e.printStackTrace();
 			}
