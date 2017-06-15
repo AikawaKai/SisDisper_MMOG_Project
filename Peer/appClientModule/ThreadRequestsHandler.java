@@ -11,6 +11,7 @@ import javax.xml.bind.Unmarshaller;
 
 import peer.objects.Game;
 import peer.objects.Player;
+import peer.objects.Position;
 
 public class ThreadRequestsHandler extends Thread{
 	
@@ -60,7 +61,7 @@ public class ThreadRequestsHandler extends Thread{
 		System.out.println(pl.getPos());
 		System.out.println(g.getPosOnGameArea(pl.getPos()));
 		int scelta=0;
-		while(scelta!=1 || scelta!=2){
+		while(scelta!=1 && scelta!=2){
 			System.out.println("Scegli cosa fare:");
 			System.out.println("1 - muoviti in una direzione");
 			System.out.println("2 - Usa una bomba (se ne possiedi una)");
@@ -70,22 +71,86 @@ public class ThreadRequestsHandler extends Thread{
 		}
 		switch(scelta){
 			case 1:
-				move();
+				move(pl.getPos());
+				System.out.println("Spostato:");
+				System.out.println(g.getPosOnGameArea(pl.getPos()));
 			case 2:
 				bomb();
 			default:
 				break;
 		}
+		System.out.println("Fine turno.");
 	}
 	
-	private void move() {
-		
-	}
-
 	private void bomb() {
 		
 	}
 
+	private void move(Position pos) {
+		int old_x = pos.getPos_x();
+		int old_y = pos.getPos_y();
+		int game_size = g.getSize_x();
+		String choice = "";
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+		boolean check = true;
+		while(check){
+			choice = "";
+			System.out.println("Usa i seguenti tasti per spostarti: ");
+			System.out.println("           nord");
+			System.out.println("            [W]");
+			System.out.println("  ovest [A]  +  [D] est");
+			System.out.println("            [x]");
+			System.out.println("            sud");
+			while(!choice.equals("a") && !choice.equals("w") && !choice.equals("d") && !choice.equals("x")){
+				try {
+					System.out.println("scelta: ");
+					choice = bufferedReader.readLine();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			switch(choice){
+				case "w":
+					if(old_x-1>=0){
+						System.out.println(old_x-1);
+						pos.setPos_x(old_x-1);
+						check = false;
+					}else{
+						System.out.println("Mossa non consentita");
+					}
+					break;
+				case "x":
+					if(old_x+1<game_size){
+						System.out.println(old_x+1);
+						pos.setPos_x(old_x+1);
+						check = false;
+					}else{
+						System.out.println("Mossa non consentita");
+					}
+					break;
+				case "a":
+					if(old_y-1>=0){
+						System.out.println(old_y-1);
+						pos.setPos_y(old_y-1);
+						check = false;
+					}else{
+						System.out.println("Mossa non consentita");
+					}
+					break;
+				case "d":
+					if(old_y+1<game_size){
+						System.out.println(old_y+1);
+						pos.setPos_y(old_y+1);
+						check = false;
+					}else{
+						System.out.println("Mossa non consentita");
+					}
+					break;
+			}
+		}
+		System.out.println(pos);
+		
+	}
 
 
 	private void playersUpdateDelete() {

@@ -90,8 +90,8 @@ public class Game {
 		Position p = new Position();
 		boolean check = true;
 		while(check){
-			p.setPos_x(randInt(0, size_x));
-			p.setPos_y(randInt(0, size_x));
+			p.setPos_x(randInt(0, size_x-1));
+			p.setPos_y(randInt(0, size_x-1));
 			check=false;
 			for(int i=0;i<players.size();i++){
 				if(players.get(i).getPos().equals(p)){
