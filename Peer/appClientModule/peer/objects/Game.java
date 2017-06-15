@@ -212,6 +212,22 @@ public class Game {
 		}
 		return sb.toString();
 	}
+
+	public synchronized void forwardToken(String current_player) {
+		int num_players = players.size();
+		Player toForward = null;
+		for(int i=0; i<num_players;i++){
+			if(players.get(i).getName().equals(current_player)){
+				if(i<num_players-1)
+					toForward = players.get(i+1);
+				else
+					toForward = players.get(0);
+				break;
+			}
+		}
+		toForward.sendMessage("token\n");
+		
+	}
 	
 }
 

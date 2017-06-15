@@ -74,6 +74,7 @@ public class ThreadRequestsHandler extends Thread{
 				move(pl.getPos());
 				System.out.println("Spostato:");
 				System.out.println(g.getPosOnGameArea(pl.getPos()));
+				g.forwardToken(player_name);
 			case 2:
 				bomb();
 			default:

@@ -1,5 +1,9 @@
 package peer.objects;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -42,6 +46,17 @@ public class Player {
 	
 	public synchronized Position getPos(){
 		return pos;
+	}
+
+	public void sendMessage(String message) {
+		try {
+			Socket peerSocket = new Socket(ip, port);
+			DataOutputStream outToPeer = new DataOutputStream(peerSocket.getOutputStream());
+			outToPeer.writeBytes(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 }
