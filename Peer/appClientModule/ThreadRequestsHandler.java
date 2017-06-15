@@ -56,14 +56,37 @@ public class ThreadRequestsHandler extends Thread{
 	}
 
 	private void doMove() {
-		int scelta;
-		System.out.println("Scegli cosa fare:");
-		System.out.println("1 - muoviti in una direzione");
-		System.out.println("2 - Usa una bomba (se ne possiedi una)");
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-		System.out.print("Scelta: ");
-		scelta = integerReaderHandler(bufferedReader);
+		Player pl = g.getPlayer(player_name);
+		System.out.println(pl.getPos());
+		System.out.println(g.getPosOnGameArea(pl.getPos()));
+		int scelta=0;
+		while(scelta!=1 || scelta!=2){
+			System.out.println("Scegli cosa fare:");
+			System.out.println("1 - muoviti in una direzione");
+			System.out.println("2 - Usa una bomba (se ne possiedi una)");
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+			System.out.print("Scelta: ");
+			scelta = integerReaderHandler(bufferedReader);
+		}
+		switch(scelta){
+			case 1:
+				move();
+			case 2:
+				bomb();
+			default:
+				break;
+		}
 	}
+	
+	private void move() {
+		
+	}
+
+	private void bomb() {
+		
+	}
+
+
 
 	private void playersUpdateDelete() {
 		String response = "";

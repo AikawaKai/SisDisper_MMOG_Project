@@ -1,11 +1,10 @@
 package server;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -152,5 +151,12 @@ public class BaseServer {
 		if(res==0)
 			return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
 		return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
+	}
+	
+	public static int randInt(int min, int max) {
+	    Random rand = new Random();
+	    int randomNum = rand.nextInt((max - min) + 1) + min;
+
+	    return randomNum;
 	}
 }

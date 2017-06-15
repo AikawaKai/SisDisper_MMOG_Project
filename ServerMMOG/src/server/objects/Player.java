@@ -7,6 +7,7 @@ public class Player {
 	private String name;
 	private String ip;
 	private int port;
+	private Position pos;
 	
 	public Player(){
 	}
@@ -33,6 +34,14 @@ public class Player {
 	
 	public synchronized int getPort(){
 		return port;
+	}
+	
+	public synchronized void setPos(Position p){
+		pos = p;
+	}
+	
+	public synchronized Position getPos(){
+		return pos;
 	}
 
 }

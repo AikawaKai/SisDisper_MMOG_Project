@@ -31,11 +31,15 @@ public class Position {
 		pos_y = y;
 	}
 
-	public boolean samePos(Position position) {
+	public boolean equals(Position position) {
 		if (pos_x == position.getPos_x() && pos_y == position.getPos_y()){
 			return true;
 		}
 		return false;
+	}
+	
+	public String toString(){
+		return "\nPosizione [X: "+pos_x+" |Y: "+pos_y+"]\n";
 	}
 
 }

@@ -3,6 +3,8 @@ package server.objects;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -68,12 +70,37 @@ public class Game {
 		max_players = max;
 	}
 	
+	public synchronized Player getPlayer(String player_name){
+		if(player_names.contains(player_name)){
+			for(Player pl: players){
+				if(pl.getName().equals(player_name)){
+					return pl;
+				}
+			}
+		}
+		return null;
+	}
+	
 	// metodo per l'aggiunta di un giocatore alla parita
 	public synchronized boolean addPlayer(Player pl){
 		if(player_names.contains(pl.getName()))
 		{
 			return false;
 		}
+		Position p = new Position();
+		boolean check = true;
+		while(check){
+			p.setPos_x(randInt(0, size_x));
+			p.setPos_y(randInt(0, size_x));
+			check=false;
+			for(int i=0;i<players.size();i++){
+				if(players.get(i).getPos().equals(p)){
+					check=true;
+					break;
+				}
+			}
+		}
+		pl.setPos(p);
 		player_names.add(pl.getName());
 		ArrayList<Player> list;
 		players.add(pl);
@@ -145,7 +172,45 @@ public class Game {
 			return players.get(0);
 		}
 		return null;
-		
+	}
+	
+	public synchronized String getPosOnGameArea(Position p){
+		String[][] matrix = new String[size_x][size_x];
+		for(int i=0;i<size_x;i++){
+			for(int j=0;j<size_x;j++){
+				if(i<size_x/2 && j<size_x/2)
+					matrix[i][j] = "b";
+				else if(i>=size_x/2 && j<size_x/2)
+					matrix[i][j] = "g";
+				else if(i<size_x/2 && j>=size_x/2)
+					matrix[i][j] = "y";
+				else
+					matrix[i][j] = "r";
+			}
+		}
+		matrix[p.getPos_x()][p.getPos_y()] = "X";
+		return matrixToString(matrix);
+	}
+	
+	public static int randInt(int min, int max) {
+	    Random rand = new Random();
+	    int randomNum = rand.nextInt((max - min) + 1) + min;
+
+	    return randomNum;
+	}
+	public String matrixToString(String[][] matrix){
+		String lineSeparator = System.lineSeparator();
+		StringBuilder sb = new StringBuilder();
+
+		for (String[] row : matrix) {
+			String string_row = "";
+			for(String el: row){
+				string_row = string_row+" "+el+" ";
+			}
+		    sb.append(string_row)
+		      .append(lineSeparator);
+		}
+		return sb.toString();
 	}
 	
 }

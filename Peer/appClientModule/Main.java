@@ -22,7 +22,6 @@ public class Main {
 	public static void main(String[] args) {
 		// inizializzazione variabili
 		String indirizzo_ip = "";
-		String input = "";
 		String nickname = "";
 		String game = "";
 		String baseuri = "";
@@ -86,7 +85,6 @@ public class Main {
 				welcomeSocket = new ServerSocket(porta_peer);
 				val = false;
 			} catch (IOException e2) {
-				// TODO Auto-generated catch block
 				e2.printStackTrace();
 			}
 		}
@@ -269,7 +267,7 @@ public class Main {
 		
 	}
 	
-	private static int randInt(int min, int max) {
+	public static int randInt(int min, int max) {
 	    Random rand = new Random();
 	    int randomNum = rand.nextInt((max - min) + 1) + min;
 
