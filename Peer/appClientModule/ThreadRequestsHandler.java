@@ -49,13 +49,50 @@ public class ThreadRequestsHandler extends Thread{
 		case "deleteplayer":
 			System.out.println("[INFO] Notifica cancellazione giocatore!");
 			playersUpdateDelete();
+			break;
 		case "token":
 			System.out.println("[INFO] È il tuo turno! Fai una mossa!");
 			doMove();
+			break;
+		case "newpos":
+			checkPos();
+			break;
 		default:
+			break;
 		}
 	}
-
+	
+	//handler change position from other player
+	private void checkPos() {
+		Player pl = g.getPlayer(player_name);
+		Position pos = pl.getPos();
+		String response = "";
+		JAXBContext jaxbContext;
+		StringReader reader;
+		Position position;
+		Unmarshaller unmarshaller;
+		try {
+			jaxbContext = JAXBContext.newInstance(Position.class);
+			unmarshaller = jaxbContext.createUnmarshaller();
+			outToClient.writeBytes("ack\n");
+			response = inFromClient.readLine(); // qui si blocca!!!!!!
+			reader = new StringReader(response);
+			position = (Position) unmarshaller.unmarshal(reader);
+			System.out.println(position);
+			if(pos.equals(position)){
+				System.out.println("[INFO] Eliminato");
+				outToClient.writeBytes("colpito\n");
+			}else{
+				outToClient.writeBytes("mancato\n");
+			}
+		} catch (JAXBException e1) {
+			e1.printStackTrace();
+		}catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	//handler do move
 	private void doMove() {
 		Player pl = g.getPlayer(player_name);
 		System.out.println(pl.getPos());
@@ -74,7 +111,9 @@ public class ThreadRequestsHandler extends Thread{
 				move(pl.getPos());
 				System.out.println("Spostato:");
 				System.out.println(g.getPosOnGameArea(pl.getPos()));
+				g.sendNewPos(pl);
 				g.forwardToken(player_name);
+				break;
 			case 2:
 				bomb();
 			default:
@@ -86,7 +125,8 @@ public class ThreadRequestsHandler extends Thread{
 	private void bomb() {
 		
 	}
-
+	
+	// function for the move turn
 	private void move(Position pos) {
 		int old_x = pos.getPos_x();
 		int old_y = pos.getPos_y();
@@ -150,10 +190,10 @@ public class ThreadRequestsHandler extends Thread{
 			}
 		}
 		System.out.println(pos);
-		
 	}
 
-
+	
+	//handler for the player delete
 	private void playersUpdateDelete() {
 		String response = "";
 		JAXBContext jaxbContext;
@@ -178,7 +218,8 @@ public class ThreadRequestsHandler extends Thread{
 			e.printStackTrace();
 		}	
 	}
-
+	
+	//handler for the player updated
 	private void playersUpdate() {
 		String response = "";
 		JAXBContext jaxbContext;
@@ -202,7 +243,6 @@ public class ThreadRequestsHandler extends Thread{
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	private static int integerReaderHandler(BufferedReader bufferedReader){
