@@ -17,6 +17,7 @@ public class ThreadRequestsHandler extends Thread{
 	
 	private Game g;
 	private String player_name;
+	private Player pl;
 	private Socket conn;
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
@@ -27,6 +28,14 @@ public class ThreadRequestsHandler extends Thread{
 		g = game;
 		player_name = my_name;
 		first = First;
+		pl = g.getPlayer(player_name);
+		try{
+			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+	        outToClient = new DataOutputStream(conn.getOutputStream());
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void run(){
@@ -36,8 +45,7 @@ public class ThreadRequestsHandler extends Thread{
 		String response="";
 		while(true){
 			try {
-	            inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-	            outToClient = new DataOutputStream(conn.getOutputStream());
+	            
 	            response = inFromClient.readLine();
 	            requestsHandler(response);
 	        } catch (IOException e) {

@@ -27,6 +27,7 @@ public class ThreadPlayingGame extends Thread {
 				connectionSocket = ws.accept();
 				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(connectionSocket, player_name, g, first);
 				clientHandler.start();
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
