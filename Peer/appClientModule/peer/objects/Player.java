@@ -4,7 +4,14 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.Socket;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -96,7 +103,34 @@ public class Player {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
-
+	
+	public synchronized String marshallerThis(){
+		String player_s = null;
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(Player.class);
+			StringWriter sw = new StringWriter();
+			Marshaller marshaller = jaxbContext.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+			marshaller.marshal(this, sw);
+			return sw.toString();
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+		return player_s;
+	}
+	
+	public static Player unmarshallThat(String player_s){
+		Player gen_play = null;
+		try {
+			StringReader reader = new StringReader(player_s);
+			JAXBContext jaxbContext = JAXBContext.newInstance(Player.class);
+			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+			gen_play = (Player) unmarshaller.unmarshal(reader);
+			return gen_play;
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+		return gen_play;
+	}
 }
