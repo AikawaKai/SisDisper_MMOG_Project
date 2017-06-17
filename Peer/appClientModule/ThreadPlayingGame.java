@@ -9,11 +9,13 @@ public class ThreadPlayingGame extends Thread {
 	private String player_name;
 	private ServerSocket ws;
 	private Socket connectionSocket;
+	private boolean first;
 	
-	public ThreadPlayingGame(String my_name, Game game, ServerSocket welcomeSocket){
+	public ThreadPlayingGame(String my_name, Game game, ServerSocket welcomeSocket, boolean First){
 		g = game;
 		ws = welcomeSocket;
 		player_name = my_name;
+		first = First;
 		
 	}
 	
@@ -23,7 +25,7 @@ public class ThreadPlayingGame extends Thread {
 		while(true){
 			try {
 				connectionSocket = ws.accept();
-				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(connectionSocket, player_name, g);
+				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(connectionSocket, player_name, g, first);
 				clientHandler.start();
 			} catch (IOException e) {
 				e.printStackTrace();

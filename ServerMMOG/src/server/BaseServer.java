@@ -42,43 +42,10 @@ public class BaseServer {
 	@Path("/creategame")
 	public Response setGame(Game g){
 		boolean res;
-		ArrayList<ArrayList<Player>> toaddplayers;
-		ArrayList<DeletePlayer> todeleteplayers;
-		ThreadConsumerAddPlayer addPlayer;
-		ThreadConsumerDeletePlayer delPlayer;
-		synchronized(g){ //blocco l'istanza game finché non preparo i suoi thread 
-			res = games.put(g.getGame_name(), g); //metodo sincronizzato
-			if(!res)
-				return Response.status(HttpServletResponse.SC_CONFLICT).build();
-			toaddplayers = g.getToAddList();
-			todeleteplayers = g.getToDelList();
-			addPlayer = new ThreadConsumerAddPlayer(toaddplayers);
-			addPlayer.start();
-			delPlayer = new ThreadConsumerDeletePlayer(todeleteplayers);
-			delPlayer.start();
-			sendToken(g);
-		}
+		res = games.put(g.getGame_name(), g); //metodo sincronizzato
+		if(!res)
+			return Response.status(HttpServletResponse.SC_CONFLICT).build();
 		return Response.created(null).build();
-	}
-	
-	
-	private void sendToken(Game g) {
-		if(g!=null)
-		{
-			synchronized(g){
-				Player first = g.getFirstPlayer();
-				if(first!=null){
-					try {
-						Socket peerSocket = new Socket(first.getIp(), first.getPort());
-						DataOutputStream outToServer = new DataOutputStream(peerSocket.getOutputStream());
-						outToServer.writeBytes("token\n");
-				        peerSocket.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
 	}
 
 	// metodo REST per la restituzione di tutte le partite in corso

@@ -20,11 +20,13 @@ public class ThreadRequestsHandler extends Thread{
 	private Socket conn;
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
+	private boolean first;
 	
-	public ThreadRequestsHandler(Socket connection, String my_name, Game game){
+	public ThreadRequestsHandler(Socket connection, String my_name, Game game, boolean First){
 		conn = connection;
 		g = game;
 		player_name = my_name;
+		first = First;
 	}
 	
 	public void run(){
