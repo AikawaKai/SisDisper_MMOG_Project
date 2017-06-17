@@ -30,16 +30,20 @@ public class ThreadRequestsHandler extends Thread{
 	}
 	
 	public void run(){
+		if(first){
+			requestsHandler("token");
+		}
 		String response="";
-		try {
-            inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            outToClient = new DataOutputStream(conn.getOutputStream());
-            response = inFromClient.readLine();
-            requestsHandler(response);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-		
+		while(true){
+			try {
+	            inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+	            outToClient = new DataOutputStream(conn.getOutputStream());
+	            response = inFromClient.readLine();
+	            requestsHandler(response);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+		}
 	}
 
 	private void requestsHandler(String response) {
