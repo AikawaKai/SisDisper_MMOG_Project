@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -69,21 +70,67 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 	
+	//handler do move
+		private void doMove() {
+			System.out.println(player.getPos());
+			System.out.println(g.getPosOnGameArea(player.getPos()));
+			int scelta=0;
+			while(scelta!=1 && scelta!=2){
+				System.out.println("Scegli cosa fare:");
+				System.out.println("1 - muoviti in una direzione");
+				System.out.println("2 - Usa una bomba (se ne possiedi una)");
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+				System.out.print("Scelta: ");
+				scelta = integerReaderHandler(bufferedReader);
+			}
+			switch(scelta){
+				case 1:
+					ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
+					move(player.getPos());
+					System.out.println("Spostato:");
+					System.out.println(g.getPosOnGameArea(player.getPos()));
+					for(Player pl_i: g.getPlayers()){
+						if(!pl_i.getName().equals(player_name)){
+							ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "sendnewpos", new boolean[1]);
+							threads.add(pl_hl);
+							pl_hl.start();
+						}
+					}
+					
+					for(ThreadSendRequestToPlayer pl_hl: threads){
+						try {
+							pl_hl.join();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+					ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(player, g.getPlayers().get(1), "token", new boolean[1]);
+					forwardToken.start();
+					try {
+						forwardToken.join();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					break;
+				case 2:
+					bomb();
+				default:
+					break;
+			}
+			System.out.println("Fine turno.");
+		}
+	
 	//handler change position from other player
 	private void checkPos() {
 		Position pos = player.getPos();
 		String response = "";
-		JAXBContext jaxbContext;
 		StringReader reader;
 		Position position;
-		Unmarshaller unmarshaller;
 		try {
-			jaxbContext = JAXBContext.newInstance(Position.class);
-			unmarshaller = jaxbContext.createUnmarshaller();
 			outToClient.writeBytes("ack\n");
 			response = inFromClient.readLine(); // qui si blocca!!!!!!
 			reader = new StringReader(response);
-			position = (Position) unmarshaller.unmarshal(reader);
+			position = Position.unmarshallThat(reader);
 			System.out.println(position);
 			if(pos.equals(position)){
 				System.out.println("[INFO] Eliminato");
@@ -91,41 +138,12 @@ public class ThreadRequestsHandler extends Thread{
 			}else{
 				outToClient.writeBytes("mancato\n");
 			}
-		} catch (JAXBException e1) {
-			e1.printStackTrace();
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	//handler do move
-	private void doMove() {
-		System.out.println(player.getPos());
-		System.out.println(g.getPosOnGameArea(player.getPos()));
-		int scelta=0;
-		while(scelta!=1 && scelta!=2){
-			System.out.println("Scegli cosa fare:");
-			System.out.println("1 - muoviti in una direzione");
-			System.out.println("2 - Usa una bomba (se ne possiedi una)");
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-			System.out.print("Scelta: ");
-			scelta = integerReaderHandler(bufferedReader);
-		}
-		switch(scelta){
-			case 1:
-				move(player.getPos());
-				System.out.println("Spostato:");
-				System.out.println(g.getPosOnGameArea(player.getPos()));
-				g.sendNewPos(player);
-				g.forwardToken(player_name);
-				break;
-			case 2:
-				bomb();
-			default:
-				break;
-		}
-		System.out.println("Fine turno.");
-	}
+	
 	
 	private void bomb() {
 		
@@ -241,8 +259,6 @@ public class ThreadRequestsHandler extends Thread{
 				System.out.println("[INFO] Notifica nuovo giocatore!");
 				g.addPlayer(pl); // metodo sincronizzato
 				System.out.println("["+pl_name+"]");
-			}else{
-				System.out.println("Collisione");
 			}
 		}catch (IOException e) {
 			e.printStackTrace();

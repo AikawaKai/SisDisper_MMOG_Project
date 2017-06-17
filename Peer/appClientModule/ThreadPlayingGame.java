@@ -29,7 +29,6 @@ public class ThreadPlayingGame extends Thread {
 		ArrayList<ThreadSendRequestToPlayer> threadsNotify = new ArrayList<ThreadSendRequestToPlayer>();
 		boolean check[] = {true};
 		while(check[0]){
-			System.out.println("Non sto riuscendo ad entrare");
 			check[0] = false;
 			Position pos = g.genRandPosition();
 			player.setPos(pos);

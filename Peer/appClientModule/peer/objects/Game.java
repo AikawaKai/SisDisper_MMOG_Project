@@ -1,19 +1,9 @@
 package peer.objects;
 
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -179,66 +169,6 @@ public class Game {
 		      .append(lineSeparator);
 		}
 		return sb.toString();
-	}
-
-	public synchronized void forwardToken(String current_player) {
-		int num_players = players.size();
-		Player toForward = null;
-		for(int i=0; i<num_players;i++){
-			if(players.get(i).getName().equals(current_player)){
-				if(i<num_players-1)
-					toForward = players.get(i+1);
-				else
-					toForward = players.get(0);
-				break;
-			}
-		}
-		toForward.sendMessage("token\n");
-		
-	}
-
-	public synchronized void sendNewPos(Player pl) {
-		for(Player pl_i: players){
-			if(!pl_i.getName().equals(pl.getName()))
-				sendPosToPlayer(pl_i, pl.getPos());
-		}
-	}
-
-	private void sendPosToPlayer(Player pl_i, Position pos) {
-		Socket peerSocket = null;
-		String response = "";
-		String position = null;
-		DataOutputStream outToPeer = null;
-		BufferedReader inFromPeer = null;
-		try {
-			JAXBContext jaxbContext = JAXBContext.newInstance(Position.class);
-			position = asString(jaxbContext, pos);
-		} catch (JAXBException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			peerSocket = new Socket(pl_i.getIp(), pl_i.getPort());
-			outToPeer = new DataOutputStream(peerSocket.getOutputStream());
-			inFromPeer = new BufferedReader(new InputStreamReader(peerSocket.getInputStream()));
-			outToPeer.writeBytes("newpos\n");
-			response = inFromPeer.readLine();
-			outToPeer.writeBytes(position+"\n");
-			response = inFromPeer.readLine();
-			if(response.equals("colpito"))
-			{
-				System.out.println("Hai colpito il giocatore ["+pl_i.getName()+"]");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public String asString(JAXBContext pContext, Object pObject) throws JAXBException {
-		StringWriter sw = new StringWriter();
-		Marshaller marshaller = pContext.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
-		marshaller.marshal(pObject, sw);
-		return sw.toString();
 	}
 
 	public synchronized Position genRandPosition() {

@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+
 import peer.objects.Player;
 
 public class ThreadSendRequestToPlayer extends Thread {
@@ -29,10 +30,35 @@ public class ThreadSendRequestToPlayer extends Thread {
 		case "notconfirmed":
 			notConfirm();
 			break;
+		case "sendnewpos":
+			checkPos();
+			break;
 		case "token":
 			sendTokenToNext();
 			break;
 		}
+	}
+
+	private void checkPos() {
+		DataOutputStream outToPeer = player_i.getSocketOutput();
+		BufferedReader inFromPeer = player_i.getSocketInput();
+		String response = "";
+		String position = null;
+		try {
+			outToPeer.writeBytes("newpos\n");
+			response = inFromPeer.readLine();
+			position = player.getPos().marshallerThis();
+			outToPeer.writeBytes(position+"\n");
+			response = inFromPeer.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		if(response.equals("colpito"))
+		{
+			System.out.println("Hai colpito il giocatore ["+player_i.getName()+"]");
+		}
+		
 	}
 
 	private void notConfirm() {
