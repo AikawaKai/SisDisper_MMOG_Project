@@ -51,7 +51,6 @@ public class ThreadRequestsHandler extends Thread{
 	public void requestsHandler(String response) {
 		switch(response){
 		case "newplayer":
-			System.out.println("[INFO] Notifica nuovo giocatore!");
 			playersUpdate();
 			break;
 		case "deleteplayer":
@@ -230,12 +229,20 @@ public class ThreadRequestsHandler extends Thread{
 			reader = new StringReader(response);
 			pl = Player.unmarshallThat(reader);
 			pl_name = pl.getName();
-			if(pl.getPos().equals(player.getPos())){
+			if(pl.getPos().equals(player.getPos()))
 				outToClient.writeBytes("ko\n");
-			}else{
+			else
+			{
 				outToClient.writeBytes("ok\n");
+			}
+			response = inFromClient.readLine();
+			if(response.equals("accepted"))
+			{
+				System.out.println("[INFO] Notifica nuovo giocatore!");
 				g.addPlayer(pl); // metodo sincronizzato
 				System.out.println("["+pl_name+"]");
+			}else{
+				System.out.println("Collisione");
 			}
 		}catch (IOException e) {
 			e.printStackTrace();

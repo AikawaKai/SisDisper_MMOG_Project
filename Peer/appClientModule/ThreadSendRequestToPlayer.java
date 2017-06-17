@@ -8,9 +8,9 @@ public class ThreadSendRequestToPlayer extends Thread {
 	private Player player;
 	private Player player_i;
 	private String case_;
-	private Boolean check;
+	private boolean []check;
 	
-	public ThreadSendRequestToPlayer(Player pl, Player pl_i, String c, Boolean check_){
+	public ThreadSendRequestToPlayer(Player pl, Player pl_i, String c, boolean []check_){
 		player = pl;
 		player_i = pl_i;
 		case_ = c;
@@ -23,9 +23,33 @@ public class ThreadSendRequestToPlayer extends Thread {
 		case "newplayer":
 			notifyImIn();
 			break;
+		case "confirmed":
+			confirm();
+			break;
+		case "notconfirmed":
+			notConfirm();
+			break;
 		case "token":
 			sendTokenToNext();
 			break;
+		}
+	}
+
+	private void notConfirm() {
+		DataOutputStream outputStream = player_i.getSocketOutput();
+		try {
+			outputStream.writeBytes("notaccepted\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void confirm() {
+		DataOutputStream outputStream = player_i.getSocketOutput();
+		try {
+			outputStream.writeBytes("accepted\n");
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -48,9 +72,10 @@ public class ThreadSendRequestToPlayer extends Thread {
 			response = inputStream.readLine();
 			outputStream.writeBytes(player.marshallerThis()+"\n");
 			response = inputStream.readLine();
-			if(response.equals("ko")){
+			if(response.equals("ko"))
+			{
 				synchronized(check){
-					check = false;
+					check[0] = true;
 				}
 			}
 		} catch (IOException e) {

@@ -262,7 +262,7 @@ public class Main {
 		try {
 			playing.start();
 			if(first){
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(game.getPlayer(my_name), game.getPlayer(my_name), "token", false);
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(game.getPlayer(my_name), game.getPlayer(my_name), "token", new boolean[1]);
 				pl_hl.start();
 			}
 			playing.join();

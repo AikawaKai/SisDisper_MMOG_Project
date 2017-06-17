@@ -24,36 +24,53 @@ public class ThreadPlayingGame extends Thread {
 	
 	public void run(){
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		ArrayList<Boolean> checks = new ArrayList<Boolean>();
-		boolean check = true;
-		while(check){
+		ArrayList<ThreadSendRequestToPlayer> threadsNotify = new ArrayList<ThreadSendRequestToPlayer>();
+		boolean check[] = {true};
+		while(check[0]){
+			System.out.println("Non sto riuscendo ad entrare");
+			check[0] = false;
 			for(Player pl_i: g.getPlayers()){
 				Position pos = g.genRandPosition();
 				player.setPos(pos);
 				if(!pl_i.getName().equals(player_name))
 				{
-					Boolean check_i = true;
-					checks.add(check_i);
-					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "newplayer", check_i);
-					pl_hl.start();
+					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "newplayer", check);
 					threads.add(pl_hl);
+					pl_hl.start();
 				}
 			}
 			for(ThreadSendRequestToPlayer hl: threads){
 				try {
 					hl.join();
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
-			check = false;
-			for(Boolean res: checks){
-				if(!res)
-				{
-					check = true;
-					break;
+			threads = new ArrayList<ThreadSendRequestToPlayer>();
+			if(check[0])
+			{
+				for(Player pl_i: g.getPlayers()){
+					if(!pl_i.getName().equals(player_name))
+					{
+						ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "notconfirmed", check);
+						threadsNotify.add(pl_hl);
+						pl_hl.start();
+					}
 				}
+				for(ThreadSendRequestToPlayer hl: threadsNotify){
+					try {
+						hl.join();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		for(Player pl_i: g.getPlayers()){
+			if(!pl_i.getName().equals(player_name))
+			{
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "confirmed", check);
+				pl_hl.start();
 			}
 		}
 		System.out.println("Partita "+g.getGame_name()+" in corso...");
