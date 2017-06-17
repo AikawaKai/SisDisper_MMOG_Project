@@ -7,6 +7,8 @@ import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.Position;
 
+// Server del Peer: Accetta le richieste e crea per ogni richiesta un nuovo threadrequesthandler
+// All'inizio verifica la posizione in cui inserire il giocatore, finché non ne trova una libera (distribuito)
 public class ThreadPlayingGame extends Thread {
 	private Game g;
 	private String player_name;
@@ -29,9 +31,9 @@ public class ThreadPlayingGame extends Thread {
 		while(check[0]){
 			System.out.println("Non sto riuscendo ad entrare");
 			check[0] = false;
+			Position pos = g.genRandPosition();
+			player.setPos(pos);
 			for(Player pl_i: g.getPlayers()){
-				Position pos = g.genRandPosition();
-				player.setPos(pos);
 				if(!pl_i.getName().equals(player_name))
 				{
 					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "newplayer", check);
@@ -66,11 +68,20 @@ public class ThreadPlayingGame extends Thread {
 				}
 			}
 		}
+		threadsNotify = new ArrayList<ThreadSendRequestToPlayer>();
 		for(Player pl_i: g.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
 			{
 				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "confirmed", check);
+				threadsNotify.add(pl_hl);
 				pl_hl.start();
+			}
+		}
+		for(ThreadSendRequestToPlayer hl: threadsNotify){
+			try {
+				hl.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
 		System.out.println("Partita "+g.getGame_name()+" in corso...");
