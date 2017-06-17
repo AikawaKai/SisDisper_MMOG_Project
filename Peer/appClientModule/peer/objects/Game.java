@@ -94,20 +94,6 @@ public class Game {
 		{
 			return false;
 		}
-		Position p = new Position();
-		boolean check = true;
-		while(check){
-			p.setPos_x(randInt(0, size_x-1));
-			p.setPos_y(randInt(0, size_x-1));
-			check=false;
-			for(int i=0;i<players.size();i++){
-				if(players.get(i).getPos().equals(p)){
-					check=true;
-					break;
-				}
-			}
-		}
-		pl.setPos(p);
 		player_names.add(pl.getName());
 		players.add(pl);
 		return true;
@@ -253,6 +239,15 @@ public class Game {
 		marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
 		marshaller.marshal(pObject, sw);
 		return sw.toString();
+	}
+
+	public synchronized Position genRandPosition() {
+		int x = randInt(0, size_x-1);
+		int y = randInt(0, size_x-1);
+		Position pos =  new Position();
+		pos.setPos_x(x);
+		pos.setPos_y(y);
+		return pos;
 	}
 	
 }

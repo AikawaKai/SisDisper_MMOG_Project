@@ -17,7 +17,7 @@ public class ThreadRequestsHandler extends Thread{
 	
 	private Game g;
 	private String player_name;
-	private Player pl;
+	private Player player;
 	private Socket conn;
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
@@ -26,7 +26,7 @@ public class ThreadRequestsHandler extends Thread{
 		conn = connection;
 		g = game;
 		player_name = my_name;
-		pl = g.getPlayer(player_name);
+		player = g.getPlayer(player_name);
 		try{
 			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 	        outToClient = new DataOutputStream(conn.getOutputStream());
@@ -72,8 +72,7 @@ public class ThreadRequestsHandler extends Thread{
 	
 	//handler change position from other player
 	private void checkPos() {
-		Player pl = g.getPlayer(player_name);
-		Position pos = pl.getPos();
+		Position pos = player.getPos();
 		String response = "";
 		JAXBContext jaxbContext;
 		StringReader reader;
@@ -102,9 +101,8 @@ public class ThreadRequestsHandler extends Thread{
 	
 	//handler do move
 	private void doMove() {
-		Player pl = g.getPlayer(player_name);
-		System.out.println(pl.getPos());
-		System.out.println(g.getPosOnGameArea(pl.getPos()));
+		System.out.println(player.getPos());
+		System.out.println(g.getPosOnGameArea(player.getPos()));
 		int scelta=0;
 		while(scelta!=1 && scelta!=2){
 			System.out.println("Scegli cosa fare:");
@@ -116,10 +114,10 @@ public class ThreadRequestsHandler extends Thread{
 		}
 		switch(scelta){
 			case 1:
-				move(pl.getPos());
+				move(player.getPos());
 				System.out.println("Spostato:");
-				System.out.println(g.getPosOnGameArea(pl.getPos()));
-				g.sendNewPos(pl);
+				System.out.println(g.getPosOnGameArea(player.getPos()));
+				g.sendNewPos(player);
 				g.forwardToken(player_name);
 				break;
 			case 2:
@@ -232,8 +230,13 @@ public class ThreadRequestsHandler extends Thread{
 			reader = new StringReader(response);
 			pl = Player.unmarshallThat(reader);
 			pl_name = pl.getName();
-			g.addPlayer(pl); // metodo sincronizzato
-			System.out.println("["+pl_name+"]");
+			if(pl.getPos().equals(player.getPos())){
+				outToClient.writeBytes("ko\n");
+			}else{
+				outToClient.writeBytes("ok\n");
+				g.addPlayer(pl); // metodo sincronizzato
+				System.out.println("["+pl_name+"]");
+			}
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
