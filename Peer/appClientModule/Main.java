@@ -191,7 +191,9 @@ public class Main {
 				response = invocationBuilder.post(Entity.entity(game, MediaType.APPLICATION_XML));
 				status = response.getStatus();
 				if(status==201)
+				{
 					System.out.println("[INFO] Creazione avvenuta con successo.");
+				}
 				else if(status==409){
 					System.out.println("[INFO] Nome partita già presente.");
 					return;
@@ -255,10 +257,14 @@ public class Main {
 		
 	}
 	
-	private static void play(String my_name, Game game, ServerSocket welcomeSocket, boolean First) {
-		ThreadPlayingGame playing = new ThreadPlayingGame(my_name, game, welcomeSocket, First);
+	private static void play(String my_name, Game game, ServerSocket welcomeSocket, boolean first) {
+		ThreadPlayingGame playing = new ThreadPlayingGame(my_name, game, welcomeSocket);
 		try {
 			playing.start();
+			if(first){
+				ThreadSendRequestToPLayer pl_hl = new ThreadSendRequestToPLayer(game.getPlayer(my_name), game.getPlayer(my_name), "token");
+				pl_hl.start();
+			}
 			playing.join();
 		} catch (InterruptedException e) {
 			System.out.println("[INFO] Processo game interrotto.");

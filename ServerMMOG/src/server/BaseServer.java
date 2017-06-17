@@ -42,6 +42,7 @@ public class BaseServer {
 	@Path("/creategame")
 	public Response setGame(Game g){
 		boolean res;
+		Player pl_1 = g.getFirstPlayer();
 		res = games.put(g.getGame_name(), g); //metodo sincronizzato
 		if(!res)
 			return Response.status(HttpServletResponse.SC_CONFLICT).build();
@@ -92,7 +93,6 @@ public class BaseServer {
 			int res;
 			Game g;
 			res = games.addPlayer(game, pl); //metodo sincronizzato
-			
 			g = games.get(game); // metodo sincronizzato
 			if(g!=null)
 			{

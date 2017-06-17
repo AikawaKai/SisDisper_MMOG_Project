@@ -120,13 +120,12 @@ public class Player {
 		return player_s;
 	}
 	
-	public static Player unmarshallThat(String player_s){
+	public static Player unmarshallThat(StringReader player_s){
 		Player gen_play = null;
 		try {
-			StringReader reader = new StringReader(player_s);
 			JAXBContext jaxbContext = JAXBContext.newInstance(Player.class);
 			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-			gen_play = (Player) unmarshaller.unmarshal(reader);
+			gen_play = (Player) unmarshaller.unmarshal(player_s);
 			return gen_play;
 		} catch (JAXBException e) {
 			e.printStackTrace();
