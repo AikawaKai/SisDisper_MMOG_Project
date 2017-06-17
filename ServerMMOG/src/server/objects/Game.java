@@ -109,7 +109,6 @@ public class Game {
 		}
 		pl.setPos(p);
 		player_names.add(pl.getName());
-		ArrayList<Player> list;
 		players.add(pl);
 		return true;
 	}
@@ -120,16 +119,11 @@ public class Game {
 			return false;
 		}
 		player_names.remove(pl_name);
-		DeletePlayer dp = null;
-		ArrayList<Player> list;
-		Player player_to_delete;
 		int i = 0;
 		for(Player pl: players){
 			if(pl.getName().equals(pl_name))
 			{
-				player_to_delete = players.remove(i);
-				list = new ArrayList<Player>(players);
-				dp = new DeletePlayer(list, player_to_delete);
+				players.remove(i);
 				break;
 			}
 			i++;

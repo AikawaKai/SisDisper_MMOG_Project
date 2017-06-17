@@ -21,7 +21,6 @@ public class ThreadRequestsHandler extends Thread{
 	private Socket conn;
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
-	private boolean first;
 	
 	public ThreadRequestsHandler(Socket connection, String my_name, Game game){
 		conn = connection;
@@ -205,24 +204,17 @@ public class ThreadRequestsHandler extends Thread{
 	//handler for the player delete
 	private void playersUpdateDelete() {
 		String response = "";
-		JAXBContext jaxbContext;
 		StringReader reader;
 		Player pl;
 		String pl_name;
-		Unmarshaller unmarshaller;
 		try {
-			jaxbContext = JAXBContext.newInstance(Player.class);
-			unmarshaller = jaxbContext.createUnmarshaller();
 			outToClient.writeBytes("ack\n");
 			response = inFromClient.readLine();
 			reader = new StringReader(response);
-			pl = (Player) unmarshaller.unmarshal(reader);
-			outToClient.writeBytes("ok\n");
+			pl = (Player) Player.unmarshallThat(reader);
 			pl_name = pl.getName();
 			g.removePlayer(pl_name);
 			System.out.println("["+pl_name+"]");
-		} catch (JAXBException e1) {
-			e1.printStackTrace();
 		}catch (IOException e) {
 			e.printStackTrace();
 		}	

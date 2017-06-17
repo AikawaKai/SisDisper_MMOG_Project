@@ -1,9 +1,5 @@
 package server;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Random;
 
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import server.objects.DeletePlayer;
 import server.objects.Game;
 import server.objects.GamesMap;
 import server.objects.Player;
@@ -42,7 +37,6 @@ public class BaseServer {
 	@Path("/creategame")
 	public Response setGame(Game g){
 		boolean res;
-		Player pl_1 = g.getFirstPlayer();
 		res = games.put(g.getGame_name(), g); //metodo sincronizzato
 		if(!res)
 			return Response.status(HttpServletResponse.SC_CONFLICT).build();

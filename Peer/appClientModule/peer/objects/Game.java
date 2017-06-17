@@ -24,8 +24,6 @@ public class Game {
 	private String game_name;
 	private HashSet<String>player_names = new HashSet<String>();
 	private ArrayList<Player> players = new ArrayList<Player>(); //token ring
-	private ArrayList<ArrayList<Player>> toAdd = new ArrayList<ArrayList<Player>>();
-	private ArrayList<DeletePlayer> toDelete = new ArrayList<DeletePlayer>();
 	
 	public Game(){
 
@@ -111,13 +109,7 @@ public class Game {
 		}
 		pl.setPos(p);
 		player_names.add(pl.getName());
-		ArrayList<Player> list;
 		players.add(pl);
-		list = new ArrayList<Player>(players);
-		synchronized(toAdd){ //sincronizzazione per la notify al thread che si occupa di aggiornare i giocatori
-			toAdd.add(list);
-			toAdd.notify();
-		}
 		return true;
 	}
 	
@@ -127,23 +119,14 @@ public class Game {
 			return false;
 		}
 		player_names.remove(pl_name);
-		DeletePlayer dp = null;
-		ArrayList<Player> list;
-		Player player_to_delete;
 		int i = 0;
 		for(Player pl: players){
 			if(pl.getName().equals(pl_name))
 			{
-				player_to_delete = players.remove(i);
-				list = new ArrayList<Player>(players);
-				dp = new DeletePlayer(list, player_to_delete);
+				players.remove(i);
 				break;
 			}
 			i++;
-		}
-		synchronized(toDelete){ //sincronizzazione per la notify al thread che si occupa di cancellare
-			toDelete.add(dp);
-			toDelete.notify();
 		}
 		return true;		
 	}
@@ -159,16 +142,6 @@ public class Game {
 			i++;
 		}
 		return "Game name: "+game_name+"\n"+"Size: "+size_x+"\nMax_point: "+max_point+"\n"+players_string;
-	}
-	
-	// metodo che restituisce il rif. alla lista di giocatori da aggiungere
-	public synchronized ArrayList<ArrayList<Player>> getToAddList() {
-		return toAdd;
-	}
-	
-	// metodo che restituisce il rif. alla lista di giocatori da cancellare
-	public synchronized ArrayList<DeletePlayer> getToDelList() {
-		return toDelete;
 	}
 	
 	// metodo per il conteggio dei giocatori attualmente presenti in parita

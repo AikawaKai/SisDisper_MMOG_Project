@@ -96,9 +96,11 @@ public class Player {
 	}
 
 	public void sendMessage(String message) {
+		if(socket==null){
+			startSocket();
+		}
 		try {
-			Socket peerSocket = new Socket(ip, port);
-			DataOutputStream outToPeer = new DataOutputStream(peerSocket.getOutputStream());
+			DataOutputStream outToPeer = new DataOutputStream(socket.getOutputStream());
 			outToPeer.writeBytes(message);
 		} catch (IOException e) {
 			e.printStackTrace();
