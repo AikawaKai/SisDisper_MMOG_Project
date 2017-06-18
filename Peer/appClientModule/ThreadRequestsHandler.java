@@ -53,8 +53,6 @@ public class ThreadRequestsHandler extends Thread{
 	            requestsHandler(response);
 	        } catch (IOException e) {
 	        	e.printStackTrace();
-	        } catch (Exception e){
-	        	System.out.println("Oggetto:"+inFromClient);
 	        }
 		}
 	}
@@ -111,7 +109,7 @@ public class ThreadRequestsHandler extends Thread{
 	private void basicMove() {
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
 		move(player.getPos());
-		System.out.println("Spostato:");
+		System.out.println("[INFO] Ti sei spostato");
 		System.out.println(g.getPosOnGameArea(player.getPos()));
 		for(Player pl_i: g.getPlayers()){
 			if(!pl_i.getName().equals(player_name)){
@@ -247,9 +245,6 @@ public class ThreadRequestsHandler extends Thread{
 				
 				if(player.getMy_next().equals(pl_name))
 				{
-					System.out.println("Io ho ricevuto la richiesta di eliminazione "+player.getName());
-					System.out.println("Io sono stato eliminato: player"+pl_name);
-					System.out.println("I'm "+player.getName()+"And my new next is "+pl.getMy_next());
 					player.setMy_next(pl.getMy_next());
 				}
 					
@@ -257,7 +252,6 @@ public class ThreadRequestsHandler extends Thread{
 				ThreadSendRequestToPlayer confirmed = new ThreadSendRequestToPlayer(player, pl, "confirmed", new boolean[1]);
 				confirmed.start();
 				confirmed.join();
-				pl.closeSocket();
 			}catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
@@ -283,8 +277,6 @@ public class ThreadRequestsHandler extends Thread{
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Ho finito tutte richieste di cancellazione?");
-		
 	}
 
 	//handler per la bomba
