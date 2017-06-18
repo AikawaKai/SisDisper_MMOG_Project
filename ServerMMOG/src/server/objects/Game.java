@@ -86,6 +86,7 @@ public class Game {
 		}
 		player_names.add(pl.getName());
 		players.add(pl);
+		pl.setMy_next(players.get(0).getName());
 		return true;
 	}
 	

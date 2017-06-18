@@ -20,9 +20,11 @@ public class Player {
 	private String ip;
 	private int port;
 	private Position pos;
+	private String my_next = null;
 	private Socket socket=null;
 	private BufferedReader inputStream = null;
 	private DataOutputStream outputStream = null;
+
 	
 	public Player(){
 	}
@@ -43,7 +45,7 @@ public class Player {
 		return ip;
 	}
 	
-	public void setPort(int p){
+	public synchronized void setPort(int p){
 		port = p;
 	}
 	
@@ -57,6 +59,20 @@ public class Player {
 	
 	public synchronized Position getPos(){
 		return pos;
+	}
+	
+	public synchronized String getMy_next(){
+		return my_next;
+	}
+	
+	public synchronized void setMy_next(String next){
+		my_next = next;
+	}
+	
+	public synchronized boolean equals(Player pl){
+		if(pl.getName().equals(name))
+			return true;
+		return false;
 	}
 	
 	public synchronized BufferedReader  getSocketInput(){
@@ -81,7 +97,6 @@ public class Player {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
 	private synchronized void closeSocket(){
