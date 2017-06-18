@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 
 import peer.objects.Game;
 import peer.objects.Player;
@@ -162,8 +161,7 @@ public class ThreadRequestsHandler extends Thread{
 	
 	
 	private void sendRequestDeletePlayer() {
-		Response resp = target.path("deleteplayer").path(g.getGame_name()).path(player_name).request().delete();
-		System.out.println(resp.getStatus());
+		target.path("deleteplayer").path(g.getGame_name()).path(player_name).request().delete();
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
 		for(Player pl_i: g.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
@@ -276,7 +274,6 @@ public class ThreadRequestsHandler extends Thread{
 			confirmed.start();
 			confirmed.join();
 			pl.closeSocket();
-			System.out.println("["+pl_name+"]");
 		}catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
