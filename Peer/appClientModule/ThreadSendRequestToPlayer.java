@@ -74,8 +74,9 @@ public class ThreadSendRequestToPlayer extends Thread {
 			if(response.equals("colpito"))
 			{
 				response = inFromPeer.readLine();
-				player.setMy_next(response);
-				System.out.println("Hai colpito il giocatore ["+player_i.getName()+"]");
+				if(player.getMy_next().equals(player_i.getName()))
+					player.setMy_next(response);
+				System.out.println("[INFO] Hai colpito il giocatore ["+player_i.getName()+"]");
 			}else{
 				response = inFromPeer.readLine();
 			}
