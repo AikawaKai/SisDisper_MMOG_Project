@@ -3,6 +3,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import javax.ws.rs.client.WebTarget;
+
 import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.Position;
@@ -21,12 +23,14 @@ public class ThreadPlayingGame extends Thread {
 	private ServerSocket ws;
 	private Socket connectionSocket;
 	private Player player;
+	private WebTarget target;
 	
-	public ThreadPlayingGame(String my_name, Game game, ServerSocket welcomeSocket){
+	public ThreadPlayingGame(WebTarget target_, String my_name, Game game, ServerSocket welcomeSocket){
 		g = game;
 		ws = welcomeSocket;
 		player_name = my_name;
 		player = g.getPlayer(player_name);
+		target = target_;
 		
 	}
 	
@@ -36,7 +40,7 @@ public class ThreadPlayingGame extends Thread {
 		while(true){
 			try {
 				connectionSocket = ws.accept();
-				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(connectionSocket, player_name, g);
+				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(target, connectionSocket, player_name, g);
 				clientHandler.start();
 			} catch (IOException e) {
 				e.printStackTrace();

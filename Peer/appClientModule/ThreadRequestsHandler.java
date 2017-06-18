@@ -6,6 +6,9 @@ import java.io.StringReader;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
 import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.Position;
@@ -22,14 +25,16 @@ public class ThreadRequestsHandler extends Thread{
 	private String player_name;
 	private Player player;
 	private Socket conn;
+	private WebTarget target;
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
 	
-	public ThreadRequestsHandler(Socket connection, String my_name, Game game){
+	public ThreadRequestsHandler(WebTarget target_, Socket connection, String my_name, Game game){
 		conn = connection;
 		g = game;
 		player_name = my_name;
 		player = g.getPlayer(player_name);
+		target = target_;
 		try{
 			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 	        outToClient = new DataOutputStream(conn.getOutputStream());
@@ -40,13 +45,17 @@ public class ThreadRequestsHandler extends Thread{
 	}
 	
 	public void run(){
-		String response="";
+		String response = "";
 		while(true){
 			try {
 	            response = inFromClient.readLine();
+	            if(response==null)
+	            	break;
 	            requestsHandler(response);
 	        } catch (IOException e) {
-	            e.printStackTrace();
+	        	e.printStackTrace();
+	        } catch (Exception e){
+	        	System.out.println("Oggetto:"+inFromClient);
 	        }
 		}
 	}
@@ -139,8 +148,12 @@ public class ThreadRequestsHandler extends Thread{
 			if(pos.equals(position)){
 				System.out.println("[INFO] Eliminato");
 				outToClient.writeBytes("colpito\n");
+				outToClient.writeBytes(player.getMy_next()+"\n");
+				sendRequestDeletePlayer();
+				System.exit(0);
 			}else{
 				outToClient.writeBytes("mancato\n");
+				outToClient.writeBytes(player.getMy_next()+"\n");
 			}
 		}catch (IOException e) {
 			e.printStackTrace();
@@ -148,6 +161,28 @@ public class ThreadRequestsHandler extends Thread{
 	}
 	
 	
+	private void sendRequestDeletePlayer() {
+		Response resp = target.path("deleteplayer").path(g.getGame_name()).path(player_name).request().delete();
+		System.out.println(resp.getStatus());
+		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
+		for(Player pl_i: g.getPlayers()){
+			if(!pl_i.getName().equals(player_name))
+			{
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "deleteplayer", new boolean[1]);
+				threads.add(pl_hl);
+				pl_hl.start();
+			}
+		}
+		for(ThreadSendRequestToPlayer pl_hl: threads){
+			try {
+				pl_hl.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
 	//handler per la bomba
 	private void bomb() {
 		
@@ -232,11 +267,21 @@ public class ThreadRequestsHandler extends Thread{
 			reader = new StringReader(response);
 			pl = (Player) Player.unmarshallThat(reader);
 			pl_name = pl.getName();
+			pl = g.getPlayer(pl_name);
+			
+			if(player.getMy_next().equals(pl_name))
+				player.setMy_next(pl.getMy_next());
 			g.removePlayer(pl_name);
+			ThreadSendRequestToPlayer confirmed = new ThreadSendRequestToPlayer(player, pl, "confirmed", new boolean[1]);
+			confirmed.start();
+			confirmed.join();
+			pl.closeSocket();
 			System.out.println("["+pl_name+"]");
 		}catch (IOException e) {
 			e.printStackTrace();
-		}	
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	//handler per l'aggiunta di un giocatore

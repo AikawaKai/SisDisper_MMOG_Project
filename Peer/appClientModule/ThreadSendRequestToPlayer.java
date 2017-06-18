@@ -29,6 +29,9 @@ public class ThreadSendRequestToPlayer extends Thread {
 		case "newplayer":
 			notifyImIn();
 			break;
+		case "deleteplayer":
+			deletePlayer();
+			break;
 		case "confirmed":
 			confirm();
 			break;
@@ -36,7 +39,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 			notConfirm();
 			break;
 		case "sendnewpos":
-			checkPos();
+			sendNewPos();
 			break;
 		case "token":
 			sendTokenToNext();
@@ -44,7 +47,20 @@ public class ThreadSendRequestToPlayer extends Thread {
 		}
 	}
 
-	private void checkPos() {
+	private void deletePlayer() {
+		DataOutputStream outToPeer = player_i.getSocketOutput();
+		BufferedReader inFromPeer = player_i.getSocketInput();
+			try {
+				outToPeer.writeBytes("deleteplayer\n");
+				inFromPeer.readLine();
+				outToPeer.writeBytes(player.marshallerThis()+"\n");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		
+	}
+
+	private void sendNewPos() {
 		DataOutputStream outToPeer = player_i.getSocketOutput();
 		BufferedReader inFromPeer = player_i.getSocketInput();
 		String response = "";
@@ -55,15 +71,17 @@ public class ThreadSendRequestToPlayer extends Thread {
 			position = player.getPos().marshallerThis();
 			outToPeer.writeBytes(position+"\n");
 			response = inFromPeer.readLine();
+			if(response.equals("colpito"))
+			{
+				response = inFromPeer.readLine();
+				player.setMy_next(response);
+				System.out.println("Hai colpito il giocatore ["+player_i.getName()+"]");
+			}else{
+				response = inFromPeer.readLine();
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		if(response.equals("colpito"))
-		{
-			System.out.println("Hai colpito il giocatore ["+player_i.getName()+"]");
-		}
-		
 	}
 
 	private void notConfirm() {

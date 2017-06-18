@@ -205,7 +205,7 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
-		play(player.getName(), game, welcomeSocket, true);
+		play(target, player.getName(), game, welcomeSocket, true);
 	}
 	
 	private static void addPlayerToGame(WebTarget target, Player player, String game_name, int type, ServerSocket welcomeSocket)
@@ -231,7 +231,7 @@ public class Main {
 			System.out.println("Giocatore "+player.getName()+" aggiunto alla partita "+game_name);
 			game = response.readEntity(Game.class);
 			player = game.getPlayer(player.getName());
-			play(player.getName(), game, welcomeSocket, false);
+			play(target, player.getName(), game, welcomeSocket, false);
 		}else if(status==406){
 			System.out.println("[INFO] Partita inesistente. Impossibile aggiungere il giocatore. ");
 		}else if(status==409){
@@ -259,8 +259,8 @@ public class Main {
 		
 	}
 	
-	private static void play(String my_name, Game game, ServerSocket welcomeSocket, boolean first) {
-		ThreadPlayingGame playing = new ThreadPlayingGame(my_name, game, welcomeSocket);
+	private static void play(WebTarget target, String my_name, Game game, ServerSocket welcomeSocket, boolean first) {
+		ThreadPlayingGame playing = new ThreadPlayingGame(target, my_name, game, welcomeSocket);
 		try {
 			playing.start();
 			if(first){

@@ -99,7 +99,7 @@ public class Player {
 		}
 	}
 	
-	private synchronized void closeSocket(){
+	public synchronized void closeSocket(){
 		if(socket!=null){
 			try {
 				socket.close();
