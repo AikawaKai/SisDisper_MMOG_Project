@@ -27,16 +27,10 @@ public class ThreadSendRequestToPlayer extends Thread {
 	public void run() {
 		switch(case_){
 		case "newplayer":
-			notifyImIn();
+			notifyNewPlayer();
 			break;
 		case "deleteplayer":
-			deletePlayer();
-			break;
-		case "confirmed":
-			confirm();
-			break;
-		case "notconfirmed":
-			notConfirm();
+			notifyDeletePlayer();
 			break;
 		case "sendnewpos":
 			sendNewPos();
@@ -44,10 +38,37 @@ public class ThreadSendRequestToPlayer extends Thread {
 		case "token":
 			sendTokenToNext();
 			break;
+		case "confirmed":
+			confirm();
+			break;
+		case "notconfirmed":
+			notConfirm();
+			break;
 		}
 	}
 
-	private void deletePlayer() {
+	private void notifyNewPlayer() {
+		BufferedReader inputStream = player_i.getSocketInput();
+		DataOutputStream outputStream = player_i.getSocketOutput();
+		String response = "";
+		try {
+			outputStream.writeBytes("newplayer\n");
+			response = inputStream.readLine();
+			outputStream.writeBytes(player.marshallerThis()+"\n");
+			response = inputStream.readLine();
+			if(response.equals("ko"))
+			{
+				synchronized(check){
+					check[0] = true;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+	private void notifyDeletePlayer() {
 		DataOutputStream outToPeer = player_i.getSocketOutput();
 		BufferedReader inFromPeer = player_i.getSocketInput();
 			try {
@@ -113,25 +134,5 @@ public class ThreadSendRequestToPlayer extends Thread {
 		
 	}
 
-	private void notifyImIn() {
-		BufferedReader inputStream = player_i.getSocketInput();
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		String response = "";
-		try {
-			outputStream.writeBytes("newplayer\n");
-			response = inputStream.readLine();
-			outputStream.writeBytes(player.marshallerThis()+"\n");
-			response = inputStream.readLine();
-			if(response.equals("ko"))
-			{
-				synchronized(check){
-					check[0] = true;
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-	}
-
+	
 }

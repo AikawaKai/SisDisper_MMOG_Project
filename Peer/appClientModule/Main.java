@@ -44,9 +44,11 @@ public class Main {
 		{
 			try{
 				System.out.print("Indirizzo ip: ");
-				indirizzo_ip = bufferedReader.readLine();
+				//indirizzo_ip = bufferedReader.readLine();
+				indirizzo_ip = "localhost";
 				System.out.print("Porta in ascolto: ");
-				porta = integerReaderHandler(bufferedReader);
+				//porta = integerReaderHandler(bufferedReader);
+				porta = 8080;
 				baseuri = "http://"+indirizzo_ip+":"+porta;
 				System.out.println("Server: "+baseuri);
 				basepath = UriBuilder.fromUri(baseuri).build();

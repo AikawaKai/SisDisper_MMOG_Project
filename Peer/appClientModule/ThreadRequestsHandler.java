@@ -72,7 +72,7 @@ public class ThreadRequestsHandler extends Thread{
 			break;
 		case "token":
 			System.out.println("[INFO] È il tuo turno! Fai una mossa!");
-			doMove();
+			myTurn();
 			break;
 		case "newpos":
 			checkPos();
@@ -83,7 +83,7 @@ public class ThreadRequestsHandler extends Thread{
 	}
 	
 	//handler per la mossa (movimento o bomba)
-	private void doMove() {
+	private void myTurn() {
 		System.out.println(player.getPos());
 		System.out.println(g.getPosOnGameArea(player.getPos()));
 		int scelta=0;
@@ -97,80 +97,30 @@ public class ThreadRequestsHandler extends Thread{
 		}
 		switch(scelta){
 		case 1:
-			ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-			move(player.getPos());
-			System.out.println("Spostato:");
-			System.out.println(g.getPosOnGameArea(player.getPos()));
-			for(Player pl_i: g.getPlayers()){
-				if(!pl_i.getName().equals(player_name)){
-					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "sendnewpos", new boolean[1]);
-					threads.add(pl_hl);
-					pl_hl.start();
-				}
-			}
-
-			for(ThreadSendRequestToPlayer pl_hl: threads){
-				try {
-					pl_hl.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(player, g.getPlayer(player.getMy_next()), "token", new boolean[1]);
-			forwardToken.start();
-			try {
-				forwardToken.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			basicMove();
 			break;
 		case 2:
 			bomb();
+			break;
 		default:
 			break;
 		}
 		System.out.println("Fine turno.");
 	}
-	
-	//handler per il controllo della posizione inviata da altro giocatore
-	private void checkPos() {
-		Position pos = player.getPos();
-		String response = "";
-		StringReader reader;
-		Position position;
-		try {
-			outToClient.writeBytes("ack\n");
-			response = inFromClient.readLine();
-			reader = new StringReader(response);
-			position = Position.unmarshallThat(reader);
-			System.out.println(position);
-			if(pos.equals(position)){
-				System.out.println("[INFO] Eliminato");
-				outToClient.writeBytes("colpito\n");
-				outToClient.writeBytes(player.getMy_next()+"\n");
-				sendRequestDeletePlayer();
-				System.exit(0);
-			}else{
-				outToClient.writeBytes("mancato\n");
-				outToClient.writeBytes(player.getMy_next()+"\n");
-			}
-		}catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	
-	private void sendRequestDeletePlayer() {
-		target.path("deleteplayer").path(g.getGame_name()).path(player_name).request().delete();
+
+	private void basicMove() {
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
+		move(player.getPos());
+		System.out.println("Spostato:");
+		System.out.println(g.getPosOnGameArea(player.getPos()));
 		for(Player pl_i: g.getPlayers()){
-			if(!pl_i.getName().equals(player_name))
-			{
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "deleteplayer", new boolean[1]);
+			if(!pl_i.getName().equals(player_name)){
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "sendnewpos", new boolean[1]);
 				threads.add(pl_hl);
 				pl_hl.start();
 			}
 		}
+
 		for(ThreadSendRequestToPlayer pl_hl: threads){
 			try {
 				pl_hl.join();
@@ -179,11 +129,14 @@ public class ThreadRequestsHandler extends Thread{
 			}
 		}
 		
-	}
-
-	//handler per la bomba
-	private void bomb() {
-		
+		//aspettiamo a forwardare il token...
+		ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(player, g.getPlayer(player.getMy_next()), "token", new boolean[1]);
+		forwardToken.start();
+		try {
+			forwardToken.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	//funzione che esegue la mossa movimento
@@ -211,75 +164,138 @@ public class ThreadRequestsHandler extends Thread{
 				}
 			}
 			switch(choice){
-				case "w":
-					if(old_x-1>=0){
-						System.out.println(old_x-1);
-						pos.setPos_x(old_x-1);
-						check = false;
-					}else{
-						System.out.println("[INFO] Mossa non consentita");
-					}
-					break;
-				case "x":
-					if(old_x+1<game_size){
-						System.out.println(old_x+1);
-						pos.setPos_x(old_x+1);
-						check = false;
-					}else{
-						System.out.println("[INFO] Mossa non consentita");
-					}
-					break;
-				case "a":
-					if(old_y-1>=0){
-						System.out.println(old_y-1);
-						pos.setPos_y(old_y-1);
-						check = false;
-					}else{
-						System.out.println("[INFO] Mossa non consentita");
-					}
-					break;
-				case "d":
-					if(old_y+1<game_size){
-						System.out.println(old_y+1);
-						pos.setPos_y(old_y+1);
-						check = false;
-					}else{
-						System.out.println("[INFO] Mossa non consentita");
-					}
-					break;
+			case "w":
+				if(old_x-1>=0){
+					System.out.println(old_x-1);
+					pos.setPos_x(old_x-1);
+					check = false;
+				}else{
+					System.out.println("[INFO] Mossa non consentita");
+				}
+				break;
+			case "x":
+				if(old_x+1<game_size){
+					System.out.println(old_x+1);
+					pos.setPos_x(old_x+1);
+					check = false;
+				}else{
+					System.out.println("[INFO] Mossa non consentita");
+				}
+				break;
+			case "a":
+				if(old_y-1>=0){
+					System.out.println(old_y-1);
+					pos.setPos_y(old_y-1);
+					check = false;
+				}else{
+					System.out.println("[INFO] Mossa non consentita");
+				}
+				break;
+			case "d":
+				if(old_y+1<game_size){
+					System.out.println(old_y+1);
+					pos.setPos_y(old_y+1);
+					check = false;
+				}else{
+					System.out.println("[INFO] Mossa non consentita");
+				}
+				break;
 			}
 		}
 		System.out.println(pos);
 	}
 
-	
-	//handler per la cancellazione di un giocatore in partita
-	private void playersUpdateDelete() {
+	//handler per il controllo della posizione inviata da altro giocatore
+	private void checkPos() {
+		Position pos = player.getPos();
 		String response = "";
 		StringReader reader;
-		Player pl;
-		String pl_name;
+		Position position;
 		try {
 			outToClient.writeBytes("ack\n");
 			response = inFromClient.readLine();
 			reader = new StringReader(response);
-			pl = (Player) Player.unmarshallThat(reader);
-			pl_name = pl.getName();
-			pl = g.getPlayer(pl_name);
-			
-			if(player.getMy_next().equals(pl_name))
-				player.setMy_next(pl.getMy_next());
-			g.removePlayer(pl_name);
-			ThreadSendRequestToPlayer confirmed = new ThreadSendRequestToPlayer(player, pl, "confirmed", new boolean[1]);
-			confirmed.start();
-			confirmed.join();
-			pl.closeSocket();
+			position = Position.unmarshallThat(reader);
+			System.out.println(position);
+			if(pos.equals(position)){
+				System.out.println("[INFO] Eliminato");
+				outToClient.writeBytes("colpito\n");
+				outToClient.writeBytes(player.getMy_next()+"\n");
+				sendRequestDeletePlayer();
+				System.exit(0);
+			}else{
+				outToClient.writeBytes("mancato\n");
+				outToClient.writeBytes(player.getMy_next()+"\n");
+			}
 		}catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	//handler per la cancellazione di un giocatore in partita
+		private void playersUpdateDelete() {
+			String response = "";
+			StringReader reader;
+			Player pl;
+			String pl_name;
+			try {
+				outToClient.writeBytes("ack\n");
+				response = inFromClient.readLine();
+				reader = new StringReader(response);
+				pl = (Player) Player.unmarshallThat(reader);
+				pl_name = pl.getName();
+				
+				if(player.getMy_next().equals(pl_name))
+				{
+					System.out.println("Io ho ricevuto la richiesta di eliminazione "+player.getName());
+					System.out.println("Io sono stato eliminato: player"+pl_name);
+					System.out.println("I'm "+player.getName()+"And my new next is "+pl.getMy_next());
+					player.setMy_next(pl.getMy_next());
+				}
+					
+				g.removePlayer(pl_name);
+				ThreadSendRequestToPlayer confirmed = new ThreadSendRequestToPlayer(player, pl, "confirmed", new boolean[1]);
+				confirmed.start();
+				confirmed.join();
+				pl.closeSocket();
+			}catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	
+	private void sendRequestDeletePlayer() {
+		target.path("deleteplayer").path(g.getGame_name()).path(player_name).request().delete();
+		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
+		for(Player pl_i: g.getPlayers()){
+			if(!pl_i.getName().equals(player_name))
+			{
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "deleteplayer", new boolean[1]);
+				threads.add(pl_hl);
+				pl_hl.start();
+			}
+		}
+		for(ThreadSendRequestToPlayer pl_hl: threads){
+			try {
+				pl_hl.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Ho finito tutte richieste di cancellazione?");
+		
+	}
+
+	//handler per la bomba
+	private void bomb() {
+		
+	}
+	
+	
+
+	
+	
 	
 	//handler per l'aggiunta di un giocatore
 	private void playersUpdate() {
