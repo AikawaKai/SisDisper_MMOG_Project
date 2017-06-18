@@ -103,7 +103,6 @@ public class ThreadRequestsHandler extends Thread{
 		default:
 			break;
 		}
-		System.out.println("Fine turno.");
 	}
 
 	private void basicMove() {
@@ -126,7 +125,7 @@ public class ThreadRequestsHandler extends Thread{
 				e.printStackTrace();
 			}
 		}
-		
+		System.out.println("[INFO] Fine turno.");
 		//aspettiamo a forwardare il token...
 		ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(player, g.getPlayer(player.getMy_next()), "token", new boolean[1]);
 		forwardToken.start();
