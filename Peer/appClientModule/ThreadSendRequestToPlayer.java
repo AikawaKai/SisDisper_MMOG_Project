@@ -5,6 +5,11 @@ import java.io.IOException;
 
 import peer.objects.Player;
 
+//------------------------------------------------------------------------------------ 
+//                               [PEER CLIENT THREAD]                                        
+//
+//          Thread handler per mandare le diverse richieste agli altri peer   
+//-------------------------------------------------------------------------------------
 public class ThreadSendRequestToPlayer extends Thread {
 	private Player player;
 	private Player player_i;

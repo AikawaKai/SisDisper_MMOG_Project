@@ -6,13 +6,15 @@ import java.io.StringReader;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
 import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.Position;
+
+//------------------------------------------------------------------------------------ 
+//						        [PEER SERVER THREAD]                                        
+//
+//            Thread handler per le diverse richieste che arrivano al peer   
+//-------------------------------------------------------------------------------------
 
 public class ThreadRequestsHandler extends Thread{
 	
@@ -49,6 +51,8 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 
+	
+	//handler per le richieste da gestire che arrivano al peer
 	public void requestsHandler(String response) {
 		switch(response){
 		case "newplayer":
@@ -70,57 +74,57 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 	
-	//handler do move
-		private void doMove() {
-			System.out.println(player.getPos());
-			System.out.println(g.getPosOnGameArea(player.getPos()));
-			int scelta=0;
-			while(scelta!=1 && scelta!=2){
-				System.out.println("Scegli cosa fare:");
-				System.out.println("1 - muoviti in una direzione");
-				System.out.println("2 - Usa una bomba (se ne possiedi una)");
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-				System.out.print("Scelta: ");
-				scelta = integerReaderHandler(bufferedReader);
-			}
-			switch(scelta){
-				case 1:
-					ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-					move(player.getPos());
-					System.out.println("Spostato:");
-					System.out.println(g.getPosOnGameArea(player.getPos()));
-					for(Player pl_i: g.getPlayers()){
-						if(!pl_i.getName().equals(player_name)){
-							ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "sendnewpos", new boolean[1]);
-							threads.add(pl_hl);
-							pl_hl.start();
-						}
-					}
-					
-					for(ThreadSendRequestToPlayer pl_hl: threads){
-						try {
-							pl_hl.join();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-					ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(player, g.getPlayers().get(1), "token", new boolean[1]);
-					forwardToken.start();
-					try {
-						forwardToken.join();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					break;
-				case 2:
-					bomb();
-				default:
-					break;
-			}
-			System.out.println("Fine turno.");
+	//handler per la mossa (movimento o bomba)
+	private void doMove() {
+		System.out.println(player.getPos());
+		System.out.println(g.getPosOnGameArea(player.getPos()));
+		int scelta=0;
+		while(scelta!=1 && scelta!=2){
+			System.out.println("Scegli cosa fare:");
+			System.out.println("1 - muoviti in una direzione");
+			System.out.println("2 - Usa una bomba (se ne possiedi una)");
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
+			System.out.print("Scelta: ");
+			scelta = integerReaderHandler(bufferedReader);
 		}
+		switch(scelta){
+		case 1:
+			ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
+			move(player.getPos());
+			System.out.println("Spostato:");
+			System.out.println(g.getPosOnGameArea(player.getPos()));
+			for(Player pl_i: g.getPlayers()){
+				if(!pl_i.getName().equals(player_name)){
+					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "sendnewpos", new boolean[1]);
+					threads.add(pl_hl);
+					pl_hl.start();
+				}
+			}
+
+			for(ThreadSendRequestToPlayer pl_hl: threads){
+				try {
+					pl_hl.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(player, g.getPlayer(player.getMy_next()), "token", new boolean[1]);
+			forwardToken.start();
+			try {
+				forwardToken.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			break;
+		case 2:
+			bomb();
+		default:
+			break;
+		}
+		System.out.println("Fine turno.");
+	}
 	
-	//handler change position from other player
+	//handler per il controllo della posizione inviata da altro giocatore
 	private void checkPos() {
 		Position pos = player.getPos();
 		String response = "";
@@ -128,7 +132,7 @@ public class ThreadRequestsHandler extends Thread{
 		Position position;
 		try {
 			outToClient.writeBytes("ack\n");
-			response = inFromClient.readLine(); // qui si blocca!!!!!!
+			response = inFromClient.readLine();
 			reader = new StringReader(response);
 			position = Position.unmarshallThat(reader);
 			System.out.println(position);
@@ -144,12 +148,12 @@ public class ThreadRequestsHandler extends Thread{
 	}
 	
 	
-	
+	//handler per la bomba
 	private void bomb() {
 		
 	}
 	
-	// function for the move turn
+	//funzione che esegue la mossa movimento
 	private void move(Position pos) {
 		int old_x = pos.getPos_x();
 		int old_y = pos.getPos_y();
@@ -216,7 +220,7 @@ public class ThreadRequestsHandler extends Thread{
 	}
 
 	
-	//handler for the player delete
+	//handler per la cancellazione di un giocatore in partita
 	private void playersUpdateDelete() {
 		String response = "";
 		StringReader reader;
@@ -235,7 +239,7 @@ public class ThreadRequestsHandler extends Thread{
 		}	
 	}
 	
-	//handler for the player updated
+	//handler per l'aggiunta di un giocatore
 	private void playersUpdate() {
 		String response = "";
 		StringReader reader = null;
@@ -257,7 +261,9 @@ public class ThreadRequestsHandler extends Thread{
 			if(response.equals("accepted"))
 			{
 				System.out.println("[INFO] Notifica nuovo giocatore!");
-				g.addPlayer(pl); // metodo sincronizzato
+				g.addPlayer(pl);
+				if(player.getMy_next().equals(pl.getMy_next()))
+					player.setMy_next(pl_name);
 				System.out.println("["+pl_name+"]");
 			}
 		}catch (IOException e) {
@@ -265,6 +271,7 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 	
+	//handler per la gestione della lettura da standard input degli interi
 	private static int integerReaderHandler(BufferedReader bufferedReader){
 		int number = 0;
 		boolean val = true;

@@ -7,8 +7,14 @@ import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.Position;
 
-// Server del Peer: Accetta le richieste e crea per ogni richiesta un nuovo threadrequesthandler
-// All'inizio verifica la posizione in cui inserire il giocatore, finché non ne trova una libera (distribuito)
+// ------------------------------------------------------------------------------------ 
+//                                  [PEER SERVER]                                        
+//
+// Accetta le richieste e crea per ogni richiesta un nuovo threadrequesthandler.        
+// All'inizio verifica la posizione in cui inserire il giocatore, finché non ne trova   
+// una libera (distribuito)                                                             
+// -------------------------------------------------------------------------------------
+
 public class ThreadPlayingGame extends Thread {
 	private Game g;
 	private String player_name;
@@ -25,6 +31,23 @@ public class ThreadPlayingGame extends Thread {
 	}
 	
 	public void run(){
+		genRandomPositionForNewPlayer();
+		System.out.println("Partita "+g.getGame_name()+" in corso...");
+		while(true){
+			try {
+				connectionSocket = ws.accept();
+				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(connectionSocket, player_name, g);
+				clientHandler.start();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+	//funzione che si occupa di generare una nuova posizione random per il nuovo giocatore
+	//confermandola agli altri peer
+	private void genRandomPositionForNewPlayer() {
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
 		ArrayList<ThreadSendRequestToPlayer> threadsNotify = new ArrayList<ThreadSendRequestToPlayer>();
 		boolean check[] = {true};
@@ -83,17 +106,6 @@ public class ThreadPlayingGame extends Thread {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Partita "+g.getGame_name()+" in corso...");
-		while(true){
-			try {
-				connectionSocket = ws.accept();
-				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(connectionSocket, player_name, g);
-				clientHandler.start();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		
 	}
 
 }

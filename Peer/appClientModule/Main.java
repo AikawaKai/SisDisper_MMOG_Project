@@ -91,6 +91,7 @@ public class Main {
 		player.setIp("localhost");
 		player.setPort(porta_peer);
 		player.setName(nickname);
+		player.setMy_next(nickname);
 		
 		// menu
 		while(scelta != 5){
@@ -229,6 +230,7 @@ public class Main {
 		if(status==200){
 			System.out.println("Giocatore "+player.getName()+" aggiunto alla partita "+game_name);
 			game = response.readEntity(Game.class);
+			player = game.getPlayer(player.getName());
 			play(player.getName(), game, welcomeSocket, false);
 		}else if(status==406){
 			System.out.println("[INFO] Partita inesistente. Impossibile aggiungere il giocatore. ");
