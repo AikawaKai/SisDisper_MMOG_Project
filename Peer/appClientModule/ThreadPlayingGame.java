@@ -106,9 +106,7 @@ public class ThreadPlayingGame extends Thread {
 		while(player_next.equals(player) && num_players>1){
 			choose = Main.randInt(0, num_players-1);
 			player_next = g.getPlayers().get(choose);
-			System.out.println("Sono bloccato qui?");
 		}
-		System.out.println("(HO SCELTO) Io sono "+player.getName()+" e ho scelto  "+player_next.getName());
 		for(Player pl_i: g.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
 			{

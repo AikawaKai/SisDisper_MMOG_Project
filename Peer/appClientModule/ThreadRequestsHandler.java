@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 import javax.ws.rs.client.WebTarget;
@@ -52,8 +53,8 @@ public class ThreadRequestsHandler extends Thread{
 	            	break;
 	            requestsHandler(response);
 	        } catch (IOException e) {
-	        	e.printStackTrace();
-	        }
+	        	break;
+	        } 
 		}
 	}
 
@@ -103,10 +104,7 @@ public class ThreadRequestsHandler extends Thread{
 				response = inFromClient.readLine();
 				outToClient.writeBytes(player.marshallerThis()+"\n");
 				if(response.equals(player_name))
-				{
 					player.setMy_next(pl_name);
-					System.out.println("(Ricevo richiesta) Io sono "+player.getName()+" e il mio next è "+player.getMy_next());
-				}
 				System.out.println("[INFO] Notifica nuovo giocatore!");
 				g.addPlayer(pl);
 				System.out.println("["+pl_name+"]");
@@ -135,6 +133,7 @@ public class ThreadRequestsHandler extends Thread{
 
 			g.removePlayer(pl_name);
 			outToClient.writeBytes("accepted\n");
+			conn.close();
 			System.out.println("[INFO] Notifica cancellazione giocatore!");
 		}catch (IOException e) {
 			e.printStackTrace();
