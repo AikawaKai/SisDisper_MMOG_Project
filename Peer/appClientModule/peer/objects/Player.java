@@ -71,7 +71,10 @@ public class Player {
 	
 	public synchronized boolean equals(Player pl){
 		if(pl.getName().equals(name))
-			return true;
+		{
+			if(pl.getIp().equals(this.getIp()) && pl.getPort() == this.getPort())
+				return true;
+		}
 		return false;
 	}
 	

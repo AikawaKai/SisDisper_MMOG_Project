@@ -1,7 +1,8 @@
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
+import java.io.StringReader;
+import java.util.ArrayList;
 
 import peer.objects.Player;
 
@@ -15,12 +16,14 @@ public class ThreadSendRequestToPlayer extends Thread {
 	private Player player_i;
 	private String case_;
 	private boolean []check;
+	private Object result;
 	
-	public ThreadSendRequestToPlayer(Player pl, Player pl_i, String c, boolean []check_){
+	public ThreadSendRequestToPlayer(Player pl, Player pl_i, String c, boolean []check_, Object res){
 		player = pl;
 		player_i = pl_i;
 		case_ = c;
 		check = check_;
+		result = res;
 		
 	}
 	
@@ -38,11 +41,11 @@ public class ThreadSendRequestToPlayer extends Thread {
 		case "token":
 			sendTokenToNext();
 			break;
-		case "confirmed":
-			confirm();
+		case "accepted":
+			accept();
 			break;
-		case "notconfirmed":
-			notConfirm();
+		case "notaccepted":
+			notaccept();
 			break;
 		}
 	}
@@ -64,6 +67,12 @@ public class ThreadSendRequestToPlayer extends Thread {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			synchronized(check){
+				check[0] = true;
+				synchronized(result){
+					((ArrayList<Player>) result).add(player_i);
+				}
+			}
 		}
 		
 	}
@@ -105,20 +114,31 @@ public class ThreadSendRequestToPlayer extends Thread {
 			e.printStackTrace();
 		}
 	}
-
-	private void notConfirm() {
+	
+	private void accept() {
 		DataOutputStream outputStream = player_i.getSocketOutput();
+		BufferedReader inFromPeer = player_i.getSocketInput();
+		String response = "";
 		try {
-			outputStream.writeBytes("notaccepted\n");
+			outputStream.writeBytes("accepted\n");
+			outputStream.writeBytes(((Player)result).getName()+"\n");
+			response = inFromPeer.readLine();
+			Player my_prev = Player.unmarshallThat(new StringReader(response));
+			if(((Player)result).equals(player_i))
+			{
+				System.out.println("Entro mai qui?");
+				player.setMy_next(my_prev.getMy_next());
+			}
+			System.out.println("(Faccio richiesta) Io sono "+player.getName()+" e il mio next è "+player.getMy_next());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private void confirm() {
+	private void notaccept() {
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		try {
-			outputStream.writeBytes("accepted\n");
+			outputStream.writeBytes("notaccepted\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

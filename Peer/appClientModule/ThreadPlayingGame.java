@@ -35,7 +35,7 @@ public class ThreadPlayingGame extends Thread {
 	}
 	
 	public void run(){
-		genRandomPositionForNewPlayer();
+		comeInNewPlayer();
 		System.out.println("Partita "+g.getGame_name()+" in corso...");
 		while(true){
 			try {
@@ -51,18 +51,19 @@ public class ThreadPlayingGame extends Thread {
 
 	//funzione che si occupa di generare una nuova posizione random per il nuovo giocatore
 	//confermandola agli altri peer
-	private void genRandomPositionForNewPlayer() {
+	private void comeInNewPlayer() {
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
 		ArrayList<ThreadSendRequestToPlayer> threadsNotify = new ArrayList<ThreadSendRequestToPlayer>();
 		boolean check[] = {true};
+		ArrayList<Player> players_deleted = new ArrayList<Player>();
 		while(check[0]){
 			check[0] = false;
-			Position pos = g.genRandPosition();
+			Position pos = g.genRandPosition(); // questo forse conviene farlo dopo?
 			player.setPos(pos);
 			for(Player pl_i: g.getPlayers()){
 				if(!pl_i.getName().equals(player_name))
 				{
-					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "newplayer", check);
+					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "newplayer", check, players_deleted);
 					threads.add(pl_hl);
 					pl_hl.start();
 				}
@@ -77,10 +78,13 @@ public class ThreadPlayingGame extends Thread {
 			threads = new ArrayList<ThreadSendRequestToPlayer>();
 			if(check[0])
 			{
+				for(Player pl_to_del: players_deleted){
+					g.removePlayer(pl_to_del.getName());
+				}
 				for(Player pl_i: g.getPlayers()){
 					if(!pl_i.getName().equals(player_name))
 					{
-						ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "notconfirmed", check);
+						ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "notaccepted", check, new Object());
 						threadsNotify.add(pl_hl);
 						pl_hl.start();
 					}
@@ -95,10 +99,20 @@ public class ThreadPlayingGame extends Thread {
 			}
 		}
 		threadsNotify = new ArrayList<ThreadSendRequestToPlayer>();
+		Player player_next;
+		int num_players = g.getPlayers().size();
+		int choose = Main.randInt(0, num_players-1);
+		player_next = g.getPlayers().get(choose);
+		while(player_next.equals(player) && num_players>1){
+			choose = Main.randInt(0, num_players-1);
+			player_next = g.getPlayers().get(choose);
+			System.out.println("Sono bloccato qui?");
+		}
+		System.out.println("(HO SCELTO) Io sono "+player.getName()+" e ho scelto  "+player_next.getName());
 		for(Player pl_i: g.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
 			{
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "confirmed", check);
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "accepted", check, player_next);
 				threadsNotify.add(pl_hl);
 				pl_hl.start();
 			}

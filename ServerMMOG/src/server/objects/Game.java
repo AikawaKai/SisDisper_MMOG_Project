@@ -1,9 +1,15 @@
 package server.objects;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -86,7 +92,6 @@ public class Game {
 		}
 		player_names.add(pl.getName());
 		players.add(pl);
-		pl.setMy_next(players.get(0).getName());
 		return true;
 	}
 	
@@ -171,6 +176,17 @@ public class Game {
 		}
 		return sb.toString();
 	}
+	
+	public synchronized boolean equals(Game other){
+		int size = players.size();
+		if(size!=other.getPlayers().size())
+			return false;
+		for(String name: player_names){
+			if(!this.getPlayer(name).equals(other.getPlayer(name)))
+				return false;
+		}
+		return true;
+	}
 
 	public synchronized Position genRandPosition() {
 		int x = randInt(0, size_x-1);
@@ -179,6 +195,34 @@ public class Game {
 		pos.setPos_x(x);
 		pos.setPos_y(y);
 		return pos;
+	}
+	
+	public synchronized String marshallerThis(){
+		String game_s = null;
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(Game.class);
+			StringWriter sw = new StringWriter();
+			Marshaller marshaller = jaxbContext.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+			marshaller.marshal(this, sw);
+			return sw.toString();
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+		return game_s;
+	}
+	
+	public static Game unmarshallThat(StringReader game_s){
+		Game gen_game = null;
+		try {
+			JAXBContext jaxbContext = JAXBContext.newInstance(Game.class);
+			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+			gen_game = (Game) unmarshaller.unmarshal(game_s);
+			return gen_game;
+		} catch (JAXBException e) {
+			e.printStackTrace();
+		}
+		return gen_game;
 	}
 	
 }
