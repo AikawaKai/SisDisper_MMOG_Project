@@ -262,16 +262,13 @@ public class Main {
 	}
 	
 	private static void play(WebTarget target, String my_name, Game game, ServerSocket welcomeSocket, boolean first) {
-		ThreadPlayingGame playing = new ThreadPlayingGame(target, my_name, game, welcomeSocket);
+		BufferMoves moves = new BufferMoves();
+		ThreadPlayingGame playing = new ThreadPlayingGame(moves, target, my_name, game, welcomeSocket, first);
 		try {
 			playing.start();
-			if(first){
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(game.getPlayer(my_name), game.getPlayer(my_name), "token", new boolean[1], new Object());
-				pl_hl.start();
-			}
 			playing.join();
 		} catch (InterruptedException e) {
-			System.out.println("[INFO] Processo game interrotto.");
+			e.printStackTrace();
 		}
 	}
 	

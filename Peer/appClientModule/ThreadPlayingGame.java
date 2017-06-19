@@ -24,18 +24,33 @@ public class ThreadPlayingGame extends Thread {
 	private Socket connectionSocket;
 	private Player player;
 	private WebTarget target;
+	private BufferMoves moves;
+	private boolean first;
 	
-	public ThreadPlayingGame(WebTarget target_, String my_name, Game game, ServerSocket welcomeSocket){
+	public ThreadPlayingGame(BufferMoves m, WebTarget target_, String my_name, Game game, ServerSocket welcomeSocket, boolean f){
+		first = f;
 		g = game;
 		ws = welcomeSocket;
 		player_name = my_name;
 		player = g.getPlayer(player_name);
 		target = target_;
+		moves = m;
 		
 	}
 	
 	public void run(){
 		comeInNewPlayer();
+		if(first){
+			try {
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, player, "token", new boolean[1], new Object());
+				pl_hl.start();
+				pl_hl.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter(moves);
+		bufferWriter.start();
 		System.out.println("Partita "+g.getGame_name()+" in corso...");
 		while(true){
 			try {
@@ -43,7 +58,7 @@ public class ThreadPlayingGame extends Thread {
 				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(target, connectionSocket, player_name, g);
 				clientHandler.start();
 			} catch (IOException e) {
-				e.printStackTrace();
+				break;
 			}
 		}
 		
