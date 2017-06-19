@@ -28,13 +28,15 @@ public class ThreadRequestsHandler extends Thread{
 	private WebTarget target;
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
+	private BufferMoves moves;
 	
-	public ThreadRequestsHandler(WebTarget target_, Socket connection, String my_name, Game game){
+	public ThreadRequestsHandler(BufferMoves m, WebTarget target_, Socket connection, String my_name, Game game){
 		conn = connection;
 		g = game;
 		player_name = my_name;
 		player = g.getPlayer(player_name);
 		target = target_;
+		moves = m;
 		try{
 			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 	        outToClient = new DataOutputStream(conn.getOutputStream());
@@ -69,7 +71,6 @@ public class ThreadRequestsHandler extends Thread{
 			playersUpdateDelete();
 			break;
 		case "token":
-			System.out.println("[INFO] È il tuo turno! Fai una mossa!");
 			myTurn();
 			break;
 		case "newpos":
@@ -144,32 +145,35 @@ public class ThreadRequestsHandler extends Thread{
 	}
 	//handler per la mossa (movimento o bomba)
 	private void myTurn() {
-		System.out.println(player.getPos());
-		System.out.println(g.getPosOnGameArea(player.getPos()));
-		int scelta=0;
-		while(scelta!=1 && scelta!=2){
-			System.out.println("Scegli cosa fare:");
-			System.out.println("1 - muoviti in una direzione");
-			System.out.println("2 - Usa una bomba (se ne possiedi una)");
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-			System.out.print("Scelta: ");
-			scelta = integerReaderHandler(bufferedReader);
+		Move m = null;
+		
+		synchronized(moves){
+			if(moves.size()>0)
+			{
+				m = moves.getFirst();
+			}else
+				forwardToken();
 		}
-		switch(scelta){
-		case 1:
-			basicMove();
-			break;
-		case 2:
-			bomb();
-			break;
-		default:
-			break;
+		if(m instanceof BasicMove)
+			basicMove((BasicMove) m);
+		else
+			bomb((Bomb) m);
+
+	}
+
+	private void forwardToken() {
+		ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(player, g.getPlayer(player.getMy_next()), "token", new boolean[1], new Object());
+		forwardToken.start();
+		try {
+			forwardToken.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 
-	private void basicMove() {
+	private void basicMove(BasicMove m) {
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		move(player.getPos());
+		move(m.getMovement());
 		System.out.println("[INFO] Ti sei spostato");
 		System.out.println(g.getPosOnGameArea(player.getPos()));
 		for(Player pl_i: g.getPlayers()){
@@ -187,81 +191,46 @@ public class ThreadRequestsHandler extends Thread{
 				e.printStackTrace();
 			}
 		}
-		System.out.println("[INFO] Fine turno.");
 		//aspettiamo a forwardare il token...
-		ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(player, g.getPlayer(player.getMy_next()), "token", new boolean[1], new Object());
-		forwardToken.start();
-		try {
-			forwardToken.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		forwardToken();
 	}
 	
 	//funzione che esegue la mossa movimento
-	private void move(Position pos) {
+	private void move(String movement) {
+		Position pos = player.getPos();
 		int old_x = pos.getPos_x();
 		int old_y = pos.getPos_y();
 		int game_size = g.getSize_x();
-		String choice = "";
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-		boolean check = true;
-		while(check){
-			choice = "";
-			System.out.println("Usa i seguenti tasti per spostarti: ");
-			System.out.println("           nord");
-			System.out.println("            [W]");
-			System.out.println("  ovest [A]  +  [D] est");
-			System.out.println("            [x]");
-			System.out.println("            sud");
-			while(!choice.equals("a") && !choice.equals("w") && !choice.equals("d") && !choice.equals("x")){
-				try {
-					System.out.println("scelta: ");
-					choice = bufferedReader.readLine();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-			switch(choice){
+		switch(movement){
 			case "w":
 				if(old_x-1>=0){
-					System.out.println(old_x-1);
 					pos.setPos_x(old_x-1);
-					check = false;
 				}else{
 					System.out.println("[INFO] Mossa non consentita");
 				}
 				break;
 			case "x":
 				if(old_x+1<game_size){
-					System.out.println(old_x+1);
 					pos.setPos_x(old_x+1);
-					check = false;
 				}else{
 					System.out.println("[INFO] Mossa non consentita");
 				}
 				break;
 			case "a":
 				if(old_y-1>=0){
-					System.out.println(old_y-1);
 					pos.setPos_y(old_y-1);
-					check = false;
 				}else{
 					System.out.println("[INFO] Mossa non consentita");
 				}
 				break;
 			case "d":
 				if(old_y+1<game_size){
-					System.out.println(old_y+1);
 					pos.setPos_y(old_y+1);
-					check = false;
 				}else{
 					System.out.println("[INFO] Mossa non consentita");
 				}
 				break;
-			}
 		}
-		System.out.println(pos);
 	}
 
 	//handler per il controllo della posizione inviata da altro giocatore
@@ -275,7 +244,6 @@ public class ThreadRequestsHandler extends Thread{
 			response = inFromClient.readLine();
 			reader = new StringReader(response);
 			position = Position.unmarshallThat(reader);
-			System.out.println(position);
 			if(pos.equals(position)){
 				System.out.println("[INFO] Eliminato");
 				outToClient.writeBytes("colpito\n");
@@ -315,26 +283,7 @@ public class ThreadRequestsHandler extends Thread{
 	}
 
 	//handler per la bomba
-	private void bomb() {
+	private void bomb(Bomb b) {
 		
 	}
-	
-	//handler per la gestione della lettura da standard input degli interi
-	private static int integerReaderHandler(BufferedReader bufferedReader){
-		int number = 0;
-		boolean val = true;
-		while(val){
-			try {
-				number = Integer.parseInt(bufferedReader.readLine());
-				val = false;
-			} catch (NumberFormatException e) {
-				System.out.println("[INFO] Dato errato, riprova.");
-			} catch (IOException e){
-				e.printStackTrace();
-			}
-		}
-		return number;
-		
-	}
-
 }

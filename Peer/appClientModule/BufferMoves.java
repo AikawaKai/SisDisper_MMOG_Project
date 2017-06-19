@@ -14,7 +14,7 @@ public class BufferMoves {
 	
 	public  synchronized Move getFirst(){
 		if(moves.size()>0)
-			return moves.get(0);
+			return moves.remove(0);
 		return null;
 	}
 
@@ -24,6 +24,18 @@ public class BufferMoves {
 
 	public void setMoves(ArrayList<Move> moves) {
 		this.moves = moves;
+	}
+
+	public synchronized int size() {
+		return moves.size();
+	}
+	
+	public synchronized String toString(){
+		String value = "";
+		for(Move m: moves){
+			value = value+"\n"+m.toString();
+		}
+		return value;
 	}
 
 }

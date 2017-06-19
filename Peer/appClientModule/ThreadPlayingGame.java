@@ -52,10 +52,17 @@ public class ThreadPlayingGame extends Thread {
 		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter(moves);
 		bufferWriter.start();
 		System.out.println("Partita "+g.getGame_name()+" in corso...");
+		System.out.println("Usa i seguenti tasti per spostarti: ");
+		System.out.println("           nord");
+		System.out.println("            [W]");
+		System.out.println("  ovest [A]  +  [D] est");
+		System.out.println("            [x]");
+		System.out.println("            sud");
+		System.out.println("Bomb: Q");
 		while(true){
 			try {
 				connectionSocket = ws.accept();
-				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(target, connectionSocket, player_name, g);
+				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(moves, target, connectionSocket, player_name, g);
 				clientHandler.start();
 			} catch (IOException e) {
 				break;
