@@ -1,21 +1,26 @@
 package sensor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BufferMeasurements implements Buffer<Measurement> {
+	ArrayList<Measurement> measurements = new ArrayList<Measurement>();
 	
 	public BufferMeasurements() {
 	}
 
 	@Override
-	public void addNewMeasurement(Measurement t) {
-		
-		System.out.println(t.toString());
+	public synchronized void addNewMeasurement(Measurement t) {
+		measurements.add(t);
 	}
 
 	@Override
-	public List readAllAndClean() {
-		return null;
+	public synchronized List readAllAndClean() {
+		ArrayList<Measurement> newList = new ArrayList<Measurement>();
+		for(int i=0;i<measurements.size();i++){
+			newList.add(measurements.remove(i));
+		}
+		return newList;
 	}
 
 }

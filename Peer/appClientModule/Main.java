@@ -262,8 +262,7 @@ public class Main {
 	}
 	
 	private static void play(WebTarget target, String my_name, Game game, ServerSocket welcomeSocket, boolean first) {
-		BufferMoves moves = new BufferMoves();
-		ThreadPlayingGame playing = new ThreadPlayingGame(moves, target, my_name, game, welcomeSocket, first);
+		ThreadPlayingGame playing = new ThreadPlayingGame(target, my_name, game, welcomeSocket, first);
 		try {
 			playing.start();
 			playing.join();

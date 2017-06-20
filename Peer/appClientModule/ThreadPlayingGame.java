@@ -9,6 +9,7 @@ import peer.objects.BufferMoves;
 import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.Position;
+import sensor.BufferMeasurements;
 
 // ------------------------------------------------------------------------------------ 
 //                                  [PEER SERVER]                                        
@@ -26,16 +27,18 @@ public class ThreadPlayingGame extends Thread {
 	private Player player;
 	private WebTarget target;
 	private BufferMoves moves;
+	private BufferMoves bombs;
 	private boolean first;
 	
-	public ThreadPlayingGame(BufferMoves m, WebTarget target_, String my_name, Game game, ServerSocket welcomeSocket, boolean f){
+	public ThreadPlayingGame(WebTarget target_, String my_name, Game game, ServerSocket welcomeSocket, boolean f){
+		moves = new BufferMoves();
+		bombs = new BufferMoves();
 		first = f;
 		g = game;
 		ws = welcomeSocket;
 		player_name = my_name;
 		player = g.getPlayer(player_name);
 		target = target_;
-		moves = m;
 		
 	}
 	
@@ -50,7 +53,7 @@ public class ThreadPlayingGame extends Thread {
 				e.printStackTrace();
 			}
 		}
-		ThreadSensorHandler sensorHl = new ThreadSensorHandler();
+		ThreadSensorHandler sensorHl = new ThreadSensorHandler(bombs, 0.3, 0.3);
 		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter(moves);
 		sensorHl.start();
 		bufferWriter.start();
