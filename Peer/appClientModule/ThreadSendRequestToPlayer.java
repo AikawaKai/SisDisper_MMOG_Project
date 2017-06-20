@@ -55,9 +55,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		String response = "";
 		try {
-			outputStream.writeBytes("newplayer\n");
-			response = inputStream.readLine();
-			outputStream.writeBytes(player.marshallerThis()+"\n");
+			outputStream.writeBytes("newplayer CONTENT:"+player.marshallerThis()+"\n");
 			response = inputStream.readLine();
 			if(response.equals("ko"))
 			{
@@ -81,9 +79,8 @@ public class ThreadSendRequestToPlayer extends Thread {
 		DataOutputStream outToPeer = player_i.getSocketOutput();
 		BufferedReader inFromPeer = player_i.getSocketInput();
 			try {
-				outToPeer.writeBytes("deleteplayer\n");
+				outToPeer.writeBytes("deleteplayer CONTENT:"+player.marshallerThis()+"\n");
 				inFromPeer.readLine();
-				outToPeer.writeBytes(player.marshallerThis()+"\n");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -94,21 +91,16 @@ public class ThreadSendRequestToPlayer extends Thread {
 		DataOutputStream outToPeer = player_i.getSocketOutput();
 		BufferedReader inFromPeer = player_i.getSocketInput();
 		String response = "";
-		String position = null;
+		String []status_next;
 		try {
-			outToPeer.writeBytes("newpos\n");
+			outToPeer.writeBytes("newpos CONTENT:"+player.getPos().marshallerThis()+"\n");
 			response = inFromPeer.readLine();
-			position = player.getPos().marshallerThis();
-			outToPeer.writeBytes(position+"\n");
-			response = inFromPeer.readLine();
-			if(response.equals("colpito"))
+			status_next = response.split(" ");
+			if(status_next[0].equals("colpito"))
 			{
-				response = inFromPeer.readLine();
 				if(player.getMy_next().equals(player_i.getName()))
-					player.setMy_next(response);
+					player.setMy_next(status_next[1]);
 				System.out.println("[INFO] Hai colpito il giocatore ["+player_i.getName()+"]");
-			}else{
-				response = inFromPeer.readLine();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -145,7 +137,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 	private void sendTokenToNext() {
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		try {
-			outputStream.writeBytes("token\n");
+			outputStream.writeBytes("token \n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

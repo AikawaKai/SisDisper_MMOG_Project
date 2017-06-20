@@ -52,9 +52,11 @@ public class ThreadRequestsHandler extends Thread{
 	
 	public void run(){
 		String response = "";
+		String []parts;
 		while(true){
 			try {
 	            response = inFromClient.readLine();
+	            // response = HEADER CONTENT
 	            if(response==null)
 	            	break;
 	            requestsHandler(response);
@@ -67,34 +69,44 @@ public class ThreadRequestsHandler extends Thread{
 	
 	//handler per le richieste da gestire che arrivano al peer
 	public void requestsHandler(String response) {
-		switch(response){
+		String []parts = response.split(" ");
+		String header = parts[0];
+		String content = null;
+		if(parts.length>1){
+			content = getContentFromArray(response);
+		}
+		switch(header){
 		case "newplayer":
-			playersUpdate();
+			playersUpdate(content);
 			break;
 		case "deleteplayer":
-			playersUpdateDelete();
+			playersUpdateDelete(content);
 			break;
 		case "token":
 			myTurn();
 			break;
 		case "newpos":
-			checkPos();
+			checkPos(content);
 			break;
 		default:
 			break;
 		}
 	}
 
+	private String getContentFromArray(String content) {
+		int length = content.length();
+		int index = content.indexOf("CONTENT:");
+		return content.substring(index+8, length);
+	}
+
 	//handler per l'aggiunta di un giocatore
-	private void playersUpdate() {
+	private void playersUpdate(String player_string) {
 		String response = "";
 		StringReader reader = null;
 		Player pl;
 		String pl_name;
 		try {
-			outToClient.writeBytes("ack\n");
-			response = inFromClient.readLine();
-			reader = new StringReader(response);
+			reader = new StringReader(player_string);
 			pl = Player.unmarshallThat(reader);
 			pl_name = pl.getName();
 			if(pl.getPos().equals(player.getPos()))
@@ -119,15 +131,13 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 	//handler per la cancellazione di un giocatore in partita
-	private void playersUpdateDelete() {
+	private void playersUpdateDelete(String content) {
 		String response = "";
 		StringReader reader;
 		Player pl;
 		String pl_name;
 		try {
-			outToClient.writeBytes("ack\n");
-			response = inFromClient.readLine();
-			reader = new StringReader(response);
+			reader = new StringReader(content);
 			pl = (Player) Player.unmarshallThat(reader);
 			pl_name = pl.getName();
 			synchronized(g){
@@ -232,24 +242,19 @@ public class ThreadRequestsHandler extends Thread{
 	}
 
 	//handler per il controllo della posizione inviata da altro giocatore
-	private void checkPos() {
+	private void checkPos(String content) {
 		Position pos = player.getPos();
-		String response = "";
 		StringReader reader;
 		Position position;
 		try {
-			outToClient.writeBytes("ack\n");
-			response = inFromClient.readLine();
-			reader = new StringReader(response);
+			reader = new StringReader(content);
 			position = Position.unmarshallThat(reader);
 			if(pos.equals(position)){
 				System.out.println("[INFO] Eliminato");
-				outToClient.writeBytes("colpito\n");
-				outToClient.writeBytes(player.getMy_next()+"\n");
+				outToClient.writeBytes("colpito "+player.getMy_next()+"\n"+"\n");
 				sendRequestDeletePlayer();
 			}else{
-				outToClient.writeBytes("mancato\n");
-				outToClient.writeBytes(player.getMy_next()+"\n");
+				outToClient.writeBytes("mancato \n");
 			}
 		}catch (IOException e) {
 			e.printStackTrace();
