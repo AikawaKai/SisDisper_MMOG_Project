@@ -58,7 +58,7 @@ public class ThreadSensorHandler extends Thread {
 					}
 					b = new Bomb(color);
 					synchronized(bombs){
-						System.out.println("Hai trovato una bomba "+color+"!");
+						System.out.println("[INFO] Hai trovato una bomba "+color+"!");
 						bombs.addMove(b);
 					}
 				}

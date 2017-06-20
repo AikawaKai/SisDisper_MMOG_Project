@@ -150,19 +150,17 @@ public class ThreadRequestsHandler extends Thread{
 	//handler per la mossa (movimento o bomba)
 	private void myTurn() {
 		Move m = null;
-		
 		synchronized(moves){
-			if(moves.size()>0)
-			{
-				m = moves.getFirst();
-			}else
+			m = moves.getFirst();
+			if(m==null)
 				forwardToken();
+			else{
+				if(m instanceof BasicMove)
+					basicMove((BasicMove) m);
+				else
+					bomb((Bomb) m);
+			}
 		}
-		if(m instanceof BasicMove)
-			basicMove((BasicMove) m);
-		else
-			bomb((Bomb) m);
-
 	}
 
 	private void forwardToken() {
