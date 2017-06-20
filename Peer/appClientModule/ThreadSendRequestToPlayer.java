@@ -112,6 +112,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.out.println("Qualcosa è andato storto");
 		}
 	}
 	
