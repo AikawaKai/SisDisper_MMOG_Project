@@ -50,7 +50,9 @@ public class ThreadPlayingGame extends Thread {
 				e.printStackTrace();
 			}
 		}
+		ThreadSensorHandler sensorHl = new ThreadSensorHandler();
 		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter(moves);
+		sensorHl.start();
 		bufferWriter.start();
 		System.out.println("Partita "+g.getGame_name()+" in corso...");
 		System.out.println("Usa i seguenti tasti per spostarti: ");

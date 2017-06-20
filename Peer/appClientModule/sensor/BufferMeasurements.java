@@ -10,7 +10,7 @@ public class BufferMeasurements implements Buffer<Measurement> {
 	@Override
 	public void addNewMeasurement(Measurement t) {
 		
-		
+		System.out.println(t.toString());
 	}
 
 	@Override
