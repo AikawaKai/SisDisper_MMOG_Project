@@ -53,7 +53,7 @@ public class ThreadPlayingGame extends Thread {
 				e.printStackTrace();
 			}
 		}
-		ThreadSensorHandler sensorHl = new ThreadSensorHandler(bombs, 0.3, 0.3);
+		ThreadSensorHandler sensorHl = new ThreadSensorHandler(bombs, 0.7, 37);
 		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter(moves);
 		sensorHl.start();
 		bufferWriter.start();

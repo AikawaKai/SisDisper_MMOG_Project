@@ -10,17 +10,30 @@ public class BufferMeasurements implements Buffer<Measurement> {
 	}
 
 	@Override
-	public synchronized void addNewMeasurement(Measurement t) {
-		measurements.add(t);
+	public void addNewMeasurement(Measurement t) {
+		synchronized(measurements){
+			measurements.add(t);
+			measurements.notify();
+		}
 	}
 
 	@Override
-	public synchronized List readAllAndClean() {
-		ArrayList<Measurement> newList = new ArrayList<Measurement>();
-		for(int i=0;i<measurements.size();i++){
-			newList.add(measurements.remove(i));
+	public List readAllAndClean() {
+		synchronized(measurements){
+			if(measurements.size()==0){
+				try {
+					measurements.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			ArrayList<Measurement> newList = new ArrayList<Measurement>();
+			for(int i=0;i<measurements.size();i++){
+				newList.add(measurements.remove(i));
+			}
+			return newList;
 		}
-		return newList;
+			
 	}
 
 }

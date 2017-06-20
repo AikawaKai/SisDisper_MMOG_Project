@@ -8,7 +8,6 @@ import sensor.Measurement;
 
 public class ThreadSensorHandler extends Thread {
 	
-	private AccelerometerSimulator mine_sim;
 	private BufferMeasurements measurementsQueue;
 	private BufferMoves bombs;
 	private double a;
@@ -19,11 +18,11 @@ public class ThreadSensorHandler extends Thread {
 		threshold = th;
 		measurementsQueue = new BufferMeasurements();
 		bombs = buffer_b;
-		mine_sim = new AccelerometerSimulator(measurementsQueue);
 	}
 	
 	public void run(){
-		mine_sim.run();
+		Thread simulator = new Thread(new AccelerometerSimulator(measurementsQueue));
+		simulator.start();
 		double mean_i;
 		double EMA_i;
 		double EMA_i_p;
@@ -40,7 +39,6 @@ public class ThreadSensorHandler extends Thread {
 			try {
 				measures = (ArrayList<Measurement>) measurementsQueue.readAllAndClean();
 				mean_i = calculateMean(measures);
-				Thread.sleep(1000);
 				// EM A i = EM A i−1 + α(m i − EM A i−1 )
 				EMA_i = EMA_i_p + a * (mean_i-EMA_i_p);
 				if(EMA_i-EMA_i_p>threshold){ //bomba trovata
@@ -58,13 +56,14 @@ public class ThreadSensorHandler extends Thread {
 						color = "gialla";
 						break;
 					}
-				b = new Bomb(color);
-				synchronized(bombs){
-					System.out.println("Hai trovato una bomba "+color+"!");
-					bombs.addMove(b);
-				}
+					b = new Bomb(color);
+					synchronized(bombs){
+						System.out.println("Hai trovato una bomba "+color+"!");
+						bombs.addMove(b);
+					}
 				}
 				EMA_i_p = EMA_i;
+				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
