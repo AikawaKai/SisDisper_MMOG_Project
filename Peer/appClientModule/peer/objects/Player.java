@@ -79,26 +79,33 @@ public class Player {
 	}
 	
 	public synchronized BufferedReader  getSocketInput(){
-		if(socket==null){
+		if(socket==null)
 			startSocket();
-		}
 		return inputStream;
 	}
 
 	public synchronized DataOutputStream getSocketOutput(){
-		if(socket==null){
+		if(socket==null)
 			startSocket();
-		}
 		return outputStream;
 	}
 	
 	private synchronized void startSocket() {
-		try {
-			socket = new Socket(ip, port);
-			outputStream = new DataOutputStream(socket.getOutputStream());
-			inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		} catch (IOException e) {
-			e.printStackTrace();
+		boolean check = true;
+		while(check){
+			try {
+				socket = new Socket(ip, port);
+				outputStream = new DataOutputStream(socket.getOutputStream());
+				inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				check = false;
+			} catch (IOException e) {
+				System.out.println("Sto ritentando la connessione");
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
 	}
 	

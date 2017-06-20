@@ -112,7 +112,6 @@ public class ThreadSendRequestToPlayer extends Thread {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.out.println("Qualcosa è andato storto");
 		}
 	}
 	
@@ -127,10 +126,8 @@ public class ThreadSendRequestToPlayer extends Thread {
 			Player my_prev = Player.unmarshallThat(new StringReader(response));
 			if(((Player)result).equals(player_i))
 			{
-				System.out.println("Entro mai qui?");
 				player.setMy_next(my_prev.getMy_next());
 			}
-			System.out.println("(Faccio richiesta) Io sono "+player.getName()+" e il mio next è "+player.getMy_next());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

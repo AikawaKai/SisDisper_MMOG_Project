@@ -130,13 +130,14 @@ public class ThreadRequestsHandler extends Thread{
 			reader = new StringReader(response);
 			pl = (Player) Player.unmarshallThat(reader);
 			pl_name = pl.getName();
-			if(player.getMy_next().equals(pl_name))
-			{
-				player.setMy_next(pl.getMy_next());
+			synchronized(g){
+				if(player.getMy_next().equals(pl_name))
+				{
+					player.setMy_next(pl.getMy_next());
+				}
+				g.removePlayer(pl_name);
 			}
-			g.removePlayer(pl_name);
 			outToClient.writeBytes("accepted\n");
-			conn.close();
 			System.out.println("[INFO] Notifica cancellazione giocatore!");
 		}catch (IOException e) {
 			e.printStackTrace();
@@ -246,7 +247,6 @@ public class ThreadRequestsHandler extends Thread{
 				outToClient.writeBytes("colpito\n");
 				outToClient.writeBytes(player.getMy_next()+"\n");
 				sendRequestDeletePlayer();
-				System.exit(0);
 			}else{
 				outToClient.writeBytes("mancato\n");
 				outToClient.writeBytes(player.getMy_next()+"\n");
