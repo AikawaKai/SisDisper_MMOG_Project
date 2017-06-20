@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import javax.ws.rs.client.WebTarget;
 
+import peer.objects.BufferMoves;
 import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.Position;

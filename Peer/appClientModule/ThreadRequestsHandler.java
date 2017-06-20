@@ -9,7 +9,11 @@ import java.util.ArrayList;
 
 import javax.ws.rs.client.WebTarget;
 
+import peer.objects.BasicMove;
+import peer.objects.Bomb;
+import peer.objects.BufferMoves;
 import peer.objects.Game;
+import peer.objects.Move;
 import peer.objects.Player;
 import peer.objects.Position;
 

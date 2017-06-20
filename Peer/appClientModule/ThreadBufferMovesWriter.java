@@ -2,6 +2,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import peer.objects.BasicMove;
+import peer.objects.Bomb;
+import peer.objects.BufferMoves;
+
 public class ThreadBufferMovesWriter extends Thread {
 	private BufferMoves moves;
 	
