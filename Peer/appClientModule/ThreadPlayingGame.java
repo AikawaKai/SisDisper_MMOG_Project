@@ -53,7 +53,7 @@ public class ThreadPlayingGame extends Thread {
 			}
 		}
 		ThreadSensorHandler sensorHl = new ThreadSensorHandler(bombs, 0.7, 37);
-		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter(moves);
+		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter(moves, bombs);
 		sensorHl.start();
 		bufferWriter.start();
 		System.out.println("Partita "+g.getGame_name()+" in corso...");
@@ -63,7 +63,7 @@ public class ThreadPlayingGame extends Thread {
 		System.out.println("  ovest [A]  +  [D] est");
 		System.out.println("            [x]");
 		System.out.println("            sud");
-		System.out.println("Bomb: Q");
+		System.out.println("Bombe [Q]");
 		while(true){
 			try {
 				connectionSocket = ws.accept();

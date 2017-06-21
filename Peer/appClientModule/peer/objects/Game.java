@@ -224,6 +224,39 @@ public class Game {
 		}
 		return gen_game;
 	}
+
+	public Position[] getArea(String color) {
+		Position a = new Position();
+		Position b = new Position();
+		Position pos[] =  {a,b};
+		switch(color){
+			case "rosso":
+				a.setPos_x(0);
+				a.setPos_y(0);
+				b.setPos_x(size_x/2);
+				b.setPos_y(size_x/2);
+				return pos;
+			case "verde":
+				a.setPos_x(size_x/2);
+				a.setPos_y(0);
+				b.setPos_x(size_x);
+				b.setPos_y(size_x/2);
+				return pos;
+			case "blu":
+				a.setPos_x(0);
+				a.setPos_y(size_x/2);
+				b.setPos_x(size_x/2);
+				b.setPos_y(size_x);
+				return pos;
+			case "giallo":
+				a.setPos_x(size_x/2);
+				a.setPos_y(size_x/2);
+				b.setPos_x(size_x);
+				b.setPos_y(size_x);
+				return pos;
+		}
+		return null;
+	}
 	
 }
 

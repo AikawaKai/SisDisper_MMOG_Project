@@ -38,6 +38,9 @@ public class ThreadSendRequestToPlayer extends Thread {
 		case "sendnewpos":
 			sendNewPos();
 			break;
+		case "bomb":
+			notifyBomb();
+			break;
 		case "token":
 			sendTokenToNext();
 			break;
@@ -55,8 +58,20 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 	
 
-	private void victory() {
+	private void notifyBomb() {
 		BufferedReader inputStream = player_i.getSocketInput();
+		DataOutputStream outputStream = player_i.getSocketOutput();
+		try {
+			System.out.println("Stai lanciando la bomba verso "+player_i.getName());
+			outputStream.writeBytes("bomb CONTENT:"+((String) result)+"\n");
+			inputStream.readLine();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		
+	}
+
+	private void victory() {
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		try {
 			outputStream.writeBytes("victory \n");

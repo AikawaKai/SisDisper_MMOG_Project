@@ -24,6 +24,7 @@ public class Player {
 	private Socket socket=null;
 	private BufferedReader inputStream = null;
 	private DataOutputStream outputStream = null;
+	private int points;
 
 	
 	public Player(){
@@ -69,6 +70,14 @@ public class Player {
 		my_next = next;
 	}
 	
+	public synchronized void setPoints(int p){
+		points = p;
+	}
+	
+	public synchronized int getPoints(){
+		return points;
+	}
+	
 	public synchronized boolean equals(Player pl){
 		if(pl.getName().equals(name))
 		{
@@ -79,26 +88,33 @@ public class Player {
 	}
 	
 	public synchronized BufferedReader  getSocketInput(){
-		if(socket==null){
+		if(socket==null)
 			startSocket();
-		}
 		return inputStream;
 	}
 
 	public synchronized DataOutputStream getSocketOutput(){
-		if(socket==null){
+		if(socket==null)
 			startSocket();
-		}
 		return outputStream;
 	}
 	
 	private synchronized void startSocket() {
-		try {
-			socket = new Socket(ip, port);
-			outputStream = new DataOutputStream(socket.getOutputStream());
-			inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		} catch (IOException e) {
-			e.printStackTrace();
+		boolean check = true;
+		while(check){
+			try {
+				socket = new Socket(ip, port);
+				outputStream = new DataOutputStream(socket.getOutputStream());
+				inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+				check = false;
+			} catch (IOException e) {
+				System.out.println("Sto ritentando la connessione");
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
 	}
 	
@@ -107,7 +123,6 @@ public class Player {
 			try {
 				socket.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

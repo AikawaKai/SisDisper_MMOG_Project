@@ -8,9 +8,11 @@ import peer.objects.BufferMoves;
 
 public class ThreadBufferMovesWriter extends Thread {
 	private BufferMoves moves;
+	private BufferMoves bombs;
 	
-	public ThreadBufferMovesWriter(BufferMoves m){
+	public ThreadBufferMovesWriter(BufferMoves m, BufferMoves b){
 		moves = m;
+		bombs = b;
 	}
 	
 	public void run(){
@@ -32,7 +34,10 @@ public class ThreadBufferMovesWriter extends Thread {
 						break;
 					case "q":
 						synchronized(moves){
-							moves.addMove(new Bomb("c"));
+							synchronized(bombs){
+								if(bombs.size()>0)
+									moves.addMove(bombs.getFirst());
+							}
 						}
 						break;
 					}

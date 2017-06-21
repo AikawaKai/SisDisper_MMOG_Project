@@ -71,7 +71,7 @@ public class ThreadRequestsHandler extends Thread{
 		String header = parts[0];
 		String content = null;
 		if(parts.length>1){
-			content = getContentFromArray(response);
+			content = getContentFromStringResponse(response);
 		}
 		switch(header){
 		case "newplayer":
@@ -85,6 +85,9 @@ public class ThreadRequestsHandler extends Thread{
 			break;
 		case "newpos":
 			checkPos(content);
+			break;
+		case "bomb":
+			checkPosBomb(content);
 			break;
 		case "victory":
 			admitDefeat();
@@ -100,7 +103,7 @@ public class ThreadRequestsHandler extends Thread{
 		
 	}
 
-	private String getContentFromArray(String content) {
+	private String getContentFromStringResponse(String content) {
 		int length = content.length();
 		int index = content.indexOf("CONTENT:");
 		return content.substring(index+8, length);
@@ -278,8 +281,20 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 	
+	private void checkPosBomb(String color) {
+		Position []area = g.getArea(color);
+		System.out.println("Bomba "+color+"!");
+		try {
+			outToClient.writeBytes("ok\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	
+	
+	
+
 	//funzione per mandare la richiesta di cancellazione al server e agli altri peer
 	private void sendRequestDeletePlayer() {
 		target.path("deleteplayer").path(g.getGame_name()).path(player_name).request().delete();
@@ -303,6 +318,24 @@ public class ThreadRequestsHandler extends Thread{
 
 	//handler per la bomba
 	private void bomb(Bomb b) {
+		System.out.println("Stai lanciando una bomba");
+		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
+		for(Player pl_i: g.getPlayers()){
+			if(!pl_i.getName().equals(player_name))
+			{
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "bomb", new boolean[1], b.getColor());
+				threads.add(pl_hl);
+				pl_hl.start();
+			}
+		}
+		for(ThreadSendRequestToPlayer pl_hl: threads){
+			try {
+				pl_hl.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		forwardToken();
 		
 	}
 }
