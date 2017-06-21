@@ -94,6 +94,7 @@ public class Main {
 		player.setPort(porta_peer);
 		player.setName(nickname);
 		player.setMy_next(nickname);
+		player.setPoints(0);
 		
 		// menu
 		while(scelta != 5){

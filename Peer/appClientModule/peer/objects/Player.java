@@ -24,6 +24,8 @@ public class Player {
 	private Socket socket=null;
 	private BufferedReader inputStream = null;
 	private DataOutputStream outputStream = null;
+	private int points;
+	private boolean is_dead=false;
 
 	
 	public Player(){
@@ -67,6 +69,22 @@ public class Player {
 	
 	public synchronized void setMy_next(String next){
 		my_next = next;
+	}
+	
+	public synchronized void setPoints(int p){
+		points = p;
+	}
+	
+	public synchronized int getPoints(){
+		return points;
+	}
+	
+	public synchronized void killPlayer(){
+		is_dead = true;
+	}
+	
+	public synchronized boolean isDead(){
+		return is_dead;
 	}
 	
 	public synchronized boolean equals(Player pl){
@@ -114,7 +132,6 @@ public class Player {
 			try {
 				socket.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

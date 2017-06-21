@@ -47,6 +47,21 @@ public class ThreadSendRequestToPlayer extends Thread {
 		case "notaccepted":
 			notaccept();
 			break;
+		case "victory":
+			victory();
+			break;
+		}
+	}
+
+	
+
+	private void victory() {
+		BufferedReader inputStream = player_i.getSocketInput();
+		DataOutputStream outputStream = player_i.getSocketOutput();
+		try {
+			outputStream.writeBytes("victory \n");
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -101,6 +116,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 				if(player.getMy_next().equals(player_i.getName()))
 					player.setMy_next(status_next[1]);
 				System.out.println("[INFO] Hai colpito il giocatore ["+player_i.getName()+"]");
+				player.setPoints(player.getPoints()+1);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -143,6 +159,5 @@ public class ThreadSendRequestToPlayer extends Thread {
 		}
 		
 	}
-
 	
 }

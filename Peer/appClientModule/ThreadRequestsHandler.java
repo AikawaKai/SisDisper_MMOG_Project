@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 
 import javax.ws.rs.client.WebTarget;
@@ -52,11 +51,10 @@ public class ThreadRequestsHandler extends Thread{
 	
 	public void run(){
 		String response = "";
-		String []parts;
 		while(true){
 			try {
 	            response = inFromClient.readLine();
-	            // response = HEADER CONTENT
+	            // response = HEADER CONTENT:
 	            if(response==null)
 	            	break;
 	            requestsHandler(response);
@@ -88,9 +86,18 @@ public class ThreadRequestsHandler extends Thread{
 		case "newpos":
 			checkPos(content);
 			break;
+		case "victory":
+			admitDefeat();
+			break;
 		default:
 			break;
 		}
+	}
+
+	private void admitDefeat() {
+		System.out.println("[INFO] Hai perso! Mi spiace.");
+		target.path("deleteplayer").path(g.getGame_name()).path(player_name).request().delete();
+		
 	}
 
 	private String getContentFromArray(String content) {
@@ -132,7 +139,6 @@ public class ThreadRequestsHandler extends Thread{
 	}
 	//handler per la cancellazione di un giocatore in partita
 	private void playersUpdateDelete(String content) {
-		String response = "";
 		StringReader reader;
 		Player pl;
 		String pl_name;
@@ -199,8 +205,19 @@ public class ThreadRequestsHandler extends Thread{
 				e.printStackTrace();
 			}
 		}
-		//aspettiamo a forwardare il token...
-		forwardToken();
+		if(!player.isDead() && player.getPoints()>=g.getMax_point())
+		{
+			for(Player pl_i: g.getPlayers()){
+				if(!pl_i.getName().equals(player_name)){
+					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "victory", new boolean[1], new Object());
+					pl_hl.start();
+				}
+			}
+			System.out.println("Hai vinto!");
+		}else{
+			forwardToken();
+		}
+		
 	}
 	
 	//funzione che esegue la mossa movimento

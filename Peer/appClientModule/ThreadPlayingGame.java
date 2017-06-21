@@ -9,7 +9,6 @@ import peer.objects.BufferMoves;
 import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.Position;
-import sensor.BufferMeasurements;
 
 // ------------------------------------------------------------------------------------ 
 //                                  [PEER SERVER]                                        
@@ -86,7 +85,7 @@ public class ThreadPlayingGame extends Thread {
 		ArrayList<Player> players_deleted = new ArrayList<Player>();
 		while(check[0]){
 			check[0] = false;
-			Position pos = g.genRandPosition(); // questo forse conviene farlo dopo?
+			Position pos = g.genRandPosition();
 			player.setPos(pos);
 			for(Player pl_i: g.getPlayers()){
 				if(!pl_i.getName().equals(player_name))
