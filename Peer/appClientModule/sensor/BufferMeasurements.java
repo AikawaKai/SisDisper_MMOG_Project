@@ -17,6 +17,7 @@ public class BufferMeasurements implements Buffer<Measurement> {
 		}
 	}
 
+	@SuppressWarnings({"unchecked", "rawtypes" })
 	@Override
 	public List readAllAndClean() {
 		synchronized(measurements){

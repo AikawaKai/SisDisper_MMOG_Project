@@ -81,6 +81,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void notifyNewPlayer() {
 		BufferedReader inputStream = player_i.getSocketInput();
 		DataOutputStream outputStream = player_i.getSocketOutput();

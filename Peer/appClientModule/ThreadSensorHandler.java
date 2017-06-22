@@ -19,6 +19,7 @@ public class ThreadSensorHandler extends Thread {
 		measurementsQueue = new BufferMeasurements();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void run(){
 		Thread simulator = new Thread(new AccelerometerSimulator(measurementsQueue));
 		simulator.start();

@@ -3,7 +3,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import javax.inject.Singleton;
 import javax.ws.rs.client.WebTarget;
 
 import peer.objects.Game;

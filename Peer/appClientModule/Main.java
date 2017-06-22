@@ -8,7 +8,6 @@ import java.util.Random;
 
 import peer.objects.*;
 
-import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -24,7 +23,6 @@ public class Main {
 		// inizializzazione variabili
 		String indirizzo_ip = "";
 		String nickname = "";
-		String game = "";
 		String baseuri = "";
 		Response serverResponse;
 		Invocation.Builder invocationBuilder;
@@ -67,16 +65,16 @@ public class Main {
 				System.out.println("[INFO] Dati non corretti / Server non attivo.");
 			}
 		}
-
+		SingletonFactory.setPlayerSingleton(player);
 		// scelta nickname
 		nickname = chooseNickname(nickname, bufferedReader);
 		//scelta porta
-		welcomeSocket = choosePort(player);
+		welcomeSocket = choosePort();
 		player.setIp("localhost");
 		player.setName(nickname);
 		player.setMy_next(nickname);
 		player.setPoints(0);
-		SingletonFactory.setPlayerSingleton(player);
+		
 
 		// menu
 		while(scelta != 5){
@@ -271,7 +269,8 @@ public class Main {
 	}
 
 	//metodo per la scelta della porta
-	private static ServerSocket choosePort(Player player) {
+	private static ServerSocket choosePort() {
+		Player player = SingletonFactory.getPlayerSingleton();
 		boolean val = true;
 		int porta_peer = 0;
 		ServerSocket welcomeSocket = null;
