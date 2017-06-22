@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 
 import peer.objects.Player;
+import peer.objects.SingletonFactory;
 
 //------------------------------------------------------------------------------------ 
 //                               [PEER CLIENT THREAD]                                        
@@ -18,8 +19,8 @@ public class ThreadSendRequestToPlayer extends Thread {
 	private boolean []check;
 	private Object result;
 	
-	public ThreadSendRequestToPlayer(Player pl, Player pl_i, String c, boolean []check_, Object res){
-		player = pl;
+	public ThreadSendRequestToPlayer(Player pl_i, String c, boolean []check_, Object res){
+		player = SingletonFactory.getPlayerSingleton();
 		player_i = pl_i;
 		case_ = c;
 		check = check_;

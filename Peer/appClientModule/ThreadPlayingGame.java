@@ -38,7 +38,7 @@ public class ThreadPlayingGame extends Thread {
 		if(first){
 			try {
 				Player player = SingletonFactory.getPlayerSingleton();
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, player, "token", new boolean[1], new Object());
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, "token", new boolean[1], new Object());
 				pl_hl.start();
 				pl_hl.join();
 			} catch (InterruptedException e) {
@@ -85,7 +85,7 @@ public class ThreadPlayingGame extends Thread {
 			for(Player pl_i: g.getPlayers()){
 				if(!pl_i.getName().equals(player_name))
 				{
-					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "newplayer", check, players_deleted);
+					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "newplayer", check, players_deleted);
 					threads.add(pl_hl);
 					pl_hl.start();
 				}
@@ -106,7 +106,7 @@ public class ThreadPlayingGame extends Thread {
 				for(Player pl_i: g.getPlayers()){
 					if(!pl_i.getName().equals(player_name))
 					{
-						ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "notaccepted", check, new Object());
+						ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "notaccepted", check, new Object());
 						threadsNotify.add(pl_hl);
 						pl_hl.start();
 					}
@@ -132,7 +132,7 @@ public class ThreadPlayingGame extends Thread {
 		for(Player pl_i: g.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
 			{
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "accepted", check, player_next);
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "accepted", check, player_next);
 				threadsNotify.add(pl_hl);
 				pl_hl.start();
 			}

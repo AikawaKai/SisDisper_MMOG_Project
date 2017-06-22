@@ -175,7 +175,7 @@ public class ThreadRequestsHandler extends Thread{
 	}
 
 	private void forwardToken() {
-		ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(player, g.getPlayer(player.getMy_next()), "token", new boolean[1], new Object());
+		ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(g.getPlayer(player.getMy_next()), "token", new boolean[1], new Object());
 		forwardToken.start();
 		try {
 			forwardToken.join();
@@ -191,7 +191,7 @@ public class ThreadRequestsHandler extends Thread{
 		System.out.println(g.getPosOnGameArea(player.getPos()));
 		for(Player pl_i: g.getPlayers()){
 			if(!pl_i.getName().equals(player_name)){
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "sendnewpos", new boolean[1], new Object());
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "sendnewpos", new boolean[1], new Object());
 				threads.add(pl_hl);
 				pl_hl.start();
 			}
@@ -208,7 +208,7 @@ public class ThreadRequestsHandler extends Thread{
 		{
 			for(Player pl_i: g.getPlayers()){
 				if(!pl_i.getName().equals(player_name)){
-					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "victory", new boolean[1], new Object());
+					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "victory", new boolean[1], new Object());
 					pl_hl.start();
 				}
 			}
@@ -298,7 +298,7 @@ public class ThreadRequestsHandler extends Thread{
 		for(Player pl_i: g.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
 			{
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "deleteplayer", new boolean[1], new Object());
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "deleteplayer", new boolean[1], new Object());
 				threads.add(pl_hl);
 				pl_hl.start();
 			}
@@ -319,7 +319,7 @@ public class ThreadRequestsHandler extends Thread{
 		for(Player pl_i: g.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
 			{
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, pl_i, "bomb", new boolean[1], b.getColor());
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "bomb", new boolean[1], b.getColor());
 				threads.add(pl_hl);
 				pl_hl.start();
 			}
