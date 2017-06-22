@@ -30,7 +30,6 @@ public class Main {
 		int status = 0;
 		int porta = 0;
 		int scelta = 1;
-		int porta_peer = 0;
 		ServerSocket welcomeSocket = null;
 		ClientConfig config = new ClientConfig();
 		Client client = ClientBuilder.newClient(config);
@@ -61,43 +60,22 @@ public class Main {
 					System.out.println(serverResponse.readEntity(String.class));
 				else
 					System.out.println("[INFO] Dati non corretti / Server non attivo.");
-				
+
 			}catch(Exception e){
 				System.out.println("[INFO] Dati non corretti / Server non attivo.");
 			}
 		}
-		
+
 		// scelta nickname
-		boolean val = true;
-		while(val)
-		{
-			try {
-				System.out.print("Inserisci il tuo nickname: ");
-				nickname = bufferedReader.readLine();
-				val= false;
-			} catch (IOException e1) {
-				System.out.println("[INFO] Errore inserimento. ");
-			}
-		}
+		nickname = chooseNickname(nickname, bufferedReader);
 		//scelta porta
-		val = true;
-		while(val){
-			// 49152-65535
-			try {
-				porta_peer = randInt(49152, 65535);
-				welcomeSocket = new ServerSocket(porta_peer);
-				val = false;
-			} catch (IOException e2) {
-				e2.printStackTrace();
-			}
-		}
+		welcomeSocket = choosePort(player);
 		player.setIp("localhost");
-		player.setPort(porta_peer);
 		player.setName(nickname);
 		player.setMy_next(nickname);
 		player.setPoints(0);
 		SingletonFactory.setPlayerSingleton(player);
-		
+
 		// menu
 		while(scelta != 5){
 			System.out.println("");
@@ -117,8 +95,10 @@ public class Main {
 				menuHandler(scelta, target, player, game, welcomeSocket);
 			}
 		}
-		
+
 	}
+
+	// handler del menu peer
 	private static void menuHandler(int scelta, WebTarget target, Player player, String game, ServerSocket welcomeSocket){
 		switch(scelta){
 		case 1:
@@ -128,14 +108,15 @@ public class Main {
 			gameDetails(target);
 			break;
 		case 3:
-			createGame(target, player, welcomeSocket);
+			createGame(target, welcomeSocket);
 			break;
 		case 4:
-			addPlayerToGame(target, player, game, 0, welcomeSocket);
+			addPlayerToGame(target, 0, welcomeSocket);
 		default:
 		}
 	}
-	
+
+	// mostra la list di partite attive
 	private static void gamesList(WebTarget target) {
 		GamesMap map = new GamesMap();
 		Invocation.Builder invocationBuilder =  target.path("allgames").request();
@@ -148,9 +129,10 @@ public class Main {
 		{
 			System.out.println("[INFO] Problemi di connessione.");
 		}
-		
+
 	}
-	
+
+	// mostra i dettagli della partita selezionata
 	private static void gameDetails(WebTarget target) {
 		try{
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
@@ -171,8 +153,11 @@ public class Main {
 			e.printStackTrace();
 		}
 	}
-	
-	private static void createGame(WebTarget target, Player player, ServerSocket welcomeSocket) {
+
+
+	// crea una partita
+	private static void createGame(WebTarget target, ServerSocket welcomeSocket) {
+		Player player = SingletonFactory.getPlayerSingleton();
 		Game game = null;
 		int status = 0;
 		Invocation.Builder invocationBuilder;
@@ -206,17 +191,20 @@ public class Main {
 					return;
 				}else
 					System.out.println("[INFO] Creazione partita fallita.");
-				
+
 			}catch(IOException e){
 				e.printStackTrace();
 			}
 		}
 		play(target, player.getName(),  welcomeSocket, true);
 	}
-	
-	private static void addPlayerToGame(WebTarget target, Player player, String game_name, int type, ServerSocket welcomeSocket)
+
+	// aggiungi giocatore alla partita
+	private static void addPlayerToGame(WebTarget target, int type, ServerSocket welcomeSocket)
 	{
 		Game game;
+		String game_name="";
+		Player player = SingletonFactory.getPlayerSingleton();
 		if(type==0){
 			try {
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
@@ -246,9 +234,56 @@ public class Main {
 		}else{
 			System.out.println("[INFO] Aggiunta giocatore alla partita fallita. ");
 		}
-		
+
 	}
 	
+	// metodo che lancia il thread di gioco
+	private static void play(WebTarget target, String my_name, ServerSocket welcomeSocket, boolean first) {
+		ThreadPlayingGame playing = new ThreadPlayingGame(target, welcomeSocket, first);
+		try {
+			playing.start();
+			playing.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+	//metodo per la scelta del nickname
+	private static String chooseNickname(String nickname, BufferedReader bufferedReader) {
+		boolean val = true;
+		while(val)
+		{
+			try {
+				System.out.print("Inserisci il tuo nickname: ");
+				nickname = bufferedReader.readLine();
+				val= false;
+			} catch (IOException e1) {
+				System.out.println("[INFO] Errore inserimento. ");
+			}
+		}
+		return nickname;
+	}
+
+	//metodo per la scelta della porta
+	private static ServerSocket choosePort(Player player) {
+		boolean val = true;
+		int porta_peer = 0;
+		ServerSocket welcomeSocket = null;
+		while(val){
+			// 49152-65535
+			try {
+				porta_peer = randInt(49152, 65535);
+				welcomeSocket = new ServerSocket(porta_peer);
+				val = false;
+			} catch (IOException e2) {
+				e2.printStackTrace();
+			}
+		}
+		player.setPort(porta_peer);
+		return welcomeSocket;
+	}
+
+	// handler per la scelta di un intero da standard input
 	private static int integerReaderHandler(BufferedReader bufferedReader){
 		int number = 0;
 		boolean val = true;
@@ -263,22 +298,13 @@ public class Main {
 			}
 		}
 		return number;
-		
+
 	}
 	
-	private static void play(WebTarget target, String my_name, ServerSocket welcomeSocket, boolean first) {
-		ThreadPlayingGame playing = new ThreadPlayingGame(target, welcomeSocket, first);
-		try {
-			playing.start();
-			playing.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	
+	// genera un numero random nell'intervallo specificato
 	public static int randInt(int min, int max) {
-	    Random rand = new Random();
-	    int randomNum = rand.nextInt((max - min) + 1) + min;
-	    return randomNum;
+		Random rand = new Random();
+		int randomNum = rand.nextInt((max - min) + 1) + min;
+		return randomNum;
 	}
 }

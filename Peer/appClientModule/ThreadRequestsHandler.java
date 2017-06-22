@@ -287,9 +287,6 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 	
-	
-	
-	
 
 	//funzione per mandare la richiesta di cancellazione al server e agli altri peer
 	private void sendRequestDeletePlayer() {
