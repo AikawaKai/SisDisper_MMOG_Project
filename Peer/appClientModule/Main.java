@@ -193,6 +193,7 @@ public class Main {
 				game.setMax_point(points);
 				game.setSize_x(N);
 				game.addPlayer(player);
+				SingletonFactory.setGameSingleton(game);
 				invocationBuilder =  target.path("creategame").request(MediaType.APPLICATION_XML);
 				response = invocationBuilder.post(Entity.entity(game, MediaType.APPLICATION_XML));
 				status = response.getStatus();
@@ -210,7 +211,7 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
-		play(target, player.getName(), game, welcomeSocket, true);
+		play(target, player.getName(),  welcomeSocket, true);
 	}
 	
 	private static void addPlayerToGame(WebTarget target, Player player, String game_name, int type, ServerSocket welcomeSocket)
@@ -235,8 +236,9 @@ public class Main {
 		if(status==200){
 			System.out.println("Giocatore "+player.getName()+" aggiunto alla partita "+game_name);
 			game = response.readEntity(Game.class);
+			SingletonFactory.setGameSingleton(game);
 			player = game.getPlayer(player.getName());
-			play(target, player.getName(), game, welcomeSocket, false);
+			play(target, player.getName(), welcomeSocket, false);
 		}else if(status==406){
 			System.out.println("[INFO] Partita inesistente. Impossibile aggiungere il giocatore. ");
 		}else if(status==409){
@@ -264,8 +266,8 @@ public class Main {
 		
 	}
 	
-	private static void play(WebTarget target, String my_name, Game game, ServerSocket welcomeSocket, boolean first) {
-		ThreadPlayingGame playing = new ThreadPlayingGame(target, game, welcomeSocket, first);
+	private static void play(WebTarget target, String my_name, ServerSocket welcomeSocket, boolean first) {
+		ThreadPlayingGame playing = new ThreadPlayingGame(target, welcomeSocket, first);
 		try {
 			playing.start();
 			playing.join();

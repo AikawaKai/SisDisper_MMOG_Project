@@ -26,18 +26,18 @@ import peer.objects.SingletonFactory;
 public class ThreadRequestsHandler extends Thread{
 	private Player player;
 	private String player_name;
-	private Game g;
+	private Game game;
 	private Socket conn;
 	private WebTarget target;
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
 	
-	public ThreadRequestsHandler(WebTarget target_, Socket connection, Game game){
+	public ThreadRequestsHandler(WebTarget target_, Socket connection){
 		player = SingletonFactory.getPlayerSingleton();
 		player_name = player.getName();
 		target = target_;
 		conn = connection;
-		g = game;
+		game = SingletonFactory.getGameSingleton();
 		try{
 			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 	        outToClient = new DataOutputStream(conn.getOutputStream());
@@ -96,7 +96,7 @@ public class ThreadRequestsHandler extends Thread{
 
 	private void admitDefeat() {
 		System.out.println("[INFO] Hai perso! Mi spiace.");
-		target.path("deleteplayer").path(g.getGame_name()).path(player_name).request().delete();
+		target.path("deleteplayer").path(game.getGame_name()).path(player_name).request().delete();
 		
 	}
 
@@ -130,7 +130,7 @@ public class ThreadRequestsHandler extends Thread{
 					if(response.equals(player_name))
 						player.setMy_next(pl_name);
 					System.out.println("[INFO] Notifica nuovo giocatore!");
-					g.addPlayer(pl);
+					game.addPlayer(pl);
 					System.out.println("["+pl_name+"]");
 			}
 		}catch (IOException e) {
@@ -150,7 +150,7 @@ public class ThreadRequestsHandler extends Thread{
 			{
 				player.setMy_next(pl.getMy_next());
 			}
-			g.removePlayer(pl_name);
+			game.removePlayer(pl_name);
 			outToClient.writeBytes("accepted\n");
 			System.out.println("[INFO] Notifica cancellazione giocatore!");
 		}catch (IOException e) {
@@ -175,7 +175,7 @@ public class ThreadRequestsHandler extends Thread{
 	}
 
 	private void forwardToken() {
-		ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(g.getPlayer(player.getMy_next()), "token", new boolean[1], new Object());
+		ThreadSendRequestToPlayer forwardToken = new ThreadSendRequestToPlayer(game.getPlayer(player.getMy_next()), "token", new boolean[1], new Object());
 		forwardToken.start();
 		try {
 			forwardToken.join();
@@ -188,8 +188,8 @@ public class ThreadRequestsHandler extends Thread{
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
 		move(m.getMovement());
 		System.out.println("[INFO] Ti sei spostato");
-		System.out.println(g.getPosOnGameArea(player.getPos()));
-		for(Player pl_i: g.getPlayers()){
+		System.out.println(game.getPosOnGameArea(player.getPos()));
+		for(Player pl_i: game.getPlayers()){
 			if(!pl_i.getName().equals(player_name)){
 				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "sendnewpos", new boolean[1], new Object());
 				threads.add(pl_hl);
@@ -204,9 +204,9 @@ public class ThreadRequestsHandler extends Thread{
 				e.printStackTrace();
 			}
 		}
-		if(!player.isDead() && player.getPoints()>=g.getMax_point())
+		if(!player.isDead() && player.getPoints()>=game.getMax_point())
 		{
-			for(Player pl_i: g.getPlayers()){
+			for(Player pl_i: game.getPlayers()){
 				if(!pl_i.getName().equals(player_name)){
 					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "victory", new boolean[1], new Object());
 					pl_hl.start();
@@ -224,7 +224,7 @@ public class ThreadRequestsHandler extends Thread{
 		Position pos = player.getPos();
 		int old_x = pos.getPos_x();
 		int old_y = pos.getPos_y();
-		int game_size = g.getSize_x();
+		int game_size = game.getSize_x();
 		switch(movement){
 			case "w":
 				if(old_x-1>=0){
@@ -278,7 +278,7 @@ public class ThreadRequestsHandler extends Thread{
 	}
 	
 	private void checkPosBomb(String color) {
-		Position []area = g.getArea(color);
+		Position []area = game.getArea(color);
 		System.out.println("Bomba "+color+"!");
 		try {
 			outToClient.writeBytes("ok\n");
@@ -293,9 +293,9 @@ public class ThreadRequestsHandler extends Thread{
 
 	//funzione per mandare la richiesta di cancellazione al server e agli altri peer
 	private void sendRequestDeletePlayer() {
-		target.path("deleteplayer").path(g.getGame_name()).path(player_name).request().delete();
+		target.path("deleteplayer").path(game.getGame_name()).path(player_name).request().delete();
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		for(Player pl_i: g.getPlayers()){
+		for(Player pl_i: game.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
 			{
 				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "deleteplayer", new boolean[1], new Object());
@@ -316,7 +316,7 @@ public class ThreadRequestsHandler extends Thread{
 	private void bomb(Bomb b) {
 		System.out.println("Stai lanciando una bomba");
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		for(Player pl_i: g.getPlayers()){
+		for(Player pl_i: game.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
 			{
 				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "bomb", new boolean[1], b.getColor());

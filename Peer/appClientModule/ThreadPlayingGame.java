@@ -19,15 +19,15 @@ import peer.objects.SingletonFactory;
 // -------------------------------------------------------------------------------------
 
 public class ThreadPlayingGame extends Thread {
-	private Game g;
+	private Game game;
 	private ServerSocket ws;
 	private Socket connectionSocket;
 	private WebTarget target;
 	private boolean first;
 	
-	public ThreadPlayingGame(WebTarget target_, Game game, ServerSocket welcomeSocket, boolean f){
+	public ThreadPlayingGame(WebTarget target_, ServerSocket welcomeSocket, boolean f){
 		first = f;
-		g = game;
+		game = SingletonFactory.getGameSingleton();
 		ws = welcomeSocket;
 		target = target_;
 		
@@ -49,7 +49,7 @@ public class ThreadPlayingGame extends Thread {
 		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter();
 		sensorHl.start();
 		bufferWriter.start();
-		System.out.println("Partita "+g.getGame_name()+" in corso...");
+		System.out.println("Partita "+game.getGame_name()+" in corso...");
 		System.out.println("Usa i seguenti tasti per spostarti: ");
 		System.out.println("           nord");
 		System.out.println("            [W]");
@@ -60,7 +60,7 @@ public class ThreadPlayingGame extends Thread {
 		while(true){
 			try {
 				connectionSocket = ws.accept();
-				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(target, connectionSocket, g);
+				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(target, connectionSocket);
 				clientHandler.start();
 			} catch (IOException e) {
 				break;
@@ -80,9 +80,9 @@ public class ThreadPlayingGame extends Thread {
 		ArrayList<Player> players_deleted = new ArrayList<Player>();
 		while(check[0]){
 			check[0] = false;
-			Position pos = g.genRandPosition();
+			Position pos = game.genRandPosition();
 			player.setPos(pos);
-			for(Player pl_i: g.getPlayers()){
+			for(Player pl_i: game.getPlayers()){
 				if(!pl_i.getName().equals(player_name))
 				{
 					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "newplayer", check, players_deleted);
@@ -101,9 +101,9 @@ public class ThreadPlayingGame extends Thread {
 			if(check[0])
 			{
 				for(Player pl_to_del: players_deleted){
-					g.removePlayer(pl_to_del.getName());
+					game.removePlayer(pl_to_del.getName());
 				}
-				for(Player pl_i: g.getPlayers()){
+				for(Player pl_i: game.getPlayers()){
 					if(!pl_i.getName().equals(player_name))
 					{
 						ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "notaccepted", check, new Object());
@@ -122,14 +122,14 @@ public class ThreadPlayingGame extends Thread {
 		}
 		threadsNotify = new ArrayList<ThreadSendRequestToPlayer>();
 		Player player_next;
-		int num_players = g.getPlayers().size();
+		int num_players = game.getPlayers().size();
 		int choose = Main.randInt(0, num_players-1);
-		player_next = g.getPlayers().get(choose);
+		player_next = game.getPlayers().get(choose);
 		while(player_next.equals(player) && num_players>1){
 			choose = Main.randInt(0, num_players-1);
-			player_next = g.getPlayers().get(choose);
+			player_next = game.getPlayers().get(choose);
 		}
-		for(Player pl_i: g.getPlayers()){
+		for(Player pl_i: game.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
 			{
 				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "accepted", check, player_next);
