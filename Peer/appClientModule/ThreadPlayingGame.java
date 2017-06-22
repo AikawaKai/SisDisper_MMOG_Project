@@ -25,13 +25,9 @@ public class ThreadPlayingGame extends Thread {
 	private Socket connectionSocket;
 	private Player player;
 	private WebTarget target;
-	private BufferMoves moves;
-	private BufferMoves bombs;
 	private boolean first;
 	
 	public ThreadPlayingGame(WebTarget target_, String my_name, Game game, ServerSocket welcomeSocket, boolean f){
-		moves = new BufferMoves();
-		bombs = new BufferMoves();
 		first = f;
 		g = game;
 		ws = welcomeSocket;
@@ -52,8 +48,8 @@ public class ThreadPlayingGame extends Thread {
 				e.printStackTrace();
 			}
 		}
-		ThreadSensorHandler sensorHl = new ThreadSensorHandler(bombs, 0.7, 37);
-		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter(moves, bombs);
+		ThreadSensorHandler sensorHl = new ThreadSensorHandler(0.7, 37);
+		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter();
 		sensorHl.start();
 		bufferWriter.start();
 		System.out.println("Partita "+g.getGame_name()+" in corso...");
@@ -67,7 +63,7 @@ public class ThreadPlayingGame extends Thread {
 		while(true){
 			try {
 				connectionSocket = ws.accept();
-				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(moves, target, connectionSocket, player_name, g);
+				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(target, connectionSocket, player_name, g);
 				clientHandler.start();
 			} catch (IOException e) {
 				break;

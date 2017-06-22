@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 import peer.objects.Bomb;
 import peer.objects.BufferMoves;
+import peer.objects.SingletonFactory;
 import sensor.AccelerometerSimulator;
 import sensor.BufferMeasurements;
 import sensor.Measurement;
@@ -9,15 +10,13 @@ import sensor.Measurement;
 public class ThreadSensorHandler extends Thread {
 	
 	private BufferMeasurements measurementsQueue;
-	private BufferMoves bombs;
 	private double a;
 	private double threshold;
 	
-	public ThreadSensorHandler(BufferMoves buffer_b, double a_input, double th){
+	public ThreadSensorHandler(double a_input, double th){
 		a = a_input;
 		threshold = th;
 		measurementsQueue = new BufferMeasurements();
-		bombs = buffer_b;
 	}
 	
 	public void run(){
@@ -27,6 +26,7 @@ public class ThreadSensorHandler extends Thread {
 		double EMA_i;
 		double EMA_i_p;
 		String color = "";
+		BufferMoves bombs = SingletonFactory.getSingletonBombMoves();
 		Bomb b;
 		ArrayList<Measurement> measures = (ArrayList<Measurement>) measurementsQueue.readAllAndClean();
 		EMA_i_p = calculateMean(measures);

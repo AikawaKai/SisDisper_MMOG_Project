@@ -5,54 +5,44 @@ import java.io.InputStreamReader;
 import peer.objects.BasicMove;
 import peer.objects.Bomb;
 import peer.objects.BufferMoves;
+import peer.objects.SingletonFactory;
 
 public class ThreadBufferMovesWriter extends Thread {
-	private BufferMoves moves;
-	private BufferMoves bombs;
-	
-	public ThreadBufferMovesWriter(BufferMoves m, BufferMoves b){
-		moves = m;
-		bombs = b;
+
+	public ThreadBufferMovesWriter(){
 	}
-	
+
 	public void run(){
 		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 		String input ="";
+		BufferMoves moves = SingletonFactory.getSingletonMoves();
+		BufferMoves bombs = SingletonFactory.getSingletonBombMoves();
 		while(true){
 			try {
 				input = bufferedReader.readLine();
-				if(checkInput(input))
-				{
-					switch(input){
-					case "a":
-					case "w":
-					case "d":
-					case "x":
-						synchronized(moves){
-							moves.addMove(new BasicMove(input));
-						}
-						break;
-					case "q":
-						synchronized(moves){
-							synchronized(bombs){
-								if(bombs.size()>0)
-									moves.addMove(bombs.getFirst());
-							}
-						}
-						break;
+				switch(input){
+				case "a":
+				case "w":
+				case "d":
+				case "x":
+					synchronized(moves){
+						moves.addMove(new BasicMove(input));
 					}
+					break;
+				case "q":
+					Bomb b = null;
+					synchronized(bombs){
+						if(bombs.size()>0)
+							b = (Bomb) bombs.getFirst();
+					}
+					synchronized(moves){
+						moves.addMove(b);
+					}
+					break;
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-
-	private boolean checkInput(String input) {
-		if(input.equals("a") || input.equals("w") || input.equals("d") || input.equals("x") || input.equals("q")){
-			return true;
-		}
-		return false;
-	}
-
 }

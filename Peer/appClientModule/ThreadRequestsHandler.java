@@ -15,6 +15,7 @@ import peer.objects.Game;
 import peer.objects.Move;
 import peer.objects.Player;
 import peer.objects.Position;
+import peer.objects.SingletonFactory;
 
 //------------------------------------------------------------------------------------ 
 //						        [PEER SERVER THREAD]                                        
@@ -31,15 +32,13 @@ public class ThreadRequestsHandler extends Thread{
 	private WebTarget target;
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
-	private BufferMoves moves;
 	
-	public ThreadRequestsHandler(BufferMoves m, WebTarget target_, Socket connection, String my_name, Game game){
+	public ThreadRequestsHandler(WebTarget target_, Socket connection, String my_name, Game game){
 		conn = connection;
 		g = game;
 		player_name = my_name;
 		player = g.getPlayer(player_name);
 		target = target_;
-		moves = m;
 		try{
 			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 	        outToClient = new DataOutputStream(conn.getOutputStream());
@@ -54,8 +53,7 @@ public class ThreadRequestsHandler extends Thread{
 		while(true){
 			try {
 	            response = inFromClient.readLine();
-	            // response = HEADER CONTENT:
-	            if(response==null)
+	            if(response==null)// response = HEADER CONTENT:
 	            	break;
 	            requestsHandler(response);
 	        } catch (IOException e) {
@@ -149,13 +147,11 @@ public class ThreadRequestsHandler extends Thread{
 			reader = new StringReader(content);
 			pl = (Player) Player.unmarshallThat(reader);
 			pl_name = pl.getName();
-			synchronized(g){
-				if(player.getMy_next().equals(pl_name))
-				{
-					player.setMy_next(pl.getMy_next());
-				}
-				g.removePlayer(pl_name);
+			if(player.getMy_next().equals(pl_name))
+			{
+				player.setMy_next(pl.getMy_next());
 			}
+			g.removePlayer(pl_name);
 			outToClient.writeBytes("accepted\n");
 			System.out.println("[INFO] Notifica cancellazione giocatore!");
 		}catch (IOException e) {
@@ -164,6 +160,7 @@ public class ThreadRequestsHandler extends Thread{
 	}
 	//handler per la mossa (movimento o bomba)
 	private void myTurn() {
+		BufferMoves moves = SingletonFactory.getSingletonMoves();
 		Move m = null;
 		synchronized(moves){
 			m = moves.getFirst();

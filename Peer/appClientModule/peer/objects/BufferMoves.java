@@ -10,7 +10,8 @@ public class BufferMoves {
 	}
 	
 	public synchronized void addMove(Move m){
-		moves.add(m);
+		if(m!=null)
+			moves.add(m);
 	}
 	
 	public  synchronized Move getFirst(){
