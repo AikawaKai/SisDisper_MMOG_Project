@@ -25,11 +25,11 @@ public class ThreadPlayingGame extends Thread {
 	private WebTarget target;
 	private boolean first;
 	
-	public ThreadPlayingGame(WebTarget target_, ServerSocket welcomeSocket, boolean f){
+	public ThreadPlayingGame(ServerSocket welcomeSocket, boolean f){
 		first = f;
 		game = SingletonFactory.getGameSingleton();
 		ws = welcomeSocket;
-		target = target_;
+		target = SingletonFactory.getWebTargetSingleton();
 		
 	}
 	

@@ -8,6 +8,7 @@ import java.util.Random;
 
 import peer.objects.*;
 
+import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -53,6 +54,7 @@ public class Main {
 				basepath = UriBuilder.fromUri(baseuri).build();
 				target = client.target(basepath);
 				target = target.path("ServerMMOG").path("rest").path("game");
+				SingletonFactory.setWebTargetSingleton(target);
 				invocationBuilder =  target.request();
 				serverResponse = invocationBuilder.get();
 				status = serverResponse.getStatus();
@@ -92,32 +94,33 @@ public class Main {
 			if(scelta < 1 || scelta > 5){
 				System.out.println("[INFO] Selezione errata.");
 			}else if(scelta!=5){
-				menuHandler(scelta, target, player, game, welcomeSocket);
+				menuHandler(scelta, player, welcomeSocket);
 			}
 		}
 
 	}
 
 	// handler del menu peer
-	private static void menuHandler(int scelta, WebTarget target, Player player, String game, ServerSocket welcomeSocket){
+	private static void menuHandler(int scelta, Player player, ServerSocket welcomeSocket){
 		switch(scelta){
 		case 1:
-			gamesList(target);
+			gamesList();
 			break;
 		case 2:
-			gameDetails(target);
+			gameDetails();
 			break;
 		case 3:
-			createGame(target, welcomeSocket);
+			createGame(welcomeSocket);
 			break;
 		case 4:
-			addPlayerToGame(target, 0, welcomeSocket);
+			addPlayerToGame(0, welcomeSocket);
 		default:
 		}
 	}
 
 	// mostra la list di partite attive
-	private static void gamesList(WebTarget target) {
+	private static void gamesList() {
+		WebTarget target = SingletonFactory.getWebTargetSingleton();
 		GamesMap map = new GamesMap();
 		Invocation.Builder invocationBuilder =  target.path("allgames").request();
 		Response serverResponse = invocationBuilder.get();
@@ -133,8 +136,9 @@ public class Main {
 	}
 
 	// mostra i dettagli della partita selezionata
-	private static void gameDetails(WebTarget target) {
+	private static void gameDetails() {
 		try{
+			WebTarget target = SingletonFactory.getWebTargetSingleton();
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 			System.out.print("Nome partita: ");
 			String name = bufferedReader.readLine();
@@ -156,8 +160,9 @@ public class Main {
 
 
 	// crea una partita
-	private static void createGame(WebTarget target, ServerSocket welcomeSocket) {
+	private static void createGame(ServerSocket welcomeSocket) {
 		Player player = SingletonFactory.getPlayerSingleton();
+		WebTarget target = SingletonFactory.getWebTargetSingleton();
 		Game game = null;
 		int status = 0;
 		Invocation.Builder invocationBuilder;
@@ -200,8 +205,9 @@ public class Main {
 	}
 
 	// aggiungi giocatore alla partita
-	private static void addPlayerToGame(WebTarget target, int type, ServerSocket welcomeSocket)
+	private static void addPlayerToGame(int type, ServerSocket welcomeSocket)
 	{
+		WebTarget target = SingletonFactory.getWebTargetSingleton();
 		Game game;
 		String game_name="";
 		int status = 0;
@@ -239,7 +245,7 @@ public class Main {
 	
 	// metodo che lancia il thread di gioco
 	private static void play(WebTarget target, ServerSocket welcomeSocket, boolean first) {
-		ThreadPlayingGame playing = new ThreadPlayingGame(target, welcomeSocket, first);
+		ThreadPlayingGame playing = new ThreadPlayingGame(welcomeSocket, first);
 		try {
 			playing.start();
 			playing.join();

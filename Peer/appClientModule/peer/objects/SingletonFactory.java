@@ -1,5 +1,7 @@
 package peer.objects;
 
+import javax.ws.rs.client.WebTarget;
+
 //------------------------------------------------------------------------------------ 
 //							[SINGLETON FACTORY]                                        
 //
@@ -7,10 +9,11 @@ package peer.objects;
 //-------------------------------------------------------------------------------------
 
 public class SingletonFactory {
+	static Player player;
 	static Game game;
+	static WebTarget target;
 	static BufferMoves moves;
 	static BufferMoves bombmoves;
-	static Player player;
 	
 	public static void setPlayerSingleton(Player p){
 		player = p;
@@ -26,6 +29,14 @@ public class SingletonFactory {
 	
 	public static Game getGameSingleton(){
 		return game;
+	}
+	
+	public static void setWebTargetSingleton(WebTarget t){
+		target = t;
+	}
+	
+	public static WebTarget getWebTargetSingleton(){
+		return target;
 	}
 	
 	
