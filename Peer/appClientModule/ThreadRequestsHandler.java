@@ -24,21 +24,20 @@ import peer.objects.SingletonFactory;
 //-------------------------------------------------------------------------------------
 
 public class ThreadRequestsHandler extends Thread{
-	
-	private Game g;
-	private String player_name;
 	private Player player;
+	private String player_name;
+	private Game g;
 	private Socket conn;
 	private WebTarget target;
 	private BufferedReader inFromClient;
 	private DataOutputStream outToClient;
 	
-	public ThreadRequestsHandler(WebTarget target_, Socket connection, String my_name, Game game){
+	public ThreadRequestsHandler(WebTarget target_, Socket connection, Game game){
+		player = SingletonFactory.getPlayerSingleton();
+		player_name = player.getName();
+		target = target_;
 		conn = connection;
 		g = game;
-		player_name = my_name;
-		player = g.getPlayer(player_name);
-		target = target_;
 		try{
 			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 	        outToClient = new DataOutputStream(conn.getOutputStream());

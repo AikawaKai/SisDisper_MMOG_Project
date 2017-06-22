@@ -5,10 +5,10 @@ import java.util.ArrayList;
 
 import javax.ws.rs.client.WebTarget;
 
-import peer.objects.BufferMoves;
 import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.Position;
+import peer.objects.SingletonFactory;
 
 // ------------------------------------------------------------------------------------ 
 //                                  [PEER SERVER]                                        
@@ -20,19 +20,15 @@ import peer.objects.Position;
 
 public class ThreadPlayingGame extends Thread {
 	private Game g;
-	private String player_name;
 	private ServerSocket ws;
 	private Socket connectionSocket;
-	private Player player;
 	private WebTarget target;
 	private boolean first;
 	
-	public ThreadPlayingGame(WebTarget target_, String my_name, Game game, ServerSocket welcomeSocket, boolean f){
+	public ThreadPlayingGame(WebTarget target_, Game game, ServerSocket welcomeSocket, boolean f){
 		first = f;
 		g = game;
 		ws = welcomeSocket;
-		player_name = my_name;
-		player = g.getPlayer(player_name);
 		target = target_;
 		
 	}
@@ -41,6 +37,7 @@ public class ThreadPlayingGame extends Thread {
 		comeInNewPlayer();
 		if(first){
 			try {
+				Player player = SingletonFactory.getPlayerSingleton();
 				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, player, "token", new boolean[1], new Object());
 				pl_hl.start();
 				pl_hl.join();
@@ -63,7 +60,7 @@ public class ThreadPlayingGame extends Thread {
 		while(true){
 			try {
 				connectionSocket = ws.accept();
-				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(target, connectionSocket, player_name, g);
+				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(target, connectionSocket, g);
 				clientHandler.start();
 			} catch (IOException e) {
 				break;
@@ -77,6 +74,8 @@ public class ThreadPlayingGame extends Thread {
 	private void comeInNewPlayer() {
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
 		ArrayList<ThreadSendRequestToPlayer> threadsNotify = new ArrayList<ThreadSendRequestToPlayer>();
+		Player player = SingletonFactory.getPlayerSingleton();
+		String player_name = player.getName();
 		boolean check[] = {true};
 		ArrayList<Player> players_deleted = new ArrayList<Player>();
 		while(check[0]){

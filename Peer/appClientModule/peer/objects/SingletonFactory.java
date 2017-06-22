@@ -10,6 +10,15 @@ public class SingletonFactory {
 	static Game game;
 	static BufferMoves moves;
 	static BufferMoves bombmoves;
+	static Player player;
+	
+	public static void setPlayerSingleton(Player p){
+		player = p;
+	}
+	
+	public static Player getPlayerSingleton(){
+		return player;
+	}
 	
 	public static void setGameSingleton(Game g){
 		game = g;

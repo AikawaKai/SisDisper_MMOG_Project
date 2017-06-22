@@ -79,6 +79,7 @@ public class Main {
 				System.out.println("[INFO] Errore inserimento. ");
 			}
 		}
+		//scelta porta
 		val = true;
 		while(val){
 			// 49152-65535
@@ -95,6 +96,7 @@ public class Main {
 		player.setName(nickname);
 		player.setMy_next(nickname);
 		player.setPoints(0);
+		SingletonFactory.setPlayerSingleton(player);
 		
 		// menu
 		while(scelta != 5){
@@ -263,7 +265,7 @@ public class Main {
 	}
 	
 	private static void play(WebTarget target, String my_name, Game game, ServerSocket welcomeSocket, boolean first) {
-		ThreadPlayingGame playing = new ThreadPlayingGame(target, my_name, game, welcomeSocket, first);
+		ThreadPlayingGame playing = new ThreadPlayingGame(target, game, welcomeSocket, first);
 		try {
 			playing.start();
 			playing.join();
