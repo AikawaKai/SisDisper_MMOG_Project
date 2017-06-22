@@ -3,6 +3,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import javax.inject.Singleton;
 import javax.ws.rs.client.WebTarget;
 
 import peer.objects.Game;
@@ -34,10 +35,11 @@ public class ThreadPlayingGame extends Thread {
 	}
 	
 	public void run(){
+		Player player = SingletonFactory.getPlayerSingleton();
 		comeInNewPlayer();
+		// se sono il primo mi mando il token da solo
 		if(first){
 			try {
-				Player player = SingletonFactory.getPlayerSingleton();
 				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, "token", new boolean[1], new Object());
 				pl_hl.start();
 				pl_hl.join();
@@ -72,72 +74,49 @@ public class ThreadPlayingGame extends Thread {
 	//funzione che si occupa di generare una nuova posizione random per il nuovo giocatore
 	//confermandola agli altri peer
 	private void comeInNewPlayer() {
-		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		ArrayList<ThreadSendRequestToPlayer> threadsNotify = new ArrayList<ThreadSendRequestToPlayer>();
 		Player player = SingletonFactory.getPlayerSingleton();
-		String player_name = player.getName();
 		boolean check[] = {true};
 		ArrayList<Player> players_deleted = new ArrayList<Player>();
 		while(check[0]){
 			check[0] = false;
 			Position pos = game.genRandPosition();
 			player.setPos(pos);
-			for(Player pl_i: game.getPlayers()){
-				if(!pl_i.getName().equals(player_name))
-				{
-					ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "newplayer", check, players_deleted);
-					threads.add(pl_hl);
-					pl_hl.start();
-				}
-			}
-			for(ThreadSendRequestToPlayer hl: threads){
-				try {
-					hl.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			threads = new ArrayList<ThreadSendRequestToPlayer>();
+			sendRequestToAll("newplayer", check, players_deleted);
 			if(check[0])
 			{
 				for(Player pl_to_del: players_deleted){
 					game.removePlayer(pl_to_del.getName());
 				}
-				for(Player pl_i: game.getPlayers()){
-					if(!pl_i.getName().equals(player_name))
-					{
-						ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "notaccepted", check, new Object());
-						threadsNotify.add(pl_hl);
-						pl_hl.start();
-					}
-				}
-				for(ThreadSendRequestToPlayer hl: threadsNotify){
-					try {
-						hl.join();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
+				sendRequestToAll("notaccepted", check, new Object());
 			}
 		}
-		threadsNotify = new ArrayList<ThreadSendRequestToPlayer>();
+		//scelgo il mio next
 		Player player_next;
-		int num_players = game.getPlayers().size();
+		int num_players = game.numPlayers();
 		int choose = Main.randInt(0, num_players-1);
 		player_next = game.getPlayers().get(choose);
 		while(player_next.equals(player) && num_players>1){
 			choose = Main.randInt(0, num_players-1);
 			player_next = game.getPlayers().get(choose);
 		}
+		// sono riuscito a notificare la mia posizione senza conflitti, la faccio accettare a tutti
+		sendRequestToAll("accepted", check, player_next);
+	}
+	
+	//manda la richiesta a tutti eccetto me stesso
+	private void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
+		String player_name = SingletonFactory.getPlayerSingleton().getName();
+		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
 		for(Player pl_i: game.getPlayers()){
 			if(!pl_i.getName().equals(player_name))
 			{
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "accepted", check, player_next);
-				threadsNotify.add(pl_hl);
+				
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
+				threads.add(pl_hl);
 				pl_hl.start();
 			}
 		}
-		for(ThreadSendRequestToPlayer hl: threadsNotify){
+		for(ThreadSendRequestToPlayer hl: threads){
 			try {
 				hl.join();
 			} catch (InterruptedException e) {
@@ -145,5 +124,4 @@ public class ThreadPlayingGame extends Thread {
 			}
 		}
 	}
-
 }
