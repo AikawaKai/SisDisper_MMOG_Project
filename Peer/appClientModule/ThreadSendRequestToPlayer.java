@@ -18,16 +18,16 @@ public class ThreadSendRequestToPlayer extends Thread {
 	private String case_;
 	private boolean []check;
 	private Object result;
-	
+
 	public ThreadSendRequestToPlayer(Player pl_i, String c, boolean []check_, Object res){
 		player = SingletonFactory.getPlayerSingleton();
 		player_i = pl_i;
 		case_ = c;
 		check = check_;
 		result = res;
-		
+
 	}
-	
+
 	public void run() {
 		switch(case_){
 		case "newplayer":
@@ -57,30 +57,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 		}
 	}
 
-	
-
-	private void notifyBomb() {
-		BufferedReader inputStream = player_i.getSocketInput();
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		try {
-			System.out.println("Stai lanciando la bomba verso "+player_i.getName());
-			outputStream.writeBytes("bomb CONTENT:"+((String) result)+"\n");
-			inputStream.readLine();
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-		
-	}
-
-	private void victory() {
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		try {
-			outputStream.writeBytes("victory \n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
+	//metodo per segnalare l'arrivo del nuovo giocatore
 	@SuppressWarnings("unchecked")
 	private void notifyNewPlayer() {
 		BufferedReader inputStream = player_i.getSocketInput();
@@ -104,21 +81,22 @@ public class ThreadSendRequestToPlayer extends Thread {
 				}
 			}
 		}
-		
+
 	}
 
+	// metodo per segnalare la cancellazione del giocatore
 	private void notifyDeletePlayer() {
 		DataOutputStream outToPeer = player_i.getSocketOutput();
 		BufferedReader inFromPeer = player_i.getSocketInput();
-			try {
-				outToPeer.writeBytes("deleteplayer CONTENT:"+player.marshallerThis()+"\n");
-				inFromPeer.readLine();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		
+		try {
+			outToPeer.writeBytes("deleteplayer CONTENT:"+player.marshallerThis()+"\n");
+			inFromPeer.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-
+	
+	// metodo per segnalare la nuova posizione dopo uno spostamento
 	private void sendNewPos() {
 		DataOutputStream outToPeer = player_i.getSocketOutput();
 		BufferedReader inFromPeer = player_i.getSocketInput();
@@ -140,6 +118,35 @@ public class ThreadSendRequestToPlayer extends Thread {
 		}
 	}
 	
+	// metodo per segnalare della bomba lanciata
+	private void notifyBomb() {
+		BufferedReader inputStream = player_i.getSocketInput();
+		DataOutputStream outputStream = player_i.getSocketOutput();
+		try {
+			System.out.println("Stai lanciando la bomba verso "+player_i.getName());
+			outputStream.writeBytes("bomb CONTENT:"+((String) result)+"\n");
+			inputStream.readLine();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+
+	}
+	
+	
+	// metodo per segnalare la propria vittoria
+	private void victory() {
+		DataOutputStream outputStream = player_i.getSocketOutput();
+		try {
+			outputStream.writeBytes("victory \n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+
+
+
 	private void accept() {
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		BufferedReader inFromPeer = player_i.getSocketInput();
@@ -174,7 +181,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 }

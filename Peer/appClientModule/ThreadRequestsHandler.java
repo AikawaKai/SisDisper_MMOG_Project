@@ -84,7 +84,7 @@ public class ThreadRequestsHandler extends Thread{
 			checkPos(content);
 			break;
 		case "bomb":
-			checkPosBomb(content);
+			notifyBomb(content);
 			break;
 		case "victory":
 			admitDefeat();
@@ -183,9 +183,9 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 
-	// metodo per il controllo dell'area di esplosione della bomba
-	private void checkPosBomb(String color) {
-		Position []area = game.getArea(color);
+	// metodo per la notifica dell'attivazione di una bomba
+	private void notifyBomb(String color) {
+		//Position []area = game.getArea(color);
 		System.out.println("[INFO] Bomba "+color+" lanciata!");
 		try {
 			outToClient.writeBytes("ok\n");
