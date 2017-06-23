@@ -145,14 +145,14 @@ public class Game {
 				if(i<size_x/2 && j<size_x/2)
 					matrix[i][j] = "b";
 				else if(i>=size_x/2 && j<size_x/2)
-					matrix[i][j] = "g";
+					matrix[i][j] = "v";
 				else if(i<size_x/2 && j>=size_x/2)
-					matrix[i][j] = "y";
+					matrix[i][j] = "g";
 				else
 					matrix[i][j] = "r";
 			}
 		}
-		matrix[p.getPos_x()][p.getPos_y()] = "X";
+		matrix[p.getPos_x()][p.getPos_y()] = "[X]";
 		return matrixToString(matrix);
 	}
 	
@@ -169,7 +169,10 @@ public class Game {
 		for (String[] row : matrix) {
 			String string_row = "";
 			for(String el: row){
-				string_row = string_row+" "+el+" ";
+				if(el.contains("["))
+					string_row = string_row+el;
+				else
+					string_row = string_row+" "+el+" ";
 			}
 		    sb.append(string_row)
 		      .append(lineSeparator);
@@ -230,13 +233,13 @@ public class Game {
 		Position b = new Position();
 		Position pos[] =  {a,b};
 		switch(color){
-			case "rosso":
+			case "verde":
 				a.setPos_x(0);
 				a.setPos_y(0);
 				b.setPos_x(size_x/2);
 				b.setPos_y(size_x/2);
 				return pos;
-			case "verde":
+			case "rosso":
 				a.setPos_x(size_x/2);
 				a.setPos_y(0);
 				b.setPos_x(size_x);

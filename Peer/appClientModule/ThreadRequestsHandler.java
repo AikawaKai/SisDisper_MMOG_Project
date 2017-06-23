@@ -86,6 +86,9 @@ public class ThreadRequestsHandler extends Thread{
 		case "bomb":
 			notifyBomb(content);
 			break;
+		case "explosion":
+			checkExplosion(content);
+			break;
 		case "victory":
 			admitDefeat();
 			break;
@@ -100,14 +103,14 @@ public class ThreadRequestsHandler extends Thread{
 		Move m = null;
 		synchronized(moves){
 			m = moves.getFirst();
-			if(m==null)
-				forwardToken();
-			else{
-				if(m instanceof BasicMove)
-					basicMove((BasicMove) m);
-				else
-					bomb((Bomb) m);
-			}
+		}
+		if(m==null)
+			forwardToken();
+		else{
+			if(m instanceof BasicMove)
+				basicMove((BasicMove) m);
+			else
+				bomb((Bomb) m);
 		}
 	}
 
@@ -193,6 +196,25 @@ public class ThreadRequestsHandler extends Thread{
 			e.printStackTrace();
 		}
 	}
+	
+	// metodo per controllare se l'esplosione mi ha fatto fuori
+	private void checkExplosion(String color) {
+		System.out.print("[INFO] Bomba "+color+" esplosa!");
+		Position []area = game.getArea(color);
+		boolean checkEx = player.isInArea(area);
+		try {
+			if(checkEx){
+				System.out.println("[INFO] Eliminato");
+				outToClient.writeBytes("colpito "+player.getMy_next()+"\n"+"\n");
+				sendRequestDeletePlayer();
+			}else{
+				outToClient.writeBytes("mancato \n");
+			}
+		}catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
 
 	// metodo per la sconfitta
 	private void admitDefeat() {
@@ -275,6 +297,8 @@ public class ThreadRequestsHandler extends Thread{
 	private void bomb(Bomb b) {
 		System.out.println("[INFO] Bomba "+b.getColor()+" lanciata!");
 		sendRequestToAll("bomb", new boolean[1], b.getColor());
+		ThreadBombExplosion bombEx = new ThreadBombExplosion(b.getColor());
+		bombEx.start();
 		forwardToken();
 	}
 
@@ -286,7 +310,7 @@ public class ThreadRequestsHandler extends Thread{
 	}
 
 	//manda la richiesta a tutti eccetto me stesso
-	private void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
+	void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
 		String player_name = SingletonFactory.getPlayerSingleton().getName();
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
 		for(Player pl_i: game.getPlayers()){

@@ -176,4 +176,14 @@ public class Player {
 		}
 		return gen_play;
 	}
+
+	public synchronized boolean isInArea(Position[] area) {
+		Position a = area[0];
+		Position b = area[1];
+		int my_x = pos.getPos_x();
+		int my_y = pos.getPos_y();
+		if (my_x>=a.getPos_x() && my_x<=b.getPos_x() && my_y>=a.getPos_y() && my_y<=b.getPos_y())
+			return true;
+		return false;
+	}
 }

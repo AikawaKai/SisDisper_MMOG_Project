@@ -42,6 +42,9 @@ public class ThreadSendRequestToPlayer extends Thread {
 		case "bomb":
 			notifyBomb();
 			break;
+		case "explosion":
+			notifyExplosion();
+			break;
 		case "token":
 			sendTokenToNext();
 			break;
@@ -129,9 +132,23 @@ public class ThreadSendRequestToPlayer extends Thread {
 		}catch(IOException e){
 			e.printStackTrace();
 		}
-
 	}
 	
+	// notifica esplosione bomba
+	private void notifyExplosion() {
+		DataOutputStream outputStream = player_i.getSocketOutput();
+		BufferedReader inputStream = player_i.getSocketInput();
+		String status;
+		try {
+			outputStream.writeBytes("explosion CONTENT:"+((String) result)+"\n");
+			status = inputStream.readLine();
+			if(status.equals("colpito") && !player.isDead()){
+				player.setPoints(player.getPoints()+1);
+			}
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+	}
 	
 	// metodo per segnalare la propria vittoria
 	private void victory() {
