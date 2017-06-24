@@ -271,7 +271,7 @@ public class ThreadRequestsHandler extends Thread{
 			if(pos.equals(position)){
 				System.out.println("[INFO] Eliminato");
 				player.killPlayer();
-				outToClient.writeBytes("colpito "+player.getMy_next()+"\n"+"\n");
+				outToClient.writeBytes("colpito "+player.getMy_next()+"\n");
 				sendRequestDeletePlayer();
 			}else{
 				outToClient.writeBytes("mancato \n");
@@ -300,10 +300,10 @@ public class ThreadRequestsHandler extends Thread{
 		try {
 			if(checkEx){
 				System.out.println("[INFO] Eliminato");
-				outToClient.writeBytes("colpito "+player.getMy_next()+"\n"+"\n");
+				outToClient.writeBytes("colpito\n");
 				sendRequestDeletePlayer();
 			}else{
-				outToClient.writeBytes("mancato \n");
+				outToClient.writeBytes("mancato\n");
 			}
 		}catch (IOException e) {
 			e.printStackTrace();
