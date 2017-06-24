@@ -193,7 +193,7 @@ public class ThreadRequestsHandler extends Thread{
 			player.killPlayer();
 			sendRequestDeletePlayer();
 		}
-		sendRequestToAll("explosion", new boolean[1], b);
+		sendRequestToAllOneAtTime("explosion", new boolean[1], b);
 		WebTarget target = SingletonFactory.getWebTargetSingleton();
 		if(!player.isDead() && player.getPoints()>=game.getMax_point())
 		{
@@ -459,6 +459,27 @@ public class ThreadRequestsHandler extends Thread{
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private void sendRequestToAllOneAtTime(String request, boolean[] check, Object objectToSend) {
+		String player_name = SingletonFactory.getPlayerSingleton().getName();
+		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
+		synchronized(game.getPlayers())
+		{
+			for(Player pl_i: game.getPlayers()){
+				if(pl_i.getName().equals(player_name))
+					continue;
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
+				threads.add(pl_hl);
+				pl_hl.start();
+				try {
+					pl_hl.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 	}
 
 }
