@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 
+import peer.objects.Bomb;
 import peer.objects.Player;
 import peer.objects.SingletonFactory;
 
@@ -163,15 +164,27 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 	// notifica esplosione bomba
 	private void notifyExplosion() {
+		Bomb b = (Bomb) result;
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		BufferedReader inputStream = player_i.getSocketInput();
 		String status;
+		String []status_next;
 		try {
-			outputStream.writeBytes("explosion CONTENT:"+((String) result)+"\n");
+			outputStream.writeBytes("explosion CONTENT:"+b.getColor()+"\n");
 			status = inputStream.readLine();
-			System.out.println("mi ha detto"+status);
-			if(status.equals("colpito") && !player.isDead()){
-				player.addOnePoint();
+			status_next = status.split(" ");
+			if(status_next[0].equals("colpito") && !player.isDead()){
+				if(player.getMy_next().equals(player_i.getName()))
+					player.setMy_next(status_next[1]);
+				System.out.println("[INFO] Hai colpito il giocatore ["+player_i.getName()+"]");
+				synchronized(b){
+					if(b.getCounter()<3)
+					{
+						player.addOnePoint();
+						b.setCounter(b.getCounter()+1);
+					}	
+				}
+				
 			}
 		}catch(IOException e){
 			e.printStackTrace();

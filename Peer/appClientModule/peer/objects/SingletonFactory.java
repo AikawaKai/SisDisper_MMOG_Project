@@ -17,6 +17,7 @@ public class SingletonFactory {
 	static BufferMoves moves;
 	static BufferMoves bombmoves;
 	static ArrayList<Player> playersToAdd;
+	static ArrayList<Bomb> explosions;
 	
 	public static void setPlayerSingleton(Player p){
 		player = p;
@@ -59,6 +60,12 @@ public class SingletonFactory {
 		if(playersToAdd==null)
 			playersToAdd = new ArrayList<Player>();
 		return playersToAdd;
+	}
+		
+	public static synchronized ArrayList<Bomb> bombExploded(){
+		if(explosions==null)
+			explosions = new ArrayList<Bomb>();
+		return explosions;
 	}
 
 }

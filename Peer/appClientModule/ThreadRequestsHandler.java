@@ -160,6 +160,7 @@ public class ThreadRequestsHandler extends Thread{
 
 	//handler per la mossa (movimento o bomba)
 	private void myTurn() {
+		checkMyExplosions();
 		checkEnteringPlayers();
 		BufferMoves moves = SingletonFactory.getSingletonMoves();
 		Move m = null;
@@ -174,6 +175,34 @@ public class ThreadRequestsHandler extends Thread{
 			else
 				bomb((Bomb) m);
 		}
+	}
+
+	private void checkMyExplosions() {
+		ArrayList<Bomb> explodedBombs = SingletonFactory.bombExploded();
+		Bomb b=null;
+		synchronized(explodedBombs){
+			if(explodedBombs.size()>0)
+				b=explodedBombs.remove(0);
+		}
+		if(b==null)
+			return;
+		System.out.print("[INFO] Bomba "+b.getColor()+" esplosa!\n");
+		Position []area = game.getArea(b.getColor());
+		if(player.isInArea(area)){
+			System.out.println("[INFO] Sei morto a causa della tua stessa bomba!");
+			player.killPlayer();
+			sendRequestDeletePlayer();
+		}
+		sendRequestToAll("explosion", new boolean[1], b);
+		WebTarget target = SingletonFactory.getWebTargetSingleton();
+		if(!player.isDead() && player.getPoints()>=game.getMax_point())
+		{
+			target.path("deletegame").path(game.getGame_name()).request().delete();
+			sendRequestToAll("victory", new boolean[1], new Object());
+			System.out.println("[INFO] Hai vinto!");
+			player.killPlayer();
+		}
+		
 	}
 
 	// prima di fare la mossa controllo che non ci siano giocatore che vogliono entrare
@@ -300,10 +329,10 @@ public class ThreadRequestsHandler extends Thread{
 		try {
 			if(checkEx){
 				System.out.println("[INFO] Eliminato");
-				outToClient.writeBytes("colpito\n");
+				outToClient.writeBytes("colpito "+player.getMy_next()+"\n");
 				sendRequestDeletePlayer();
 			}else{
-				outToClient.writeBytes("mancato\n");
+				outToClient.writeBytes("mancato \n");
 			}
 		}catch (IOException e) {
 			e.printStackTrace();
@@ -397,7 +426,7 @@ public class ThreadRequestsHandler extends Thread{
 	private void bomb(Bomb b) {
 		System.out.println("[INFO] Bomba "+b.getColor()+" lanciata!");
 		sendRequestToAll("bomb", new boolean[1], b.getColor());
-		ThreadBombExplosion bombEx = new ThreadBombExplosion(b.getColor());
+		ThreadBombExplosion bombEx = new ThreadBombExplosion(b);
 		bombEx.start();
 		forwardToken();
 	}
