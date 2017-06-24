@@ -2,6 +2,7 @@ import java.util.ArrayList;
 
 import peer.objects.Bomb;
 import peer.objects.BufferMoves;
+import peer.objects.Player;
 import peer.objects.SingletonFactory;
 import sensor.AccelerometerSimulator;
 import sensor.BufferMeasurements;
@@ -21,6 +22,7 @@ public class ThreadSensorHandler extends Thread {
 	
 	@SuppressWarnings("unchecked")
 	public void run(){
+		Player player = SingletonFactory.getPlayerSingleton();
 		Thread simulator = new Thread(new AccelerometerSimulator(measurementsQueue));
 		simulator.start();
 		double mean_i;
@@ -36,7 +38,7 @@ public class ThreadSensorHandler extends Thread {
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}
-		while(true){
+		while(true && !player.isDead()){
 			try {
 				measures = (ArrayList<Measurement>) measurementsQueue.readAllAndClean();
 				mean_i = calculateMean(measures);
