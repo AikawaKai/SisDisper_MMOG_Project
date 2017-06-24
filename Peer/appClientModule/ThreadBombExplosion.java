@@ -31,13 +31,6 @@ public class ThreadBombExplosion extends Thread{
 			sendRequestDeletePlayer();
 		}
 		sendRequestToAll("explosion", new boolean[1], color);
-		System.out.println("player points"+player.getPoints()+player.isDead());
-		if(player.getPoints()>=game.getMax_point() && !player.isDead())
-		{
-			System.out.println("[INFO] Hai vinto");
-			sendRequestToAll("victory", new boolean[1], new Object());
-		}
-
 	}
 
 	//manda la richiesta a tutti eccetto me stesso
