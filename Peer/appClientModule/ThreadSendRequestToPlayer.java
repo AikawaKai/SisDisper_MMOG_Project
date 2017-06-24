@@ -30,8 +30,20 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 	public void run() {
 		switch(case_){
+		case "checkin":
+			checkIn();
+			break;
 		case "newplayer":
 			notifyNewPlayer();
+			break;
+		case "accepted":
+			accept();
+			break;
+		case "notaccepted":
+			notaccept();
+			break;
+		case "imin":
+			notifyImIn();
 			break;
 		case "deleteplayer":
 			notifyDeletePlayer();
@@ -48,19 +60,24 @@ public class ThreadSendRequestToPlayer extends Thread {
 		case "token":
 			sendTokenToNext();
 			break;
-		case "accepted":
-			accept();
-			break;
-		case "notaccepted":
-			notaccept();
-			break;
 		case "victory":
 			victory();
 			break;
 		}
 	}
 
-	//metodo per segnalare l'arrivo del nuovo giocatore
+	// sto dicendo che voglio entrare
+	private void checkIn() {
+		DataOutputStream outputStream = player_i.getSocketOutput();
+		try {
+			outputStream.writeBytes("checkin CONTENT:"+player.marshallerThis()+"\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	// provo ad aggiungermi come giocatore. Viene controllata la posizione
 	@SuppressWarnings("unchecked")
 	private void notifyNewPlayer() {
 		BufferedReader inputStream = player_i.getSocketInput();
@@ -86,8 +103,19 @@ public class ThreadSendRequestToPlayer extends Thread {
 		}
 
 	}
+	
+	// sono riuscito ad entrare, comunico al giocatore di avercela fatta (per poterlo sbloccare)
+	private void notifyImIn() {
+		DataOutputStream outputStream = player_i.getSocketOutput();
+		try {
+			outputStream.writeBytes("imin\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
 
-	// metodo per segnalare la cancellazione del giocatore
+	// metodo per segnalare che sto uscendo
 	private void notifyDeletePlayer() {
 		DataOutputStream outToPeer = player_i.getSocketOutput();
 		BufferedReader inFromPeer = player_i.getSocketInput();
@@ -98,7 +126,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// metodo per segnalare la nuova posizione dopo uno spostamento
 	private void sendNewPos() {
 		DataOutputStream outToPeer = player_i.getSocketOutput();
@@ -120,7 +148,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// metodo per segnalare della bomba lanciata
 	private void notifyBomb() {
 		BufferedReader inputStream = player_i.getSocketInput();
@@ -133,7 +161,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// notifica esplosione bomba
 	private void notifyExplosion() {
 		DataOutputStream outputStream = player_i.getSocketOutput();
@@ -149,7 +177,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// metodo per segnalare la propria vittoria
 	private void victory() {
 		DataOutputStream outputStream = player_i.getSocketOutput();
@@ -163,8 +191,9 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 
 
-
+	// metodo per segnalare che la posizione del giocatore è stata acettata da tutti
 	private void accept() {
+		ArrayList<Player> playersToAdd = SingletonFactory.getPlayersToAdd();
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		BufferedReader inFromPeer = player_i.getSocketInput();
 		String response = "";
@@ -180,8 +209,19 @@ public class ThreadSendRequestToPlayer extends Thread {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		synchronized(playersToAdd){
+			for(int i=0; i<playersToAdd.size(); i++){
+				if(playersToAdd.get(i).getName().equals(player_i.getName()))
+				{
+					playersToAdd.remove(i);
+					break;
+				}
+			}
+		}
 	}
-
+	
+	
+	// metodo per segnalare che la posizione non è stata accettata da tutti
 	private void notaccept() {
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		try {
@@ -190,7 +230,9 @@ public class ThreadSendRequestToPlayer extends Thread {
 			e.printStackTrace();
 		}
 	}
-
+	
+	
+	// mando il token al mio next
 	private void sendTokenToNext() {
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		try {

@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -74,6 +75,15 @@ public class ThreadRequestsHandler extends Thread{
 		case "token":
 			myTurn();
 			break;
+		case "checkin":
+			checkIn(content);
+			break;
+		case "ok":
+			comeInNewPlayer();
+			break;
+		case "imin":
+			unlockThePlayerWithTheToken();
+			break;
 		case "newplayer":
 			playersUpdate(content);
 			break;
@@ -96,9 +106,63 @@ public class ThreadRequestsHandler extends Thread{
 			break;
 		}
 	}
+	
+	// sblocco il giocatore che ha il token, visto che il giocatore è entrato
+	private void unlockThePlayerWithTheToken() {
+		ArrayList<Player> playerToAdd = SingletonFactory.getPlayersToAdd();
+		synchronized(playerToAdd){
+			playerToAdd.notify();
+		}
+		
+	}
+
+	//funzione che si occupa di generare una nuova posizione random per il nuovo giocatore
+	//confermandola agli altri peer
+	private void comeInNewPlayer() {
+		Player player = SingletonFactory.getPlayerSingleton();
+		// controllo la posizione randomica all'ingresso
+		boolean check[] = {true};
+		ArrayList<Player> players_deleted = new ArrayList<Player>();
+		while(check[0]){
+			check[0] = false;
+			Position pos = game.genRandPosition();
+			player.setPos(pos);
+			sendRequestToAll("newplayer", check, players_deleted);
+			if(check[0])
+			{
+				for(Player pl_to_del: players_deleted){
+					game.removePlayer(pl_to_del.getName());
+				}
+				sendRequestToAll("notaccepted", check, new Object());
+			}
+		}
+		//scelgo il mio next
+		Player player_next;
+		int num_players = game.numPlayers();
+		int choose = Main.randInt(0, num_players-1);
+		player_next = game.getPlayers().get(choose);
+		while(player_next.equals(player) && num_players>1){
+			choose = Main.randInt(0, num_players-1);
+			player_next = game.getPlayers().get(choose);
+		}
+		// sono riuscito a notificare la mia posizione senza conflitti, la faccio accettare a tutti
+		sendRequestToAll("accepted", check, player_next);
+		sendRequestToAll("imin", new boolean[1], new Object());
+	}
+
+	// aggiunge alla coda dei player da aggiungere
+	private void checkIn(String player) {
+		Player toAdd = Player.unmarshallThat(new StringReader(player));
+		ArrayList<Player> playersToAdd = SingletonFactory.getPlayersToAdd();
+		synchronized(playersToAdd){
+			playersToAdd.add(toAdd);
+		}
+
+	}
 
 	//handler per la mossa (movimento o bomba)
 	private void myTurn() {
+		checkEnteringPlayers();
 		BufferMoves moves = SingletonFactory.getSingletonMoves();
 		Move m = null;
 		synchronized(moves){
@@ -112,6 +176,30 @@ public class ThreadRequestsHandler extends Thread{
 			else
 				bomb((Bomb) m);
 		}
+	}
+	
+	// prima di fare la mossa controllo che non ci siano giocatore che vogliono entrare
+	private void checkEnteringPlayers() {
+		Player enterPl;
+		ArrayList<Player> playersToAdd = SingletonFactory.getPlayersToAdd();
+		synchronized(playersToAdd){
+			if(playersToAdd.isEmpty())
+				return;
+			enterPl = playersToAdd.remove(0);
+		}
+		DataOutputStream outputStream = enterPl.getSocketOutput();
+		try {
+			outputStream.writeBytes("ok\n");
+			synchronized(playersToAdd){
+				playersToAdd.wait();
+				System.out.println("Vengo mai sbloccato?");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	//handler per l'aggiunta di un giocatore
@@ -196,7 +284,7 @@ public class ThreadRequestsHandler extends Thread{
 			e.printStackTrace();
 		}
 	}
-	
+
 	// metodo per controllare se l'esplosione mi ha fatto fuori
 	private void checkExplosion(String color) {
 		System.out.print("[INFO] Bomba "+color+" esplosa!");
@@ -213,7 +301,7 @@ public class ThreadRequestsHandler extends Thread{
 		}catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	// metodo per la sconfitta

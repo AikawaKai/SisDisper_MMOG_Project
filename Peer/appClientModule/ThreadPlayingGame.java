@@ -7,7 +7,6 @@ import javax.ws.rs.client.WebTarget;
 
 import peer.objects.Game;
 import peer.objects.Player;
-import peer.objects.Position;
 import peer.objects.SingletonFactory;
 
 // ------------------------------------------------------------------------------------ 
@@ -47,7 +46,9 @@ public class ThreadPlayingGame extends Thread {
 				e.printStackTrace();
 			}
 		}else{
-			comeInNewPlayer();
+			//altrimenti provo ad entrare
+			//comeInNewPlayer();
+			sendRequestToAll("checkin", new boolean[1], player);
 		}
 		ThreadSensorHandler sensorHl = new ThreadSensorHandler(0.7, 37);
 		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter();
@@ -70,41 +71,9 @@ public class ThreadPlayingGame extends Thread {
 				break;
 			}
 		}
-		
 	}
 
-	//funzione che si occupa di generare una nuova posizione random per il nuovo giocatore
-	//confermandola agli altri peer
-	private void comeInNewPlayer() {
-		Player player = SingletonFactory.getPlayerSingleton();
-		// controllo la posizione randomica all'ingresso
-		boolean check[] = {true};
-		ArrayList<Player> players_deleted = new ArrayList<Player>();
-		while(check[0]){
-			check[0] = false;
-			Position pos = game.genRandPosition();
-			player.setPos(pos);
-			sendRequestToAll("newplayer", check, players_deleted);
-			if(check[0])
-			{
-				for(Player pl_to_del: players_deleted){
-					game.removePlayer(pl_to_del.getName());
-				}
-				sendRequestToAll("notaccepted", check, new Object());
-			}
-		}
-		//scelgo il mio next
-		Player player_next;
-		int num_players = game.numPlayers();
-		int choose = Main.randInt(0, num_players-1);
-		player_next = game.getPlayers().get(choose);
-		while(player_next.equals(player) && num_players>1){
-			choose = Main.randInt(0, num_players-1);
-			player_next = game.getPlayers().get(choose);
-		}
-		// sono riuscito a notificare la mia posizione senza conflitti, la faccio accettare a tutti
-		sendRequestToAll("accepted", check, player_next);
-	}
+	
 	
 	//manda la richiesta a tutti eccetto me stesso
 	private void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
