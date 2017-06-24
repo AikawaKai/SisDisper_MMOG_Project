@@ -1,5 +1,7 @@
 package peer.objects;
 
+import java.util.ArrayList;
+
 import javax.ws.rs.client.WebTarget;
 
 //------------------------------------------------------------------------------------ 
@@ -14,6 +16,7 @@ public class SingletonFactory {
 	static WebTarget target;
 	static BufferMoves moves;
 	static BufferMoves bombmoves;
+	static ArrayList<Player> playersToAdd;
 	
 	public static void setPlayerSingleton(Player p){
 		player = p;
@@ -50,6 +53,12 @@ public class SingletonFactory {
 		if(bombmoves==null)
 			bombmoves = new BufferMoves();
 		return bombmoves;
+	}
+	
+	public static synchronized ArrayList<Player> getPlayersToAdd(){
+		if(playersToAdd==null)
+			playersToAdd = new ArrayList<Player>();
+		return playersToAdd;
 	}
 
 }

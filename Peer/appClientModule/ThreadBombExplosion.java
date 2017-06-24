@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 
+import javax.ws.rs.client.WebTarget;
+
 import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.Position;
@@ -24,7 +26,9 @@ public class ThreadBombExplosion extends Thread{
 		Game game = SingletonFactory.getGameSingleton();
 		Position []area = game.getArea(color);
 		if(player.isInArea(area)){
+			System.out.println("[INFO] Sei morto a causa della tua stessa bomba!");
 			player.killPlayer();
+			sendRequestDeletePlayer();
 		}
 		sendRequestToAll("explosion", new boolean[1], color);
 
@@ -49,6 +53,15 @@ public class ThreadBombExplosion extends Thread{
 				e.printStackTrace();
 			}
 		}
+	}
+
+	//funzione per mandare la richiesta di cancellazione al server e agli altri peer
+	private void sendRequestDeletePlayer() {
+		WebTarget target = SingletonFactory.getWebTargetSingleton();
+		Game game = SingletonFactory.getGameSingleton();
+		Player player = SingletonFactory.getPlayerSingleton();
+		target.path("deleteplayer").path(game.getGame_name()).path(player.getName()).request().delete();
+		sendRequestToAll("deleteplayer", new boolean[1], new Object());
 	}
 
 }

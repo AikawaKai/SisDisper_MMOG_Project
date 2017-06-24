@@ -199,7 +199,7 @@ public class Main {
 				e.printStackTrace();
 			}
 		}
-		play(target, welcomeSocket, true);
+		play(welcomeSocket, true);
 	}
 
 	// aggiungi giocatore alla partita
@@ -230,7 +230,7 @@ public class Main {
 			game = response.readEntity(Game.class);
 			SingletonFactory.setGameSingleton(game);
 			player = game.getPlayer(player.getName());
-			play(target, welcomeSocket, false);
+			play(welcomeSocket, false);
 		}else if(status==406){
 			System.out.println("[INFO] Partita inesistente. Impossibile aggiungere il giocatore. ");
 		}else if(status==409){
@@ -242,7 +242,7 @@ public class Main {
 	}
 	
 	// metodo che lancia il thread di gioco
-	private static void play(WebTarget target, ServerSocket welcomeSocket, boolean first) {
+	private static void play(ServerSocket welcomeSocket, boolean first) {
 		ThreadPlayingGame playing = new ThreadPlayingGame(welcomeSocket, first);
 		try {
 			playing.start();

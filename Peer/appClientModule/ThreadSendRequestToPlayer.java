@@ -114,7 +114,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 				if(player.getMy_next().equals(player_i.getName()))
 					player.setMy_next(status_next[1]);
 				System.out.println("[INFO] Hai colpito il giocatore ["+player_i.getName()+"]");
-				player.setPoints(player.getPoints()+1);
+				player.addOnePoint();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -143,7 +143,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 			outputStream.writeBytes("explosion CONTENT:"+((String) result)+"\n");
 			status = inputStream.readLine();
 			if(status.equals("colpito") && !player.isDead()){
-				player.setPoints(player.getPoints()+1);
+				player.addOnePoint();
 			}
 		}catch(IOException e){
 			e.printStackTrace();

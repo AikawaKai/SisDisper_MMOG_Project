@@ -25,6 +25,7 @@ public class Player {
 	private BufferedReader inputStream = null;
 	private DataOutputStream outputStream = null;
 	private int points;
+	private boolean is_dead=false;
 
 	
 	public Player(){
@@ -78,6 +79,18 @@ public class Player {
 		return points;
 	}
 	
+	public synchronized void addOnePoint(){
+		points = points + 1;
+	}
+	
+	public synchronized void killPlayer(){
+		is_dead = true;
+	}
+	
+	public synchronized boolean isDead(){
+		return is_dead;
+	}
+	
 	public synchronized boolean equals(Player pl){
 		if(pl.getName().equals(name))
 		{
@@ -128,7 +141,7 @@ public class Player {
 		}
 	}
 
-	public void sendMessage(String message) {
+	public synchronized void sendMessage(String message) {
 		if(socket==null){
 			startSocket();
 		}
@@ -166,5 +179,15 @@ public class Player {
 			e.printStackTrace();
 		}
 		return gen_play;
+	}
+
+	public synchronized boolean isInArea(Position[] area) {
+		Position a = area[0];
+		Position b = area[1];
+		int my_x = pos.getPos_x();
+		int my_y = pos.getPos_y();
+		if (my_x>=a.getPos_x() && my_x<=b.getPos_x() && my_y>=a.getPos_y() && my_y<=b.getPos_y())
+			return true;
+		return false;
 	}
 }

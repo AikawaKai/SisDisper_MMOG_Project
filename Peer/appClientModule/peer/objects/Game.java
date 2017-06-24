@@ -143,13 +143,13 @@ public class Game {
 		for(int i=0;i<size_x;i++){
 			for(int j=0;j<size_x;j++){
 				if(i<size_x/2 && j<size_x/2)
-					matrix[i][j] = "b";
-				else if(i>=size_x/2 && j<size_x/2)
 					matrix[i][j] = "v";
+				else if(i>=size_x/2 && j<size_x/2)
+					matrix[i][j] = "b";
 				else if(i<size_x/2 && j>=size_x/2)
-					matrix[i][j] = "g";
-				else
 					matrix[i][j] = "r";
+				else
+					matrix[i][j] = "g";
 			}
 		}
 		matrix[p.getPos_x()][p.getPos_y()] = "[X]";
@@ -236,26 +236,26 @@ public class Game {
 			case "verde":
 				a.setPos_x(0);
 				a.setPos_y(0);
-				b.setPos_x(size_x/2);
-				b.setPos_y(size_x/2);
+				b.setPos_x(size_x/2-1);
+				b.setPos_y(size_x/2-1);
 				return pos;
-			case "rosso":
-				a.setPos_x(size_x/2);
-				a.setPos_y(0);
-				b.setPos_x(size_x);
-				b.setPos_y(size_x/2);
-				return pos;
-			case "blu":
+			case "rossa":
 				a.setPos_x(0);
 				a.setPos_y(size_x/2);
-				b.setPos_x(size_x/2);
-				b.setPos_y(size_x);
+				b.setPos_x(size_x/2-1);
+				b.setPos_y(size_x-1);
 				return pos;
-			case "giallo":
+			case "blu":
 				a.setPos_x(size_x/2);
-				a.setPos_y(size_x/2);
-				b.setPos_x(size_x);
-				b.setPos_y(size_x);
+				a.setPos_y(0);
+				b.setPos_x(size_x-1);
+				b.setPos_y(size_x/2-1);
+				return pos;
+			case "gialla":
+				a.setPos_x(size_x/2);
+				a.setPos_y(size_x/2-1);
+				b.setPos_x(size_x-1);
+				b.setPos_y(size_x-1);
 				return pos;
 		}
 		return null;

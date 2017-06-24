@@ -79,6 +79,10 @@ public class Player {
 		return points;
 	}
 	
+	public synchronized void addOnePoint(){
+		points = points + 1;
+	}
+	
 	public synchronized void killPlayer(){
 		is_dead = true;
 	}
@@ -137,7 +141,7 @@ public class Player {
 		}
 	}
 
-	public void sendMessage(String message) {
+	public synchronized void sendMessage(String message) {
 		if(socket==null){
 			startSocket();
 		}

@@ -35,16 +35,19 @@ public class ThreadPlayingGame extends Thread {
 	
 	public void run(){
 		Player player = SingletonFactory.getPlayerSingleton();
-		comeInNewPlayer();
+		
 		// se sono il primo mi mando il token da solo
 		if(first){
 			try {
+				player.setPos(game.genRandPosition());
 				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(player, "token", new boolean[1], new Object());
 				pl_hl.start();
 				pl_hl.join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		}else{
+			comeInNewPlayer();
 		}
 		ThreadSensorHandler sensorHl = new ThreadSensorHandler(0.7, 37);
 		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter();
@@ -74,6 +77,7 @@ public class ThreadPlayingGame extends Thread {
 	//confermandola agli altri peer
 	private void comeInNewPlayer() {
 		Player player = SingletonFactory.getPlayerSingleton();
+		// controllo la posizione randomica all'ingresso
 		boolean check[] = {true};
 		ArrayList<Player> players_deleted = new ArrayList<Player>();
 		while(check[0]){
