@@ -62,7 +62,7 @@ public class ThreadPlayingGame extends Thread {
 		System.out.println("            [x]");
 		System.out.println("            sud");
 		System.out.println("Bombe [Q]");
-		while(true){
+		while(true && !player.isDead()){
 			try {
 				connectionSocket = ws.accept();
 				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(target, connectionSocket);

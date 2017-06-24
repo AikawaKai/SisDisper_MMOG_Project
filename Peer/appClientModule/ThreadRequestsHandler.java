@@ -50,7 +50,7 @@ public class ThreadRequestsHandler extends Thread{
 
 	public void run(){
 		String response = "";
-		while(true){
+		while(true && !player.isDead()){
 			try {
 				response = inFromClient.readLine();
 				if(response==null)// response = HEADER CONTENT:
