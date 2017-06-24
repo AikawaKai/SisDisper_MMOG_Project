@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -50,7 +49,7 @@ public class ThreadRequestsHandler extends Thread{
 
 	public void run(){
 		String response = "";
-		while(true && !player.isDead()){
+		while(true){
 			try {
 				response = inFromClient.readLine();
 				if(response==null)// response = HEADER CONTENT:
@@ -78,7 +77,7 @@ public class ThreadRequestsHandler extends Thread{
 		case "checkin":
 			checkIn(content);
 			break;
-		case "ok":
+		case "start":
 			comeInNewPlayer();
 			break;
 		case "imin":
@@ -119,7 +118,6 @@ public class ThreadRequestsHandler extends Thread{
 	//funzione che si occupa di generare una nuova posizione random per il nuovo giocatore
 	//confermandola agli altri peer
 	private void comeInNewPlayer() {
-		Player player = SingletonFactory.getPlayerSingleton();
 		// controllo la posizione randomica all'ingresso
 		boolean check[] = {true};
 		ArrayList<Player> players_deleted = new ArrayList<Player>();
@@ -177,22 +175,23 @@ public class ThreadRequestsHandler extends Thread{
 				bomb((Bomb) m);
 		}
 	}
-	
+
 	// prima di fare la mossa controllo che non ci siano giocatore che vogliono entrare
 	private void checkEnteringPlayers() {
 		Player enterPl;
 		ArrayList<Player> playersToAdd = SingletonFactory.getPlayersToAdd();
 		synchronized(playersToAdd){
 			if(playersToAdd.isEmpty())
+			{
 				return;
+			}
 			enterPl = playersToAdd.remove(0);
 		}
 		DataOutputStream outputStream = enterPl.getSocketOutput();
 		try {
-			outputStream.writeBytes("ok\n");
+			outputStream.writeBytes("start\n");
 			synchronized(playersToAdd){
 				playersToAdd.wait();
-				System.out.println("Vengo mai sbloccato?");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -221,6 +220,13 @@ public class ThreadRequestsHandler extends Thread{
 			response = inFromClient.readLine();
 			if(response.equals("accepted"))
 			{
+				ArrayList<Player> playerToAdd = SingletonFactory.getPlayersToAdd();
+				synchronized(playerToAdd){
+					for(int i=0;i<playerToAdd.size();i++){
+						if(playerToAdd.get(i).getName().equals(pl.getName()))
+							playerToAdd.remove(i);
+					}
+				}
 				response = inFromClient.readLine();
 				outToClient.writeBytes(player.marshallerThis()+"\n");
 				if(response.equals(player_name))
@@ -264,6 +270,7 @@ public class ThreadRequestsHandler extends Thread{
 			position = Position.unmarshallThat(reader);
 			if(pos.equals(position)){
 				System.out.println("[INFO] Eliminato");
+				player.killPlayer();
 				outToClient.writeBytes("colpito "+player.getMy_next()+"\n"+"\n");
 				sendRequestDeletePlayer();
 			}else{
@@ -307,6 +314,7 @@ public class ThreadRequestsHandler extends Thread{
 	// metodo per la sconfitta
 	private void admitDefeat() {
 		System.out.println("[INFO] Hai perso! Mi spiace.");
+		player.killPlayer();
 		target.path("deleteplayer").path(game.getGame_name()).path(player_name).request().delete();
 
 	}
@@ -325,13 +333,13 @@ public class ThreadRequestsHandler extends Thread{
 	// mi muovo nella direzione specificata in m
 	private void basicMove(BasicMove m) {
 		move(m.getMovement());
-		System.out.println("[INFO] Ti sei spostato");
 		System.out.println(game.getPosOnGameArea(player.getPos()));
 		sendRequestToAll("sendnewpos", new boolean[1], new Object());
 		if(!player.isDead() && player.getPoints()>=game.getMax_point())
 		{
 			sendRequestToAll("victory", new boolean[1], new Object());
-			System.out.println("Hai vinto!");
+			System.out.println("[INFO] Hai vinto!");
+			player.killPlayer();
 		}else{
 			forwardToken();
 		}
@@ -347,6 +355,7 @@ public class ThreadRequestsHandler extends Thread{
 		case "w":
 			if(old_x-1>=0){
 				pos.setPos_x(old_x-1);
+				System.out.println("[INFO] Ti sei spostato");
 			}else{
 				System.out.println("[INFO] Mossa non consentita");
 			}
@@ -354,6 +363,7 @@ public class ThreadRequestsHandler extends Thread{
 		case "x":
 			if(old_x+1<game_size){
 				pos.setPos_x(old_x+1);
+				System.out.println("[INFO] Ti sei spostato");
 			}else{
 				System.out.println("[INFO] Mossa non consentita");
 			}
@@ -361,12 +371,14 @@ public class ThreadRequestsHandler extends Thread{
 		case "a":
 			if(old_y-1>=0){
 				pos.setPos_y(old_y-1);
+				System.out.println("[INFO] Ti sei spostato");
 			}else{
 				System.out.println("[INFO] Mossa non consentita");
 			}
 			break;
 		case "d":
 			if(old_y+1<game_size){
+				System.out.println("[INFO] Ti sei spostato");
 				pos.setPos_y(old_y+1);
 			}else{
 				System.out.println("[INFO] Mossa non consentita");
@@ -378,7 +390,7 @@ public class ThreadRequestsHandler extends Thread{
 	//funzione per mandare la richiesta di cancellazione al server e agli altri peer
 	private void sendRequestDeletePlayer() {
 		target.path("deleteplayer").path(game.getGame_name()).path(player_name).request().delete();
-		sendRequestToAll("deleteplayer", new boolean[1], new Object());
+		sendRequestToAll("deleteplayer", new boolean[1], player);
 	}
 
 	//handler per la bomba

@@ -253,7 +253,7 @@ public class Game {
 				return pos;
 			case "gialla":
 				a.setPos_x(size_x/2);
-				a.setPos_y(size_x/2-1);
+				a.setPos_y(size_x/2);
 				b.setPos_x(size_x-1);
 				b.setPos_y(size_x-1);
 				return pos;

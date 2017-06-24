@@ -154,7 +154,6 @@ public class ThreadSendRequestToPlayer extends Thread {
 		BufferedReader inputStream = player_i.getSocketInput();
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		try {
-			System.out.println("Stai lanciando la bomba verso "+player_i.getName());
 			outputStream.writeBytes("bomb CONTENT:"+((String) result)+"\n");
 			inputStream.readLine();
 		}catch(IOException e){
@@ -170,6 +169,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 		try {
 			outputStream.writeBytes("explosion CONTENT:"+((String) result)+"\n");
 			status = inputStream.readLine();
+			System.out.println("mi ha detto"+status);
 			if(status.equals("colpito") && !player.isDead()){
 				player.addOnePoint();
 			}
