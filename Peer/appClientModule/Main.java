@@ -112,6 +112,7 @@ public class Main {
 			break;
 		case 4:
 			addPlayerToGame(0, welcomeSocket);
+			break;
 		default:
 		}
 	}
@@ -250,6 +251,7 @@ public class Main {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		System.exit(0);
 	}
 
 	//metodo per la scelta del nickname

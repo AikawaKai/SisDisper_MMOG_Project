@@ -31,6 +31,14 @@ public class ThreadBombExplosion extends Thread{
 			sendRequestDeletePlayer();
 		}
 		sendRequestToAll("explosion", new boolean[1], color);
+		WebTarget target = SingletonFactory.getWebTargetSingleton();
+		if(!player.isDead() && player.getPoints()>=game.getMax_point())
+		{
+			target.path("deletegame").path(game.getGame_name()).request().delete();
+			sendRequestToAll("victory", new boolean[1], new Object());
+			System.out.println("[INFO] Hai vinto!");
+			player.killPlayer();
+		}
 	}
 
 	//manda la richiesta a tutti eccetto me stesso

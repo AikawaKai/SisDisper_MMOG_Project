@@ -315,7 +315,6 @@ public class ThreadRequestsHandler extends Thread{
 	private void admitDefeat() {
 		System.out.println("[INFO] Hai perso! Mi spiace.");
 		player.killPlayer();
-		target.path("deleteplayer").path(game.getGame_name()).path(player_name).request().delete();
 
 	}
 
@@ -337,6 +336,7 @@ public class ThreadRequestsHandler extends Thread{
 		sendRequestToAll("sendnewpos", new boolean[1], new Object());
 		if(!player.isDead() && player.getPoints()>=game.getMax_point())
 		{
+			target.path("deletegame").path(game.getGame_name()).request().delete();
 			sendRequestToAll("victory", new boolean[1], new Object());
 			System.out.println("[INFO] Hai vinto!");
 			player.killPlayer();
@@ -413,12 +413,15 @@ public class ThreadRequestsHandler extends Thread{
 	void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
 		String player_name = SingletonFactory.getPlayerSingleton().getName();
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		for(Player pl_i: game.getPlayers()){
-			if(pl_i.getName().equals(player_name))
-				continue;
-			ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
-			threads.add(pl_hl);
-			pl_hl.start();
+		synchronized(game.getPlayers())
+		{
+			for(Player pl_i: game.getPlayers()){
+				if(pl_i.getName().equals(player_name))
+					continue;
+				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
+				threads.add(pl_hl);
+				pl_hl.start();
+			}
 		}
 		for(ThreadSendRequestToPlayer hl: threads){
 			try {
