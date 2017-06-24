@@ -105,14 +105,14 @@ public class ThreadRequestsHandler extends Thread{
 			break;
 		}
 	}
-	
+
 	// sblocco il giocatore che ha il token, visto che il giocatore è entrato
 	private void unlockThePlayerWithTheToken() {
 		ArrayList<Player> playerToAdd = SingletonFactory.getPlayersToAdd();
 		synchronized(playerToAdd){
 			playerToAdd.notify();
 		}
-		
+
 	}
 
 	//funzione che si occupa di generare una nuova posizione random per il nuovo giocatore
@@ -202,7 +202,7 @@ public class ThreadRequestsHandler extends Thread{
 			System.out.println("[INFO] Hai vinto!");
 			player.killPlayer();
 		}
-		
+
 	}
 
 	// prima di fare la mossa controllo che non ci siano giocatore che vogliono entrare
@@ -442,15 +442,13 @@ public class ThreadRequestsHandler extends Thread{
 	void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
 		String player_name = SingletonFactory.getPlayerSingleton().getName();
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		synchronized(game.getPlayers())
-		{
-			for(Player pl_i: game.getPlayers()){
-				if(pl_i.getName().equals(player_name))
-					continue;
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
-				threads.add(pl_hl);
-				pl_hl.start();
-			}
+		ArrayList<Player> players_copy = game.getPlayersCopy();
+		for(Player pl_i: players_copy){
+			if(pl_i.getName().equals(player_name))
+				continue;
+			ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
+			threads.add(pl_hl);
+			pl_hl.start();
 		}
 		for(ThreadSendRequestToPlayer hl: threads){
 			try {
@@ -460,26 +458,24 @@ public class ThreadRequestsHandler extends Thread{
 			}
 		}
 	}
-	
+
 	private void sendRequestToAllOneAtTime(String request, boolean[] check, Object objectToSend) {
 		String player_name = SingletonFactory.getPlayerSingleton().getName();
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		synchronized(game.getPlayers())
-		{
-			for(Player pl_i: game.getPlayers()){
-				if(pl_i.getName().equals(player_name))
-					continue;
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
-				threads.add(pl_hl);
-				pl_hl.start();
-				try {
-					pl_hl.join();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+		ArrayList<Player> players_copy = game.getPlayersCopy();
+		for(Player pl_i: players_copy){
+			if(pl_i.getName().equals(player_name))
+				continue;
+			ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
+			threads.add(pl_hl);
+			pl_hl.start();
+			try {
+				pl_hl.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}
-		
+
 	}
 
 }

@@ -23,18 +23,18 @@ public class ThreadPlayingGame extends Thread {
 	private Socket connectionSocket;
 	private WebTarget target;
 	private boolean first;
-	
+
 	public ThreadPlayingGame(ServerSocket welcomeSocket, boolean f){
 		first = f;
 		game = SingletonFactory.getGameSingleton();
 		ws = welcomeSocket;
 		target = SingletonFactory.getWebTargetSingleton();
-		
+
 	}
-	
+
 	public void run(){
 		Player player = SingletonFactory.getPlayerSingleton();
-		
+
 		// se sono il primo mi mando il token da solo
 		if(first){
 			try {
@@ -73,20 +73,19 @@ public class ThreadPlayingGame extends Thread {
 		}
 	}
 
-	
-	
+
+
 	//manda la richiesta a tutti eccetto me stesso
-	private void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
+	void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
 		String player_name = SingletonFactory.getPlayerSingleton().getName();
 		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		for(Player pl_i: game.getPlayers()){
-			if(!pl_i.getName().equals(player_name))
-			{
-				
-				ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
-				threads.add(pl_hl);
-				pl_hl.start();
-			}
+		ArrayList<Player> players_copy = game.getPlayersCopy();
+		for(Player pl_i: players_copy){
+			if(pl_i.getName().equals(player_name))
+				continue;
+			ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
+			threads.add(pl_hl);
+			pl_hl.start();
 		}
 		for(ThreadSendRequestToPlayer hl: threads){
 			try {

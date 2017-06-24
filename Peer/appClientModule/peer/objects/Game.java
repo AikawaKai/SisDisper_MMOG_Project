@@ -84,6 +84,10 @@ public class Game {
 		return null;
 	}
 	
+	public synchronized ArrayList<Player> getPlayersCopy(){
+		return new ArrayList<Player>(players);
+	}
+	
 	// metodo per l'aggiunta di un giocatore alla parita
 	public synchronized boolean addPlayer(Player pl){
 		if(player_names.contains(pl.getName()))
