@@ -167,14 +167,14 @@ public class ThreadRequestsHandler extends Thread{
 		synchronized(moves){
 			m = moves.getFirst();
 		}
-		if(m==null)
+		if(m==null){
 			forwardToken();
-		else{
-			if(m instanceof BasicMove)
-				basicMove((BasicMove) m);
-			else
-				bomb((Bomb) m);
+			return;
 		}
+		if(m instanceof BasicMove)
+			basicMove((BasicMove) m);
+		else
+			bomb((Bomb) m);
 	}
 
 	private void checkMyExplosions() {
@@ -360,7 +360,7 @@ public class ThreadRequestsHandler extends Thread{
 
 	// mi muovo nella direzione specificata in m
 	private void basicMove(BasicMove m) {
-		move(m.getMovement());
+		m.move(player, game);
 		System.out.println(game.getPosOnGameArea(player.getPos()));
 		sendRequestToAll("sendnewpos", new boolean[1], new Object());
 		if(!player.isDead() && player.getPoints()>=game.getMax_point())
@@ -371,48 +371,6 @@ public class ThreadRequestsHandler extends Thread{
 			player.killPlayer();
 		}else{
 			forwardToken();
-		}
-	}
-
-	//funzione che esegue la mossa movimento
-	private void move(String movement) {
-		Position pos = player.getPos();
-		int old_x = pos.getPos_x();
-		int old_y = pos.getPos_y();
-		int game_size = game.getSize_x();
-		switch(movement){
-		case "w":
-			if(old_x-1>=0){
-				pos.setPos_x(old_x-1);
-				System.out.println("[INFO] Ti sei spostato");
-			}else{
-				System.out.println("[INFO] Mossa non consentita");
-			}
-			break;
-		case "x":
-			if(old_x+1<game_size){
-				pos.setPos_x(old_x+1);
-				System.out.println("[INFO] Ti sei spostato");
-			}else{
-				System.out.println("[INFO] Mossa non consentita");
-			}
-			break;
-		case "a":
-			if(old_y-1>=0){
-				pos.setPos_y(old_y-1);
-				System.out.println("[INFO] Ti sei spostato");
-			}else{
-				System.out.println("[INFO] Mossa non consentita");
-			}
-			break;
-		case "d":
-			if(old_y+1<game_size){
-				System.out.println("[INFO] Ti sei spostato");
-				pos.setPos_y(old_y+1);
-			}else{
-				System.out.println("[INFO] Mossa non consentita");
-			}
-			break;
 		}
 	}
 
