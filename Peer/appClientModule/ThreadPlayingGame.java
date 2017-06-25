@@ -3,8 +3,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import javax.ws.rs.client.WebTarget;
-
 import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.SingletonFactory;
@@ -21,14 +19,12 @@ public class ThreadPlayingGame extends Thread {
 	private Game game;
 	private ServerSocket ws;
 	private Socket connectionSocket;
-	private WebTarget target;
 	private boolean first;
 
 	public ThreadPlayingGame(ServerSocket welcomeSocket, boolean f){
 		first = f;
 		game = SingletonFactory.getGameSingleton();
 		ws = welcomeSocket;
-		target = SingletonFactory.getWebTargetSingleton();
 
 	}
 
@@ -65,7 +61,7 @@ public class ThreadPlayingGame extends Thread {
 		while(true && !player.isDead()){
 			try {
 				connectionSocket = ws.accept();
-				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(target, connectionSocket);
+				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(connectionSocket);
 				clientHandler.start();
 			} catch (IOException e) {
 				break;

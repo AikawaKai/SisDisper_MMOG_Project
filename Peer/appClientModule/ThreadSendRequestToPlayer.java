@@ -19,6 +19,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 	private String case_;
 	private boolean []check;
 	private Object result;
+	private ArrayList<Player> playersToAdd;
 
 	public ThreadSendRequestToPlayer(Player pl_i, String c, boolean []check_, Object res){
 		player = SingletonFactory.getPlayerSingleton();
@@ -26,6 +27,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 		case_ = c;
 		check = check_;
 		result = res;
+		playersToAdd = SingletonFactory.getPlayersToAdd();
 
 	}
 
@@ -206,7 +208,6 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 	// metodo per segnalare che la posizione del giocatore è stata acettata da tutti
 	private void accept() {
-		ArrayList<Player> playersToAdd = SingletonFactory.getPlayersToAdd();
 		DataOutputStream outputStream = player_i.getSocketOutput();
 		BufferedReader inFromPeer = player_i.getSocketInput();
 		String response = "";
