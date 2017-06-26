@@ -168,18 +168,14 @@ public class ThreadRequestsHandler extends Thread{
 			}
 			enterPl = playersToAdd.remove(0);
 		}
-		DataOutputStream outputStream = enterPl.getSocketOutput();
-		try {
-			outputStream.writeBytes("start\n");
-			synchronized(playersToAdd){
+		enterPl.sendMessage("start\n");
+		synchronized(playersToAdd){
+			try {
 				playersToAdd.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
-
 	}
 
 	// mi muovo nella direzione specificata in m
