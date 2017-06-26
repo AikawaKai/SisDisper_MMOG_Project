@@ -1,6 +1,3 @@
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 
@@ -28,7 +25,6 @@ public class ThreadSendRequestToPlayer extends Thread {
 		check = check_;
 		result = res;
 		playersToAdd = SingletonFactory.getPlayersToAdd();
-
 	}
 
 	public void run() {
@@ -72,8 +68,6 @@ public class ThreadSendRequestToPlayer extends Thread {
 	// sto dicendo che voglio entrare
 	private void checkIn() {
 		player_i.sendMessage("checkin CONTENT:"+player.marshallerThis()+"\n");
-
-
 	}
 
 	// provo ad aggiungermi come giocatore. Viene controllata la posizione
@@ -97,7 +91,6 @@ public class ThreadSendRequestToPlayer extends Thread {
 				check[0] = true;
 			}
 		}
-
 	}
 
 	// sono riuscito ad entrare, comunico al giocatore di avercela fatta (per poterlo sbloccare)
@@ -157,11 +150,8 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 	// metodo per segnalare la propria vittoria
 	private void victory() {
-		player_i.sendMessage("victory \n");
+		player_i.sendMessage("victory\n");
 	}
-
-
-
 
 	// metodo per segnalare che la posizione del giocatore è stata acettata da tutti
 	private void accept() {
@@ -194,7 +184,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 	// mando il token al mio next
 	private void sendTokenToNext() {
-		player_i.sendMessage("token \n");
+		player_i.sendMessage("token\n");
 	}
 
 }

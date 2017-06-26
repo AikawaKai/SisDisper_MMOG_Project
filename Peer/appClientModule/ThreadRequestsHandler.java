@@ -56,14 +56,10 @@ public class ThreadRequestsHandler extends Thread{
 	public void run(){
 		String response = "";
 		while(true){
-			try {
-				response = inFromClient.readLine();
-				if(response==null)// response = HEADER CONTENT:
-					break;
-				requestsHandler(response);
-			} catch (IOException e) {
+			response = socketHandlerReader();
+			if(response==null)// response = HEADER CONTENT:
 				break;
-			} 
+			requestsHandler(response);
 		}
 	}
 
@@ -257,35 +253,31 @@ public class ThreadRequestsHandler extends Thread{
 		StringReader reader = null;
 		Player pl;
 		String pl_name;
-		try {
-			reader = new StringReader(player_string);
-			pl = Player.unmarshallThat(reader);
-			pl_name = pl.getName();
-			if(pl.getPos().equals(player.getPos()))
-				socketHandlerWriter("ko\n");
-			else
-			{
-				socketHandlerWriter("ok\n");
-			}
-			response = inFromClient.readLine();
-			if(response.equals("accepted"))
-			{
-				synchronized(playersToAdd){
-					for(int i=0;i<playersToAdd.size();i++){
-						if(playersToAdd.get(i).getName().equals(pl.getName()))
-							playersToAdd.remove(i);
-					}
+		reader = new StringReader(player_string);
+		pl = Player.unmarshallThat(reader);
+		pl_name = pl.getName();
+		if(pl.getPos().equals(player.getPos()))
+			socketHandlerWriter("ko\n");
+		else
+		{
+			socketHandlerWriter("ok\n");
+		}
+		response = socketHandlerReader();
+		if(response.equals("accepted"))
+		{
+			synchronized(playersToAdd){
+				for(int i=0;i<playersToAdd.size();i++){
+					if(playersToAdd.get(i).getName().equals(pl.getName()))
+						playersToAdd.remove(i);
 				}
-				response = inFromClient.readLine();
-				socketHandlerWriter(player.marshallerThis()+"\n");
-				if(response.equals(player_name))
-					player.setMy_next(pl_name);
-				System.out.println("[INFO] Notifica nuovo giocatore!");
-				game.addPlayer(pl);
-				System.out.println("["+pl_name+"]");
 			}
-		}catch (IOException e) {
-			e.printStackTrace();
+			response = socketHandlerReader();
+			socketHandlerWriter(player.marshallerThis()+"\n");
+			if(response.equals(player_name))
+				player.setMy_next(pl_name);
+			System.out.println("[INFO] Notifica nuovo giocatore!");
+			game.addPlayer(pl);
+			System.out.println("["+pl_name+"]");
 		}
 	}
 
@@ -419,6 +411,16 @@ public class ThreadRequestsHandler extends Thread{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private String socketHandlerReader(){
+		String response = null;
+		try {
+			response = inFromClient.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return response;
 	}
 
 }
