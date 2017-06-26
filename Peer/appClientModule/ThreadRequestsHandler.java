@@ -33,7 +33,7 @@ public class ThreadRequestsHandler extends Thread{
 	private DataOutputStream outToClient;
 	private BufferMoves moves;
 	private ArrayList<Bomb> explodedBombs;
-	private ArrayList<Player> playerToAdd;
+	private ArrayList<Player> playersToAdd;
 
 	public ThreadRequestsHandler(Socket connection){
 		player = SingletonFactory.getPlayerSingleton();
@@ -43,7 +43,7 @@ public class ThreadRequestsHandler extends Thread{
 		game = SingletonFactory.getGameSingleton();
 		moves = SingletonFactory.getSingletonMoves();
 		explodedBombs = SingletonFactory.bombExploded();
-		playerToAdd = SingletonFactory.getPlayersToAdd();
+		playersToAdd = SingletonFactory.getPlayersToAdd();
 		try{
 			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			outToClient = new DataOutputStream(conn.getOutputStream());
@@ -161,7 +161,6 @@ public class ThreadRequestsHandler extends Thread{
 	// prima di fare la mossa controllo che non ci siano giocatore che vogliono entrare
 	private void checkEnteringPlayers() {
 		Player enterPl;
-		ArrayList<Player> playersToAdd = SingletonFactory.getPlayersToAdd();
 		synchronized(playersToAdd){
 			if(playersToAdd.isEmpty())
 			{
@@ -211,7 +210,6 @@ public class ThreadRequestsHandler extends Thread{
 	// aggiunge alla coda dei player da aggiungere
 	private void checkIn(String player) {
 		Player toAdd = Player.unmarshallThat(new StringReader(player));
-		ArrayList<Player> playersToAdd = SingletonFactory.getPlayersToAdd();
 		synchronized(playersToAdd){
 			playersToAdd.add(toAdd);
 		}
@@ -252,8 +250,8 @@ public class ThreadRequestsHandler extends Thread{
 
 	// sblocco il giocatore che ha il token, visto che il giocatore è entrato
 	private void unlockThePlayerWithTheToken() {
-		synchronized(playerToAdd){
-			playerToAdd.notify();
+		synchronized(playersToAdd){
+			playersToAdd.notify();
 		}
 	}
 
@@ -276,10 +274,10 @@ public class ThreadRequestsHandler extends Thread{
 			response = inFromClient.readLine();
 			if(response.equals("accepted"))
 			{
-				synchronized(playerToAdd){
-					for(int i=0;i<playerToAdd.size();i++){
-						if(playerToAdd.get(i).getName().equals(pl.getName()))
-							playerToAdd.remove(i);
+				synchronized(playersToAdd){
+					for(int i=0;i<playersToAdd.size();i++){
+						if(playersToAdd.get(i).getName().equals(pl.getName()))
+							playersToAdd.remove(i);
 					}
 				}
 				response = inFromClient.readLine();

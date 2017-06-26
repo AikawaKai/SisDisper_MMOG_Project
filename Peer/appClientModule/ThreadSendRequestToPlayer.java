@@ -71,136 +71,93 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 	// sto dicendo che voglio entrare
 	private void checkIn() {
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		try {
-			outputStream.writeBytes("checkin CONTENT:"+player.marshallerThis()+"\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		player_i.sendMessage("checkin CONTENT:"+player.marshallerThis()+"\n");
+
 
 	}
 
 	// provo ad aggiungermi come giocatore. Viene controllata la posizione
 	@SuppressWarnings("unchecked")
 	private void notifyNewPlayer() {
-		BufferedReader inputStream = player_i.getSocketInput();
-		DataOutputStream outputStream = player_i.getSocketOutput();
 		String response = "";
-		try {
-			outputStream.writeBytes("newplayer CONTENT:"+player.marshallerThis()+"\n");
-			response = inputStream.readLine();
-			if(response.equals("ko"))
-			{
-				synchronized(check){
-					check[0] = true;
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		player_i.sendMessage("newplayer CONTENT:"+player.marshallerThis()+"\n");
+		response = player_i.getMessage();
+		if(response == null){
 			synchronized(check){
 				check[0] = true;
 				synchronized(result){
 					((ArrayList<Player>) result).add(player_i);
 				}
 			}
+			return;
+		}
+		if(response.equals("ko"))
+		{
+			synchronized(check){
+				check[0] = true;
+			}
 		}
 
 	}
-	
+
 	// sono riuscito ad entrare, comunico al giocatore di avercela fatta (per poterlo sbloccare)
 	private void notifyImIn() {
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		try {
-			outputStream.writeBytes("imin\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
+		player_i.sendMessage("imin\n");
 	}
 
 	// metodo per segnalare che sto uscendo
 	private void notifyDeletePlayer() {
-		DataOutputStream outToPeer = player_i.getSocketOutput();
-		BufferedReader inFromPeer = player_i.getSocketInput();
-		try {
-			outToPeer.writeBytes("deleteplayer CONTENT:"+player.marshallerThis()+"\n");
-			inFromPeer.readLine();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		player_i.sendMessage("deleteplayer CONTENT:"+player.marshallerThis()+"\n");
+		player_i.getMessage();
 	}
 
 	// metodo per segnalare la nuova posizione dopo uno spostamento
 	private void sendNewPos() {
-		DataOutputStream outToPeer = player_i.getSocketOutput();
-		BufferedReader inFromPeer = player_i.getSocketInput();
 		String response = "";
 		String []status_next;
-		try {
-			outToPeer.writeBytes("newpos CONTENT:"+player.getPos().marshallerThis()+"\n");
-			response = inFromPeer.readLine();
-			status_next = response.split(" ");
-			if(status_next[0].equals("colpito"))
-			{
-				if(player.getMy_next().equals(player_i.getName()))
-					player.setMy_next(status_next[1]);
-				System.out.println("[INFO] Hai colpito il giocatore ["+player_i.getName()+"]");
-				player.addOnePoint();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		player_i.sendMessage("newpos CONTENT:"+player.getPos().marshallerThis()+"\n");
+		response = player_i.getMessage();
+		status_next = response.split(" ");
+		if(status_next[0].equals("colpito"))
+		{
+			if(player.getMy_next().equals(player_i.getName()))
+				player.setMy_next(status_next[1]);
+			System.out.println("[INFO] Hai colpito il giocatore ["+player_i.getName()+"]");
+			player.addOnePoint();
 		}
 	}
 
 	// metodo per segnalare della bomba lanciata
 	private void notifyBomb() {
-		BufferedReader inputStream = player_i.getSocketInput();
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		try {
-			outputStream.writeBytes("bomb CONTENT:"+((String) result)+"\n");
-			inputStream.readLine();
-		}catch(IOException e){
-			e.printStackTrace();
-		}
+		player_i.sendMessage("bomb CONTENT:"+((String) result)+"\n");
+		player_i.getMessage();
 	}
 
 	// notifica esplosione bomba
 	private void notifyExplosion() {
 		Bomb b = (Bomb) result;
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		BufferedReader inputStream = player_i.getSocketInput();
 		String status;
 		String []status_next;
-		try {
-			outputStream.writeBytes("explosion CONTENT:"+b.getColor()+"\n");
-			status = inputStream.readLine();
-			status_next = status.split(" ");
-			if(status_next[0].equals("colpito") && !player.isDead()){
-				if(player.getMy_next().equals(player_i.getName()))
-					player.setMy_next(status_next[1]);
-				System.out.println("[INFO] Hai colpito il giocatore ["+player_i.getName()+"]");
-				synchronized(b){
-					if(b.getCounter()<3)
-					{
-						player.addOnePoint();
-						b.setCounter(b.getCounter()+1);
-					}	
-				}
-				
+		player_i.sendMessage("explosion CONTENT:"+b.getColor()+"\n");
+		status = player_i.getMessage();
+		status_next = status.split(" ");
+		if(status_next[0].equals("colpito") && !player.isDead()){
+			if(player.getMy_next().equals(player_i.getName()))
+				player.setMy_next(status_next[1]);
+			System.out.println("[INFO] Hai colpito il giocatore ["+player_i.getName()+"]");
+			synchronized(b){
+				if(b.getCounter()<3)
+				{
+					player.addOnePoint();
+					b.setCounter(b.getCounter()+1);
+				}	
 			}
-		}catch(IOException e){
-			e.printStackTrace();
 		}
 	}
 
 	// metodo per segnalare la propria vittoria
 	private void victory() {
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		try {
-			outputStream.writeBytes("victory \n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		player_i.sendMessage("victory \n");
 	}
 
 
@@ -208,20 +165,14 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 	// metodo per segnalare che la posizione del giocatore è stata acettata da tutti
 	private void accept() {
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		BufferedReader inFromPeer = player_i.getSocketInput();
 		String response = "";
-		try {
-			outputStream.writeBytes("accepted\n");
-			outputStream.writeBytes(((Player)result).getName()+"\n");
-			response = inFromPeer.readLine();
-			Player my_prev = Player.unmarshallThat(new StringReader(response));
-			if(((Player)result).equals(player_i))
-			{
-				player.setMy_next(my_prev.getMy_next());
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		player_i.sendMessage("accepted\n");
+		player_i.sendMessage(((Player)result).getName()+"\n");
+		response = player_i.getMessage();
+		Player my_prev = Player.unmarshallThat(new StringReader(response));
+		if(((Player)result).equals(player_i))
+		{
+			player.setMy_next(my_prev.getMy_next());
 		}
 		synchronized(playersToAdd){
 			for(int i=0; i<playersToAdd.size(); i++){
@@ -233,28 +184,17 @@ public class ThreadSendRequestToPlayer extends Thread {
 			}
 		}
 	}
-	
-	
+
+
 	// metodo per segnalare che la posizione non è stata accettata da tutti
 	private void notaccept() {
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		try {
-			outputStream.writeBytes("notaccepted\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		player_i.sendMessage("notaccepted\n");
 	}
-	
-	
+
+
 	// mando il token al mio next
 	private void sendTokenToNext() {
-		DataOutputStream outputStream = player_i.getSocketOutput();
-		try {
-			outputStream.writeBytes("token \n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		player_i.sendMessage("token \n");
 	}
 
 }

@@ -153,6 +153,19 @@ public class Player {
 		}
 	}
 	
+	public synchronized String getMessage(){
+		if(socket==null){
+			startSocket();
+		}
+		String response = null;
+		try {
+			response = inputStream.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return response;
+	}
+	
 	public synchronized String marshallerThis(){
 		String player_s = null;
 		try {
