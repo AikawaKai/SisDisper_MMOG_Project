@@ -262,10 +262,10 @@ public class ThreadRequestsHandler extends Thread{
 			pl = Player.unmarshallThat(reader);
 			pl_name = pl.getName();
 			if(pl.getPos().equals(player.getPos()))
-				outToClient.writeBytes("ko\n");
+				socketHandlerWriter("ko\n");
 			else
 			{
-				outToClient.writeBytes("ok\n");
+				socketHandlerWriter("ok\n");
 			}
 			response = inFromClient.readLine();
 			if(response.equals("accepted"))
@@ -277,7 +277,7 @@ public class ThreadRequestsHandler extends Thread{
 					}
 				}
 				response = inFromClient.readLine();
-				outToClient.writeBytes(player.marshallerThis()+"\n");
+				socketHandlerWriter(player.marshallerThis()+"\n");
 				if(response.equals(player_name))
 					player.setMy_next(pl_name);
 				System.out.println("[INFO] Notifica nuovo giocatore!");
@@ -294,20 +294,16 @@ public class ThreadRequestsHandler extends Thread{
 		StringReader reader;
 		Player pl;
 		String pl_name;
-		try {
-			reader = new StringReader(content);
-			pl = (Player) Player.unmarshallThat(reader);
-			pl_name = pl.getName();
-			if(player.getMy_next().equals(pl_name))
-			{
-				player.setMy_next(pl.getMy_next());
-			}
-			game.removePlayer(pl_name);
-			outToClient.writeBytes("accepted\n");
-			System.out.println("[INFO] Notifica cancellazione giocatore!");
-		}catch (IOException e) {
-			e.printStackTrace();
+		reader = new StringReader(content);
+		pl = (Player) Player.unmarshallThat(reader);
+		pl_name = pl.getName();
+		if(player.getMy_next().equals(pl_name))
+		{
+			player.setMy_next(pl.getMy_next());
 		}
+		game.removePlayer(pl_name);
+		socketHandlerWriter("accepted\n");
+		System.out.println("[INFO] Notifica cancellazione giocatore!");
 	}
 
 	//handler per il controllo della posizione inviata da altro giocatore
@@ -315,19 +311,15 @@ public class ThreadRequestsHandler extends Thread{
 		Position pos = player.getPos();
 		StringReader reader;
 		Position position;
-		try {
-			reader = new StringReader(content);
-			position = Position.unmarshallThat(reader);
-			if(pos.equals(position)){
-				System.out.println("[INFO] Eliminato");
-				player.killPlayer();
-				outToClient.writeBytes("colpito "+player.getMy_next()+"\n");
-				sendRequestDeletePlayer();
-			}else{
-				outToClient.writeBytes("mancato \n");
-			}
-		}catch (IOException e) {
-			e.printStackTrace();
+		reader = new StringReader(content);
+		position = Position.unmarshallThat(reader);
+		if(pos.equals(position)){
+			System.out.println("[INFO] Eliminato");
+			player.killPlayer();
+			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
+			sendRequestDeletePlayer();
+		}else{
+			socketHandlerWriter("mancato \n");
 		}
 	}
 
@@ -335,11 +327,7 @@ public class ThreadRequestsHandler extends Thread{
 	private void notifyBomb(String color) {
 		//Position []area = game.getArea(color);
 		System.out.println("[INFO] Bomba "+color+" lanciata!");
-		try {
-			outToClient.writeBytes("ok\n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		socketHandlerWriter("ok\n");
 	}
 
 	// metodo per controllare se l'esplosione mi ha fatto fuori
@@ -347,16 +335,12 @@ public class ThreadRequestsHandler extends Thread{
 		System.out.print("[INFO] Bomba "+color+" esplosa!");
 		Position []area = game.getArea(color);
 		boolean checkEx = player.isInArea(area);
-		try {
-			if(checkEx){
-				System.out.println("[INFO] Eliminato");
-				outToClient.writeBytes("colpito "+player.getMy_next()+"\n");
-				sendRequestDeletePlayer();
-			}else{
-				outToClient.writeBytes("mancato \n");
-			}
-		}catch (IOException e) {
-			e.printStackTrace();
+		if(checkEx){
+			System.out.println("[INFO] Eliminato");
+			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
+			sendRequestDeletePlayer();
+		}else{
+			socketHandlerWriter("mancato \n");
 		}
 
 	}
@@ -427,6 +411,14 @@ public class ThreadRequestsHandler extends Thread{
 			}
 		}
 
+	}
+
+	private void socketHandlerWriter(String message){
+		try {
+			outToClient.writeBytes(message);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
