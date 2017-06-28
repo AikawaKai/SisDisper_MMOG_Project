@@ -34,6 +34,7 @@ public class ThreadRequestsHandler extends Thread{
 	private BufferMoves moves;
 	private ArrayList<Bomb> explodedBombs;
 	private ArrayList<Player> playersToAdd;
+	private ArrayList<Player> playersToDelete;
 
 	public ThreadRequestsHandler(Socket connection){
 		player = SingletonFactory.getPlayerSingleton();
@@ -44,13 +45,13 @@ public class ThreadRequestsHandler extends Thread{
 		moves = SingletonFactory.getSingletonMoves();
 		explodedBombs = SingletonFactory.bombExploded();
 		playersToAdd = SingletonFactory.getPlayersToAdd();
+		playersToDelete = SingletonFactory.getPlayersToDelete();
 		try{
 			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			outToClient = new DataOutputStream(conn.getOutputStream());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-
 	}
 
 	public void run(){
@@ -111,6 +112,7 @@ public class ThreadRequestsHandler extends Thread{
 	//handler per la mossa (movimento o bomba)
 	private void myTurn() {
 		checkMyExplosions();
+		checkDeletedPlayers();
 		checkEnteringPlayers();
 		Move m = null;
 		synchronized(moves){
@@ -124,6 +126,25 @@ public class ThreadRequestsHandler extends Thread{
 			basicMove((BasicMove) m);
 		else
 			bomb((Bomb) m);
+	}
+
+	private void checkDeletedPlayers() {
+		synchronized(playersToDelete){
+			if(playersToDelete.isEmpty())
+			{
+				return;
+			}
+			while(playersToDelete.size()!=0){
+				Player first = playersToDelete.remove(0);
+				for(Player pl:playersToDelete){
+					if(pl.getMy_next().equals(first.getName()))
+						pl.setMy_next(first.getMy_next());
+				}
+				if(player.getMy_next().equals(first.getName()))
+					player.setMy_next(first.getMy_next());
+			}
+
+		}
 	}
 
 	//handler per il controllo delle esplosioni causate da me
@@ -142,7 +163,7 @@ public class ThreadRequestsHandler extends Thread{
 			player.killPlayer();
 			sendRequestDeletePlayer();
 		}
-		sendRequestToAllOneAtTime("explosion", new boolean[1], b);
+		sendRequestToAll("explosion", new boolean[1], b);
 		WebTarget target = SingletonFactory.getWebTargetSingleton();
 		if(!player.isDead() && player.getPoints()>=game.getMax_point())
 		{
@@ -289,6 +310,9 @@ public class ThreadRequestsHandler extends Thread{
 		reader = new StringReader(content);
 		pl = (Player) Player.unmarshallThat(reader);
 		pl_name = pl.getName();
+		synchronized(playersToDelete){
+			playersToDelete.add(pl);
+		}
 		if(player.getMy_next().equals(pl_name))
 		{
 			player.setMy_next(pl.getMy_next());
@@ -315,13 +339,6 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 
-	// metodo per la notifica dell'attivazione di una bomba
-	private void notifyBomb(String color) {
-		//Position []area = game.getArea(color);
-		System.out.println("[INFO] Bomba "+color+" lanciata!");
-		socketHandlerWriter("ok\n");
-	}
-
 	// metodo per controllare se l'esplosione mi ha fatto fuori
 	private void checkExplosion(String color) {
 		System.out.print("[INFO] Bomba "+color+" esplosa!");
@@ -334,7 +351,13 @@ public class ThreadRequestsHandler extends Thread{
 		}else{
 			socketHandlerWriter("mancato \n");
 		}
+	}
 
+	// metodo per la notifica dell'attivazione di una bomba
+	private void notifyBomb(String color) {
+		//Position []area = game.getArea(color);
+		System.out.println("[INFO] Bomba "+color+" lanciata!");
+		socketHandlerWriter("ok\n");
 	}
 
 	// metodo per la sconfitta

@@ -20,17 +20,17 @@ public class ThreadPlayingGame extends Thread {
 	private ServerSocket ws;
 	private Socket connectionSocket;
 	private boolean first;
+	private Player player;
 
 	public ThreadPlayingGame(ServerSocket welcomeSocket, boolean f){
 		first = f;
 		game = SingletonFactory.getGameSingleton();
 		ws = welcomeSocket;
+		player = SingletonFactory.getPlayerSingleton();
 
 	}
 
 	public void run(){
-		Player player = SingletonFactory.getPlayerSingleton();
-
 		// se sono il primo mi mando il token da solo
 		if(first){
 			try {
@@ -68,8 +68,6 @@ public class ThreadPlayingGame extends Thread {
 			}
 		}
 	}
-
-
 
 	//manda la richiesta a tutti eccetto me stesso
 	void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
