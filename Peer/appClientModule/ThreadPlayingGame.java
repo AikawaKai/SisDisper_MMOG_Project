@@ -67,6 +67,7 @@ public class ThreadPlayingGame extends Thread {
 				break;
 			}
 		}
+		System.exit(0);
 	}
 
 	//manda la richiesta a tutti eccetto me stesso

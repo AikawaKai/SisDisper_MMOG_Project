@@ -101,7 +101,6 @@ public class ThreadSendRequestToPlayer extends Thread {
 	// metodo per segnalare che sto uscendo
 	private void notifyDeletePlayer() {
 		player_i.sendMessage("deleteplayer CONTENT:"+player.marshallerThis()+"\n");
-		player_i.getMessage();
 	}
 
 	// metodo per segnalare la nuova posizione dopo uno spostamento

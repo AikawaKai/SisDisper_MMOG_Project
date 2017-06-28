@@ -56,7 +56,7 @@ public class ThreadRequestsHandler extends Thread{
 
 	public void run(){
 		String response = "";
-		while(true){
+		while(true && !player.isDead()){
 			response = socketHandlerReader();
 			if(response==null)// response = HEADER CONTENT:
 				break;
@@ -136,6 +136,7 @@ public class ThreadRequestsHandler extends Thread{
 			}
 			while(playersToDelete.size()!=0){
 				Player first = playersToDelete.remove(0);
+				game.removePlayer(first.getName());
 				for(Player pl:playersToDelete){
 					if(pl.getMy_next().equals(first.getName()))
 						pl.setMy_next(first.getMy_next());
@@ -296,9 +297,8 @@ public class ThreadRequestsHandler extends Thread{
 			socketHandlerWriter(player.marshallerThis()+"\n");
 			if(response.equals(player_name))
 				player.setMy_next(pl_name);
-			System.out.println("[INFO] Notifica nuovo giocatore!");
+			System.out.println("[INFO] Notifica nuovo giocatore!"+"["+pl_name+"]");
 			game.addPlayer(pl);
-			System.out.println("["+pl_name+"]");
 		}
 	}
 
@@ -317,9 +317,7 @@ public class ThreadRequestsHandler extends Thread{
 		{
 			player.setMy_next(pl.getMy_next());
 		}
-		game.removePlayer(pl_name);
-		socketHandlerWriter("accepted\n");
-		System.out.println("[INFO] Notifica cancellazione giocatore!");
+		System.out.println("\n[INFO] Notifica cancellazione giocatore! ["+pl_name+"]");
 	}
 
 	//handler per il controllo della posizione inviata da altro giocatore
@@ -330,10 +328,11 @@ public class ThreadRequestsHandler extends Thread{
 		reader = new StringReader(content);
 		position = Position.unmarshallThat(reader);
 		if(pos.equals(position)){
-			System.out.println("[INFO] Eliminato");
-			player.killPlayer();
 			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
 			sendRequestDeletePlayer();
+			player.killPlayer();
+			player.closeSocket();
+			System.out.println("[INFO] Eliminato");
 		}else{
 			socketHandlerWriter("mancato \n");
 		}
@@ -345,9 +344,11 @@ public class ThreadRequestsHandler extends Thread{
 		Position []area = game.getArea(color);
 		boolean checkEx = player.isInArea(area);
 		if(checkEx){
-			System.out.println("[INFO] Eliminato");
 			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
 			sendRequestDeletePlayer();
+			player.killPlayer();
+			player.closeSocket();
+			System.out.println("[INFO] Eliminato");
 		}else{
 			socketHandlerWriter("mancato \n");
 		}
@@ -364,6 +365,7 @@ public class ThreadRequestsHandler extends Thread{
 	private void admitDefeat() {
 		System.out.println("[INFO] Hai perso! Mi spiace.");
 		player.killPlayer();
+		player.closeSocket();
 	}
 
 	// manda il token al mio next
@@ -408,24 +410,6 @@ public class ThreadRequestsHandler extends Thread{
 				e.printStackTrace();
 			}
 		}
-	}
-
-	private void sendRequestToAllOneAtTime(String request, boolean[] check, Object objectToSend) {
-		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		ArrayList<Player> players_copy = game.getPlayersCopy();
-		for(Player pl_i: players_copy){
-			if(pl_i.getName().equals(player_name))
-				continue;
-			ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
-			threads.add(pl_hl);
-			pl_hl.start();
-			try {
-				pl_hl.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-
 	}
 
 	private void socketHandlerWriter(String message){
