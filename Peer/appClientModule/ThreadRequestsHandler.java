@@ -440,6 +440,15 @@ public class ThreadRequestsHandler extends Thread{
 		sendRequestDeletePlayer();
 		player.killPlayer();
 		player.closeSocket();
+		synchronized(connections){
+			for(Socket c: connections){
+				try {
+					c.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		System.out.println("[INFO] Fine partita.");
 		System.exit(0);
 
