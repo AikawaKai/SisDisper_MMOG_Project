@@ -154,6 +154,8 @@ public class ThreadRequestsHandler extends Thread{
 				if(player.getMy_next().equals(first.getName()))
 					player.setMy_next(first.getMy_next());
 			}
+			System.out.println("CHECKDELETEDPLAYERS: "+ player_name+" ha come nuovo next "+player.getMy_next());
+
 
 		}
 	}
@@ -172,7 +174,7 @@ public class ThreadRequestsHandler extends Thread{
 		if(player.isInArea(area)){
 			System.out.println("[INFO] Sei morto a causa della tua stessa bomba!");
 			player.killPlayer();
-			sendRequestDeletePlayer();
+			deletePlayer();
 		}
 		sendRequestToAll("explosion", new boolean[1], b);
 	}
@@ -257,7 +259,7 @@ public class ThreadRequestsHandler extends Thread{
 	// sblocco il giocatore che ha il token, visto che il giocatore è entrato
 	private void unlockThePlayerWithTheToken() {
 		synchronized(playersToAdd){
-			playersToAdd.notify();
+			playersToAdd.notifyAll();
 		}
 	}
 
@@ -291,6 +293,7 @@ public class ThreadRequestsHandler extends Thread{
 			socketHandlerWriter(player.marshallerThis()+"\n");
 			if(content.equals(player_name))
 				player.setMy_next(pl_name);
+			System.out.println("UPDATED: "+ player_name+" ha come nuovo next "+player.getMy_next());
 			System.out.println("[INFO] Notifica nuovo giocatore!"+"["+pl_name+"]");
 			game.addPlayer(pl);
 		}
@@ -306,14 +309,16 @@ public class ThreadRequestsHandler extends Thread{
 		pl = (Player) Player.unmarshallThat(reader);
 		pl_name = pl.getName();
 		synchronized(playersToDelete){
+			System.out.println("Da eliminare "+pl.getName());
 			playersToDelete.add(pl);
 		}
 		if(player.getMy_next().equals(pl_name))
 		{
 			player.setMy_next(pl.getMy_next());
+			System.out.println("UTENTE CANCELLATO "+ player_name+" ha come nuovo next "+player.getMy_next());
 		}
-		socketHandlerWriter("ok\n");
 		System.out.println("\n[INFO] Notifica cancellazione giocatore! ["+pl_name+"]");
+		socketHandlerWriter("ok\n");
 	}
 
 	//handler per il controllo della posizione inviata da altro giocatore
@@ -370,12 +375,6 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 
-	//funzione per mandare la richiesta di cancellazione al server e agli altri peer
-	private void sendRequestDeletePlayer() {
-		target.path("deleteplayer").path(game.getGame_name()).path(player_name).request().delete();
-		sendRequestToAll("deleteplayer", new boolean[1], player);
-	}
-
 	// parsing del messaggio
 	private String getContentFromStringResponse(String content) {
 		int length = content.length();
@@ -407,7 +406,7 @@ public class ThreadRequestsHandler extends Thread{
 		try {
 			outToClient.writeBytes(message);
 		} catch (IOException e) {
-			
+
 		}
 	}
 
@@ -430,27 +429,14 @@ public class ThreadRequestsHandler extends Thread{
 			sendRequestToAll("victory", new boolean[1], new Object());
 			System.out.println("[INFO] Hai vinto!");
 			player.killPlayer();
-			player.closeSocket();
-			System.exit(0);
 		}
 	}
-	
+
 	// metodo per cancellare il giocatore
 	private void deletePlayer() {
-		sendRequestDeletePlayer();
-		player.killPlayer();
-		player.closeSocket();
-		synchronized(connections){
-			for(Socket c: connections){
-				try {
-					c.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		target.path("deleteplayer").path(game.getGame_name()).path(player_name).request().delete();
+		sendRequestToAll("deleteplayer", new boolean[1], player);
 		System.out.println("[INFO] Fine partita.");
-		System.exit(0);
 	}
 
 }
