@@ -251,6 +251,7 @@ public class ThreadRequestsHandler extends Thread{
 		// sono riuscito a notificare la mia posizione senza conflitti, la faccio accettare a tutti
 		sendRequestToAll("accepted", check, player_next);
 		sendRequestToAll("imin", new boolean[1], new Object());
+		System.out.println(game.getPosOnGameArea(player.getPos()));
 	}
 
 	// sblocco il giocatore che ha il token, visto che il giocatore è entrato
@@ -324,6 +325,7 @@ public class ThreadRequestsHandler extends Thread{
 		position = Position.unmarshallThat(reader);
 		if(pos.equals(position)){
 			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
+			System.out.println("[INFO] Sei stato eliminato!");
 			deletePlayer();
 		}else{
 			socketHandlerWriter("mancato \n");
@@ -337,6 +339,7 @@ public class ThreadRequestsHandler extends Thread{
 		boolean checkEx = player.isInArea(area);
 		if(checkEx){
 			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
+			System.out.println("[INFO] Sei stato eliminato!");
 			deletePlayer();
 		}else{
 			socketHandlerWriter("mancato \n");
@@ -404,7 +407,7 @@ public class ThreadRequestsHandler extends Thread{
 		try {
 			outToClient.writeBytes(message);
 		} catch (IOException e) {
-			System.out.println("Socket chiusa");
+			
 		}
 	}
 
@@ -413,7 +416,7 @@ public class ThreadRequestsHandler extends Thread{
 		try {
 			response = inFromClient.readLine();
 		} catch (IOException e) {
-			System.out.println("Socket chiusa");
+
 		}
 		return response;
 	}

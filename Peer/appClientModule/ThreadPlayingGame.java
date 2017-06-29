@@ -58,6 +58,8 @@ public class ThreadPlayingGame extends Thread {
 		System.out.println("            [x]");
 		System.out.println("            sud");
 		System.out.println("Bombe [Q]");
+		if(first)
+			System.out.println(game.getPosOnGameArea(player.getPos()));
 		while(true && !player.isDead()){
 			try {
 				connectionSocket = ws.accept();
