@@ -263,7 +263,7 @@ public class ThreadRequestsHandler extends Thread{
 
 	//handler per l'aggiunta di un giocatore
 	private void playersUpdate(String player_string) {
-		System.out.println("[DEBUG] INIZIO INSERIMENTO");
+		//System.out.println("[DEBUG] INIZIO INSERIMENTO");
 		String response = "";
 		StringReader reader = null;
 		Player pl;
@@ -287,14 +287,14 @@ public class ThreadRequestsHandler extends Thread{
 						playersToAdd.remove(i);
 				}
 			}
-			System.out.println("[DEBUG] INSERIMENTO, ARRIVO QUI?");
+			//System.out.println("[DEBUG] INSERIMENTO, ARRIVO QUI?");
 			socketHandlerWriter(player.marshallerThis()+"\n");
 			if(content.equals(player_name))
 				player.setMy_next(pl_name);
 			System.out.println("[INFO] Notifica nuovo giocatore!"+"["+pl_name+"]");
 			game.addPlayer(pl);
 		}
-		System.out.println("[DEBUG] FINE INSERIMENTO");
+		//System.out.println("[DEBUG] FINE INSERIMENTO");
 	}
 
 	//handler per la cancellazione di un giocatore in partita
@@ -451,7 +451,6 @@ public class ThreadRequestsHandler extends Thread{
 		}
 		System.out.println("[INFO] Fine partita.");
 		System.exit(0);
-
 	}
 
 }
