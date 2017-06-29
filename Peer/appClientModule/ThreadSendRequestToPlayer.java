@@ -155,8 +155,7 @@ public class ThreadSendRequestToPlayer extends Thread {
 	// metodo per segnalare che la posizione del giocatore è stata acettata da tutti
 	private void accept() {
 		String response = "";
-		player_i.sendMessage("accepted\n");
-		player_i.sendMessage(((Player)result).getName()+"\n");
+		player_i.sendMessage("accepted CONTENT:"+((Player)result).getName()+"\n");
 		response = player_i.getMessage();
 		Player my_prev = Player.unmarshallThat(new StringReader(response));
 		if(((Player)result).equals(player_i))

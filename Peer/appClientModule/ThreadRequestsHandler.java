@@ -176,7 +176,7 @@ public class ThreadRequestsHandler extends Thread{
 
 	}
 
-	// prima di fare la mossa controllo che non ci siano giocatore che vogliono entrare
+	// prima di fare la mossa controllo che non ci siano giocatori che vogliono entrare
 	private void checkEnteringPlayers() {
 		Player enterPl;
 		synchronized(playersToAdd){
@@ -285,7 +285,8 @@ public class ThreadRequestsHandler extends Thread{
 			socketHandlerWriter("ok\n");
 		}
 		response = socketHandlerReader();
-		if(response.equals("accepted"))
+		String content = getContentFromStringResponse(response);
+		if(response.split(" ")[0].equals("accepted"))
 		{
 			synchronized(playersToAdd){
 				for(int i=0;i<playersToAdd.size();i++){
@@ -293,9 +294,8 @@ public class ThreadRequestsHandler extends Thread{
 						playersToAdd.remove(i);
 				}
 			}
-			response = socketHandlerReader();
 			socketHandlerWriter(player.marshallerThis()+"\n");
-			if(response.equals(player_name))
+			if(content.equals(player_name))
 				player.setMy_next(pl_name);
 			System.out.println("[INFO] Notifica nuovo giocatore!"+"["+pl_name+"]");
 			game.addPlayer(pl);
