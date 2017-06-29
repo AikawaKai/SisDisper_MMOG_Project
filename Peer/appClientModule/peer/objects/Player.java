@@ -149,7 +149,7 @@ public class Player {
 			DataOutputStream outToPeer = new DataOutputStream(socket.getOutputStream());
 			outToPeer.writeBytes(message);
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Player: "+this.name+" morto");
 		}
 	}
 	
@@ -161,7 +161,7 @@ public class Player {
 		try {
 			response = inputStream.readLine();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Player: "+this.name+" morto");
 		}
 		return response;
 	}

@@ -35,6 +35,7 @@ public class ThreadRequestsHandler extends Thread{
 	private ArrayList<Bomb> explodedBombs;
 	private ArrayList<Player> playersToAdd;
 	private ArrayList<Player> playersToDelete;
+	private ArrayList<Socket> connections;
 
 	public ThreadRequestsHandler(Socket connection){
 		player = SingletonFactory.getPlayerSingleton();
@@ -46,6 +47,10 @@ public class ThreadRequestsHandler extends Thread{
 		explodedBombs = SingletonFactory.bombExploded();
 		playersToAdd = SingletonFactory.getPlayersToAdd();
 		playersToDelete = SingletonFactory.getPlayersToDelete();
+		connections = SingletonFactory.getConnections();
+		synchronized(connections){
+			connections.add(conn);
+		}
 		try{
 			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			outToClient = new DataOutputStream(conn.getOutputStream());
@@ -113,6 +118,7 @@ public class ThreadRequestsHandler extends Thread{
 	private void myTurn() {
 		checkMyExplosions();
 		checkDeletedPlayers();
+		checkVictory();
 		checkEnteringPlayers();
 		Move m = null;
 		synchronized(moves){
@@ -126,8 +132,12 @@ public class ThreadRequestsHandler extends Thread{
 			basicMove((BasicMove) m);
 		else
 			bomb((Bomb) m);
+		checkVictory();
+		forwardToken();
 	}
 
+
+	// prima di iniziare il mio turno ricostruisco la topologia
 	private void checkDeletedPlayers() {
 		synchronized(playersToDelete){
 			if(playersToDelete.isEmpty())
@@ -165,15 +175,6 @@ public class ThreadRequestsHandler extends Thread{
 			sendRequestDeletePlayer();
 		}
 		sendRequestToAll("explosion", new boolean[1], b);
-		WebTarget target = SingletonFactory.getWebTargetSingleton();
-		if(!player.isDead() && player.getPoints()>=game.getMax_point())
-		{
-			target.path("deletegame").path(game.getGame_name()).request().delete();
-			sendRequestToAll("victory", new boolean[1], new Object());
-			System.out.println("[INFO] Hai vinto!");
-			player.killPlayer();
-		}
-
 	}
 
 	// prima di fare la mossa controllo che non ci siano giocatori che vogliono entrare
@@ -201,15 +202,6 @@ public class ThreadRequestsHandler extends Thread{
 		m.move(player, game);
 		System.out.println(game.getPosOnGameArea(player.getPos()));
 		sendRequestToAll("sendnewpos", new boolean[1], new Object());
-		if(!player.isDead() && player.getPoints()>=game.getMax_point())
-		{
-			target.path("deletegame").path(game.getGame_name()).request().delete();
-			sendRequestToAll("victory", new boolean[1], new Object());
-			System.out.println("[INFO] Hai vinto!");
-			player.killPlayer();
-		}else{
-			forwardToken();
-		}
 	}
 
 	//handler per la bomba
@@ -218,7 +210,6 @@ public class ThreadRequestsHandler extends Thread{
 		sendRequestToAll("bomb", new boolean[1], b.getColor());
 		ThreadBombExplosion bombEx = new ThreadBombExplosion(b);
 		bombEx.start();
-		forwardToken();
 	}
 
 	// aggiunge alla coda dei player da aggiungere
@@ -271,6 +262,7 @@ public class ThreadRequestsHandler extends Thread{
 
 	//handler per l'aggiunta di un giocatore
 	private void playersUpdate(String player_string) {
+		System.out.println("[DEBUG] INIZIO INSERIMENTO");
 		String response = "";
 		StringReader reader = null;
 		Player pl;
@@ -294,12 +286,14 @@ public class ThreadRequestsHandler extends Thread{
 						playersToAdd.remove(i);
 				}
 			}
+			System.out.println("[DEBUG] INSERIMENTO, ARRIVO QUI?");
 			socketHandlerWriter(player.marshallerThis()+"\n");
 			if(content.equals(player_name))
 				player.setMy_next(pl_name);
 			System.out.println("[INFO] Notifica nuovo giocatore!"+"["+pl_name+"]");
 			game.addPlayer(pl);
 		}
+		System.out.println("[DEBUG] FINE INSERIMENTO");
 	}
 
 	//handler per la cancellazione di un giocatore in partita
@@ -317,6 +311,7 @@ public class ThreadRequestsHandler extends Thread{
 		{
 			player.setMy_next(pl.getMy_next());
 		}
+		socketHandlerWriter("ok\n");
 		System.out.println("\n[INFO] Notifica cancellazione giocatore! ["+pl_name+"]");
 	}
 
@@ -329,10 +324,7 @@ public class ThreadRequestsHandler extends Thread{
 		position = Position.unmarshallThat(reader);
 		if(pos.equals(position)){
 			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
-			sendRequestDeletePlayer();
-			player.killPlayer();
-			player.closeSocket();
-			System.out.println("[INFO] Eliminato");
+			deletePlayer();
 		}else{
 			socketHandlerWriter("mancato \n");
 		}
@@ -345,10 +337,7 @@ public class ThreadRequestsHandler extends Thread{
 		boolean checkEx = player.isInArea(area);
 		if(checkEx){
 			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
-			sendRequestDeletePlayer();
-			player.killPlayer();
-			player.closeSocket();
-			System.out.println("[INFO] Eliminato");
+			deletePlayer();
 		}else{
 			socketHandlerWriter("mancato \n");
 		}
@@ -364,8 +353,7 @@ public class ThreadRequestsHandler extends Thread{
 	// metodo per la sconfitta
 	private void admitDefeat() {
 		System.out.println("[INFO] Hai perso! Mi spiace.");
-		player.killPlayer();
-		player.closeSocket();
+		deletePlayer();
 	}
 
 	// manda il token al mio next
@@ -416,7 +404,7 @@ public class ThreadRequestsHandler extends Thread{
 		try {
 			outToClient.writeBytes(message);
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Socket chiusa");
 		}
 	}
 
@@ -425,9 +413,33 @@ public class ThreadRequestsHandler extends Thread{
 		try {
 			response = inFromClient.readLine();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Socket chiusa");
 		}
 		return response;
+	}
+
+	// metodo per controllare se il giocatore ha vinto
+	private void checkVictory() {
+		WebTarget target = SingletonFactory.getWebTargetSingleton();
+		if(!player.isDead() && player.getPoints()>=game.getMax_point())
+		{
+			target.path("deletegame").path(game.getGame_name()).request().delete();
+			sendRequestToAll("victory", new boolean[1], new Object());
+			System.out.println("[INFO] Hai vinto!");
+			player.killPlayer();
+			player.closeSocket();
+			System.exit(0);
+		}
+	}
+	
+	// metodo per cancellare il giocatore
+	private void deletePlayer() {
+		sendRequestDeletePlayer();
+		player.killPlayer();
+		player.closeSocket();
+		System.out.println("[INFO] Fine partita.");
+		System.exit(0);
+
 	}
 
 }
