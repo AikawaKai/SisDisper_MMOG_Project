@@ -100,11 +100,8 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 	// metodo per segnalare che sto uscendo
 	private void notifyDeletePlayer() {
-		System.out.println("Io giocatore "+player.getName()+" Sto dicendo a "+player_i.getName()+" che sono morto");
 		player_i.sendMessage("deleteplayer CONTENT:"+player.marshallerThis()+"\n");
 		player_i.getMessage();
-		System.out.println("[FATTO]"+player.getName()+" Sto dicendo a "+player_i.getName()+" che sono morto");
-
 	}
 
 	// metodo per segnalare la nuova posizione dopo uno spostamento
@@ -138,8 +135,6 @@ public class ThreadSendRequestToPlayer extends Thread {
 		status = player_i.getMessage();
 		status_next = status.split(" ");
 		if(status_next[0].equals("colpito") && !player.isDead()){
-//			if(player.getMy_next().equals(player_i.getName()))
-//				player.setMy_next(status_next[1]);
 			System.out.println("[INFO] Hai colpito il giocatore ["+player_i.getName()+"]");
 			synchronized(b){
 				if(b.getCounter()<3)
@@ -188,5 +183,4 @@ public class ThreadSendRequestToPlayer extends Thread {
 	private void sendTokenToNext() {
 		player_i.sendMessage("token\n");
 	}
-
 }
