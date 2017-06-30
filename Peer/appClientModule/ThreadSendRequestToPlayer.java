@@ -10,6 +10,7 @@ import peer.objects.SingletonFactory;
 //
 //          Thread handler per mandare le diverse richieste agli altri peer   
 //-------------------------------------------------------------------------------------
+
 public class ThreadSendRequestToPlayer extends Thread {
 	private Player player;
 	private Player player_i;
@@ -61,6 +62,9 @@ public class ThreadSendRequestToPlayer extends Thread {
 			break;
 		case "victory":
 			victory();
+			break;
+		case "end":
+			end();
 			break;
 		}
 	}
@@ -183,4 +187,10 @@ public class ThreadSendRequestToPlayer extends Thread {
 	private void sendTokenToNext() {
 		player_i.sendMessage("token\n");
 	}
+	
+	// comunico a chi vuole entrare che la partita è finita
+	private void end() {
+		player_i.sendMessage("end\n");
+	}
+
 }

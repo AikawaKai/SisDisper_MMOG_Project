@@ -18,7 +18,6 @@ public class SingletonFactory {
 	static BufferMoves moves;
 	static BufferMoves bombmoves;
 	static ArrayList<Player> playersToAdd;
-	static ArrayList<Player> playersToDelete;
 	static ArrayList<Bomb> explosions;
 	
 	public static void setPlayerSingleton(Player p){
@@ -63,12 +62,7 @@ public class SingletonFactory {
 			playersToAdd = new ArrayList<Player>();
 		return playersToAdd;
 	}
-	
-	public static synchronized ArrayList<Player> getPlayersToDelete(){
-		if(playersToDelete==null)
-			playersToDelete = new ArrayList<Player>();
-		return playersToDelete;
-	}
+
 		
 	public static synchronized ArrayList<Bomb> bombExploded(){
 		if(explosions==null)

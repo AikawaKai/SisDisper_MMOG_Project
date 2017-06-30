@@ -104,6 +104,8 @@ public class ThreadRequestsHandler extends Thread{
 		case "victory":
 			admitDefeat();
 			break;
+		case "end":
+			notEntering();
 		default:
 			break;
 		}
@@ -133,8 +135,10 @@ public class ThreadRequestsHandler extends Thread{
 
 
 	private void checkIfImDead() {
-		if(player.isDead()){
+		if(player.isDead() && player.getActiveBombs()==0){
 			deletePlayer();
+		}else if(player.isDead()){
+			forwardToken();
 		}
 	}
 
@@ -147,6 +151,7 @@ public class ThreadRequestsHandler extends Thread{
 		}
 		if(b==null)
 			return;
+		player.removeActiveBomb();
 		System.out.print("[INFO] Bomba "+b.getColor()+" esplosa!\n");
 		Position []area = game.getArea(b.getColor());
 		if(player.isInArea(area) && !player.isDead()){
@@ -187,6 +192,7 @@ public class ThreadRequestsHandler extends Thread{
 	//handler per la bomba
 	private void bomb(Bomb b) {
 		System.out.println("[INFO] Bomba "+b.getColor()+" lanciata!");
+		player.addActiveBomb();
 		sendRequestToAll("bomb", new boolean[1], b.getColor());
 		ThreadBombExplosion bombEx = new ThreadBombExplosion(b);
 		bombEx.start();
@@ -243,7 +249,6 @@ public class ThreadRequestsHandler extends Thread{
 
 	//handler per l'aggiunta di un giocatore
 	private void playersUpdate(String player_string) {
-		//System.out.println("[DEBUG] INIZIO INSERIMENTO");
 		String response = "";
 		StringReader reader = null;
 		Player pl;
@@ -267,14 +272,12 @@ public class ThreadRequestsHandler extends Thread{
 						playersToAdd.remove(i);
 				}
 			}
-			//System.out.println("[DEBUG] INSERIMENTO, ARRIVO QUI?");
 			socketHandlerWriter(player.marshallerThis()+"\n");
 			if(content.equals(player_name))
 				player.setMy_next(pl_name);
 			System.out.println("[INFO] Notifica nuovo giocatore!"+"["+pl_name+"]");
 			game.addPlayer(pl);
 		}
-		//System.out.println("[DEBUG] FINE INSERIMENTO");
 	}
 
 	//handler per la cancellazione di un giocatore in partita
@@ -285,9 +288,6 @@ public class ThreadRequestsHandler extends Thread{
 		reader = new StringReader(content);
 		pl = (Player) Player.unmarshallThat(reader);
 		pl_name = pl.getName();
-		//		synchronized(playersToDelete){
-		//			playersToDelete.add(pl);
-		//		}
 		if(player.getMy_next().equals(pl_name))
 		{
 			player.setMy_next(pl.getMy_next());
@@ -337,7 +337,7 @@ public class ThreadRequestsHandler extends Thread{
 	// metodo per la sconfitta
 	private void admitDefeat() {
 		System.out.println("[INFO] Hai perso! Mi spiace.");
-		deletePlayer();
+		player.killPlayer();
 	}
 
 	// manda il token al mio next
@@ -358,25 +358,7 @@ public class ThreadRequestsHandler extends Thread{
 		return content.substring(index+8, length);
 	}
 
-	//manda la richiesta a tutti eccetto me stesso
-	void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
-		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
-		ArrayList<Player> players_copy = game.getPlayersCopy();
-		for(Player pl_i: players_copy){
-			if(pl_i.getName().equals(player_name))
-				continue;
-			ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
-			threads.add(pl_hl);
-			pl_hl.start();
-		}
-		for(ThreadSendRequestToPlayer hl: threads){
-			try {
-				hl.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+
 
 	private void socketHandlerWriter(String message){
 		try {
@@ -398,14 +380,20 @@ public class ThreadRequestsHandler extends Thread{
 
 	// metodo per controllare se il giocatore ha vinto
 	private void checkVictory() {
-		WebTarget target = SingletonFactory.getWebTargetSingleton();
 		if(!player.isDead() && player.getPoints()>=game.getMax_point())
 		{
 			target.path("deletegame").path(game.getGame_name()).request().delete();
 			sendRequestToAll("victory", new boolean[1], new Object());
+			sendKoToEnteringPlayers();
 			System.out.println("[INFO] Hai vinto!");
 			player.killPlayer();
 		}
+	}
+	
+	private void notEntering() {
+		System.out.println("[INFO] La partita si è conclusa! Mi spiace.");
+		System.exit(0);
+		
 	}
 
 	// metodo per cancellare il giocatore
@@ -415,7 +403,44 @@ public class ThreadRequestsHandler extends Thread{
 		System.out.println("[INFO] Fine partita.");
 		if(game.getPlayers().size()>1)
 			forwardToken();
+		target.path("deletegame").path(game.getGame_name()).request().delete();
 		System.exit(0);
 	}
 
+	//manda la richiesta a tutti eccetto me stesso
+	void sendRequestToAll(String request, boolean[] check, Object objectToSend) {
+		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
+		ArrayList<Player> players_copy = game.getPlayersCopy();
+		for(Player pl_i: players_copy){
+			if(pl_i.getName().equals(player_name))
+				continue;
+			ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, request, check, objectToSend);
+			threads.add(pl_hl);
+			pl_hl.start();
+		}
+		for(ThreadSendRequestToPlayer hl: threads){
+			try {
+				hl.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void sendKoToEnteringPlayers() {
+		ArrayList<ThreadSendRequestToPlayer> threads = new ArrayList<ThreadSendRequestToPlayer>();
+		for(Player pl_i: playersToAdd){
+			ThreadSendRequestToPlayer pl_hl = new ThreadSendRequestToPlayer(pl_i, "end", null, null);
+			threads.add(pl_hl);
+			pl_hl.start();
+		}
+		for(ThreadSendRequestToPlayer hl: threads){
+			try {
+				hl.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
 }
