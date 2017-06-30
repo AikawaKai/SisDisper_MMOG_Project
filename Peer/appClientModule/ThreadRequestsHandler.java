@@ -34,8 +34,7 @@ public class ThreadRequestsHandler extends Thread{
 	private BufferMoves moves;
 	private ArrayList<Bomb> explodedBombs;
 	private ArrayList<Player> playersToAdd;
-	private ArrayList<Player> playersToDelete;
-	private ArrayList<Socket> connections;
+	//private ArrayList<Player> playersToDelete;
 
 	public ThreadRequestsHandler(Socket connection){
 		player = SingletonFactory.getPlayerSingleton();
@@ -46,11 +45,7 @@ public class ThreadRequestsHandler extends Thread{
 		moves = SingletonFactory.getSingletonMoves();
 		explodedBombs = SingletonFactory.bombExploded();
 		playersToAdd = SingletonFactory.getPlayersToAdd();
-		playersToDelete = SingletonFactory.getPlayersToDelete();
-		connections = SingletonFactory.getConnections();
-		synchronized(connections){
-			connections.add(conn);
-		}
+		//playersToDelete = SingletonFactory.getPlayersToDelete();
 		try{
 			inFromClient = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 			outToClient = new DataOutputStream(conn.getOutputStream());
@@ -61,7 +56,7 @@ public class ThreadRequestsHandler extends Thread{
 
 	public void run(){
 		String response = "";
-		while(true && !player.isDead()){
+		while(true){
 			response = socketHandlerReader();
 			if(response==null)// response = HEADER CONTENT:
 				break;
@@ -117,9 +112,10 @@ public class ThreadRequestsHandler extends Thread{
 	//handler per la mossa (movimento o bomba)
 	private void myTurn() {
 		checkMyExplosions();
-		checkDeletedPlayers();
+		//checkDeletedPlayers();
 		checkVictory();
 		checkEnteringPlayers();
+		checkIfImDead();
 		Move m = null;
 		synchronized(moves){
 			m = moves.getFirst();
@@ -137,28 +133,32 @@ public class ThreadRequestsHandler extends Thread{
 	}
 
 
-	// prima di iniziare il mio turno ricostruisco la topologia
-	private void checkDeletedPlayers() {
-		synchronized(playersToDelete){
-			if(playersToDelete.isEmpty())
-			{
-				return;
-			}
-			while(playersToDelete.size()!=0){
-				Player first = playersToDelete.remove(0);
-				game.removePlayer(first.getName());
-				for(Player pl:playersToDelete){
-					if(pl.getMy_next().equals(first.getName()))
-						pl.setMy_next(first.getMy_next());
-				}
-				if(player.getMy_next().equals(first.getName()))
-					player.setMy_next(first.getMy_next());
-			}
-			System.out.println("CHECKDELETEDPLAYERS: "+ player_name+" ha come nuovo next "+player.getMy_next());
-
-
+	private void checkIfImDead() {
+		if(player.isDead()){
+			deletePlayer();
 		}
 	}
+
+//	// prima di iniziare il mio turno ricostruisco la topologia
+//	private void checkDeletedPlayers() {
+//		synchronized(playersToDelete){
+//			if(playersToDelete.isEmpty())
+//			{
+//				return;
+//			}
+//			while(playersToDelete.size()!=0){
+//				Player first = playersToDelete.remove(0);
+//				game.removePlayer(first.getName());
+//				for(Player pl:playersToDelete){
+//					if(pl.getMy_next().equals(first.getName()))
+//						pl.setMy_next(first.getMy_next());
+//				}
+//				if(player.getMy_next().equals(first.getName()))
+//					player.setMy_next(first.getMy_next());
+//			}
+//
+//		}
+//	}
 
 	//handler per il controllo delle esplosioni causate da me
 	private void checkMyExplosions() {
@@ -171,7 +171,7 @@ public class ThreadRequestsHandler extends Thread{
 			return;
 		System.out.print("[INFO] Bomba "+b.getColor()+" esplosa!\n");
 		Position []area = game.getArea(b.getColor());
-		if(player.isInArea(area)){
+		if(player.isInArea(area) && !player.isDead()){
 			System.out.println("[INFO] Sei morto a causa della tua stessa bomba!");
 			player.killPlayer();
 			deletePlayer();
@@ -293,7 +293,6 @@ public class ThreadRequestsHandler extends Thread{
 			socketHandlerWriter(player.marshallerThis()+"\n");
 			if(content.equals(player_name))
 				player.setMy_next(pl_name);
-			System.out.println("UPDATED: "+ player_name+" ha come nuovo next "+player.getMy_next());
 			System.out.println("[INFO] Notifica nuovo giocatore!"+"["+pl_name+"]");
 			game.addPlayer(pl);
 		}
@@ -308,15 +307,14 @@ public class ThreadRequestsHandler extends Thread{
 		reader = new StringReader(content);
 		pl = (Player) Player.unmarshallThat(reader);
 		pl_name = pl.getName();
-		synchronized(playersToDelete){
-			System.out.println("Da eliminare "+pl.getName());
-			playersToDelete.add(pl);
-		}
+//		synchronized(playersToDelete){
+//			playersToDelete.add(pl);
+//		}
 		if(player.getMy_next().equals(pl_name))
 		{
 			player.setMy_next(pl.getMy_next());
-			System.out.println("UTENTE CANCELLATO "+ player_name+" ha come nuovo next "+player.getMy_next());
 		}
+		game.removePlayer(pl_name);
 		System.out.println("\n[INFO] Notifica cancellazione giocatore! ["+pl_name+"]");
 		socketHandlerWriter("ok\n");
 	}
@@ -331,7 +329,7 @@ public class ThreadRequestsHandler extends Thread{
 		if(pos.equals(position)){
 			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
 			System.out.println("[INFO] Sei stato eliminato!");
-			deletePlayer();
+			player.killPlayer();
 		}else{
 			socketHandlerWriter("mancato \n");
 		}
@@ -345,7 +343,7 @@ public class ThreadRequestsHandler extends Thread{
 		if(checkEx){
 			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
 			System.out.println("[INFO] Sei stato eliminato!");
-			deletePlayer();
+			player.killPlayer();
 		}else{
 			socketHandlerWriter("mancato \n");
 		}
@@ -437,6 +435,8 @@ public class ThreadRequestsHandler extends Thread{
 		target.path("deleteplayer").path(game.getGame_name()).path(player_name).request().delete();
 		sendRequestToAll("deleteplayer", new boolean[1], player);
 		System.out.println("[INFO] Fine partita.");
+		forwardToken();
+		System.exit(0);
 	}
 
 }

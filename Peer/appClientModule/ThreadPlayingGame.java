@@ -60,7 +60,7 @@ public class ThreadPlayingGame extends Thread {
 		System.out.println("Bombe [Q]");
 		if(first)
 			System.out.println(game.getPosOnGameArea(player.getPos()));
-		while(true && !player.isDead()){
+		while(true){
 			try {
 				connectionSocket = ws.accept();
 				ThreadRequestsHandler clientHandler = new ThreadRequestsHandler(connectionSocket);
@@ -69,7 +69,6 @@ public class ThreadPlayingGame extends Thread {
 				break;
 			}
 		}
-		System.exit(0);
 	}
 
 	//manda la richiesta a tutti eccetto me stesso

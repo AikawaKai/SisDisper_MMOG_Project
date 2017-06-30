@@ -1,6 +1,6 @@
 package peer.objects;
 
-import java.net.Socket;
+
 import java.util.ArrayList;
 
 import javax.ws.rs.client.WebTarget;
@@ -20,7 +20,6 @@ public class SingletonFactory {
 	static ArrayList<Player> playersToAdd;
 	static ArrayList<Player> playersToDelete;
 	static ArrayList<Bomb> explosions;
-	static ArrayList<Socket> connections;
 	
 	public static void setPlayerSingleton(Player p){
 		player = p;
@@ -77,10 +76,5 @@ public class SingletonFactory {
 		return explosions;
 	}
 	
-	public static synchronized ArrayList<Socket> getConnections(){
-		if(connections==null)
-			connections = new ArrayList<Socket>();
-		return connections;
-	}
 
 }
