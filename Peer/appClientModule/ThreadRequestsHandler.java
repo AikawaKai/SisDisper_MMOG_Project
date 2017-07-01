@@ -147,7 +147,7 @@ public class ThreadRequestsHandler extends Thread{
 		Bomb b=null;
 		synchronized(explodedBombs){
 			if(explodedBombs.size()>0)
-				b=explodedBombs.remove(0);
+				b=explodedBombs.remove(0); //ne faccio espodere sempre e solo una alla volta 
 		}
 		if(b==null)
 			return;
