@@ -157,7 +157,6 @@ public class ThreadRequestsHandler extends Thread{
 		if(player.isInArea(area) && !player.isDead()){
 			System.out.println("[INFO] Sei morto a causa della tua stessa bomba!");
 			player.killPlayer();
-			deletePlayer();
 		}
 		sendRequestToAll("explosion", new boolean[1], b);
 	}
@@ -359,7 +358,7 @@ public class ThreadRequestsHandler extends Thread{
 	}
 
 
-
+	// handler per la scrittura sulla socket
 	private void socketHandlerWriter(String message){
 		try {
 			outToClient.writeBytes(message);
@@ -367,7 +366,8 @@ public class ThreadRequestsHandler extends Thread{
 
 		}
 	}
-
+	
+	// handelr per la lettura sulla socket
 	private String socketHandlerReader(){
 		String response = null;
 		try {
@@ -390,6 +390,7 @@ public class ThreadRequestsHandler extends Thread{
 		}
 	}
 	
+	// metodo per uscire dalla partita se questa si è conclusa durante il mio inserimento
 	private void notEntering() {
 		System.out.println("[INFO] La partita si è conclusa! Mi spiace.");
 		System.exit(0);
@@ -401,9 +402,7 @@ public class ThreadRequestsHandler extends Thread{
 		target.path("deleteplayer").path(game.getGame_name()).path(player_name).request().delete();
 		sendRequestToAll("deleteplayer", new boolean[1], player);
 		System.out.println("[INFO] Fine partita.");
-		if(game.getPlayers().size()>1)
-			forwardToken();
-		target.path("deletegame").path(game.getGame_name()).request().delete();
+		forwardToken();
 		System.exit(0);
 	}
 
