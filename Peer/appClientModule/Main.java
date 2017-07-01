@@ -173,8 +173,11 @@ public class Main {
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 				System.out.print("Inserisci il nome della partita: ");
 				GameName = bufferedReader.readLine();
-				System.out.print("Inserisci la larghezza del quadrato di gioco: ");
-				int N = integerReaderHandler(bufferedReader);
+				int N = 0;
+				while(N<=1 || N%2==1){
+					System.out.print("Inserisci la larghezza del quadrato di gioco (N>1 && N pari): ");
+					N = integerReaderHandler(bufferedReader);
+				}
 				System.out.print("Inserisci il numero di punti della partita: ");
 				int points = integerReaderHandler(bufferedReader);
 				game = new Game();
