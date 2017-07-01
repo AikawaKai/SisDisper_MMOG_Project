@@ -303,10 +303,10 @@ public class ThreadRequestsHandler extends Thread{
 		Position position;
 		reader = new StringReader(content);
 		position = Position.unmarshallThat(reader);
-		if(pos.equals(position)){
+		if(pos.equals(position) && !player.isDead()){
+			player.killPlayer();
 			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
 			System.out.println("[INFO] Sei stato eliminato!");
-			player.killPlayer();
 		}else{
 			socketHandlerWriter("mancato \n");
 		}
@@ -317,10 +317,10 @@ public class ThreadRequestsHandler extends Thread{
 		System.out.print("[INFO] Bomba "+color+" esplosa!");
 		Position []area = game.getArea(color);
 		boolean checkEx = player.isInArea(area);
-		if(checkEx){
+		if(checkEx && !player.isDead()){
+			player.killPlayer();
 			socketHandlerWriter("colpito "+player.getMy_next()+"\n");
 			System.out.println("[INFO] Sei stato eliminato!");
-			player.killPlayer();
 		}else{
 			socketHandlerWriter("mancato \n");
 		}
