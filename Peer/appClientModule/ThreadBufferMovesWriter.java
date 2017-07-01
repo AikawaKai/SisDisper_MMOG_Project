@@ -34,9 +34,10 @@ public class ThreadBufferMovesWriter extends Thread {
 				case "q":
 					Bomb b = null;
 					synchronized(bombs){
-						if(bombs.size()>0 && player.getActiveBombs()==0 )
+						if(bombs.size()>0 && player.getActiveBombs()==0 ){	
 							b = (Bomb) bombs.getFirst();
-						else if(bombs.size()>0 && player.getActiveBombs()==1)
+							player.addActiveBomb();
+						}else if(bombs.size()>0 && player.getActiveBombs()==1)
 							System.out.println("[INFO] Hai già una bomba attiva!!");
 					}
 					synchronized(moves){

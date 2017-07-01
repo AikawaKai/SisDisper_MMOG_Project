@@ -191,7 +191,6 @@ public class ThreadRequestsHandler extends Thread{
 	//handler per la bomba
 	private void bomb(Bomb b) {
 		System.out.println("[INFO] Bomba "+b.getColor()+" lanciata!");
-		player.addActiveBomb();
 		sendRequestToAll("bomb", new boolean[1], b.getColor());
 		ThreadBombExplosion bombEx = new ThreadBombExplosion(b);
 		bombEx.start();
