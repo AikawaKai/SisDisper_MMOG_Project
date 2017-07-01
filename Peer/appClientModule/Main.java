@@ -238,7 +238,7 @@ public class Main {
 		}else if(status==406){
 			System.out.println("[INFO] Partita inesistente. Impossibile aggiungere il giocatore. ");
 		}else if(status==409){
-			System.out.println("[INFO] Giocatore con medesimo nickname già presente in partita. ");
+			System.out.println("[INFO] Giocatore con medesimo nickname già presente in partita. / Partita piena. ");
 		}else{
 			System.out.println("[INFO] Aggiunta giocatore alla partita fallita. ");
 		}

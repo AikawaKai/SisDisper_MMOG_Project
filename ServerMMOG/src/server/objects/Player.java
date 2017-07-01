@@ -26,71 +26,84 @@ public class Player {
 	private DataOutputStream outputStream = null;
 	private int points;
 	private boolean is_dead=false;
+	private int activebombs = 0;
 
-	
+
 	public Player(){
 	}
-	
+
 	public String getName(){
 		return name;
 	}
-	
+
 	public void setName(String n){
 		name = n;
 	}
-	
+
 	public void setIp(String host){
 		ip = host;
 	}
-	
+
 	public synchronized String getIp(){
 		return ip;
 	}
-	
+
 	public synchronized void setPort(int p){
 		port = p;
 	}
-	
+
 	public synchronized int getPort(){
 		return port;
 	}
-	
+
 	public synchronized void setPos(Position p){
 		pos = p;
 	}
-	
+
 	public synchronized Position getPos(){
 		return pos;
 	}
-	
+
 	public synchronized String getMy_next(){
 		return my_next;
 	}
-	
+
 	public synchronized void setMy_next(String next){
 		my_next = next;
 	}
-	
+
 	public synchronized void setPoints(int p){
 		points = p;
 	}
-	
+
 	public synchronized int getPoints(){
 		return points;
 	}
-	
+
 	public synchronized void addOnePoint(){
 		points = points + 1;
 	}
 	
+	public synchronized void addActiveBomb(){
+		activebombs++;
+	}
+	
+	public synchronized void removeActiveBomb() {
+		activebombs--;
+	}
+	
+	public synchronized int getActiveBombs(){
+		return activebombs;
+	}
+
 	public synchronized void killPlayer(){
 		is_dead = true;
 	}
-	
+
 	public synchronized boolean isDead(){
 		return is_dead;
 	}
-	
+
 	public synchronized boolean equals(Player pl){
 		if(pl.getName().equals(name))
 		{
@@ -99,7 +112,7 @@ public class Player {
 		}
 		return false;
 	}
-	
+
 	public synchronized BufferedReader  getSocketInput(){
 		if(socket==null)
 			startSocket();
@@ -111,26 +124,17 @@ public class Player {
 			startSocket();
 		return outputStream;
 	}
-	
+
 	private synchronized void startSocket() {
-		boolean check = true;
-		while(check){
-			try {
-				socket = new Socket(ip, port);
-				outputStream = new DataOutputStream(socket.getOutputStream());
-				inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-				check = false;
-			} catch (IOException e) {
-				System.out.println("Sto ritentando la connessione");
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-			}
+		try {
+			socket = new Socket(ip, port);
+			outputStream = new DataOutputStream(socket.getOutputStream());
+			inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		} catch (IOException e) {
+
 		}
 	}
-	
+
 	public synchronized void closeSocket(){
 		if(socket!=null){
 			try {
@@ -149,10 +153,23 @@ public class Player {
 			DataOutputStream outToPeer = new DataOutputStream(socket.getOutputStream());
 			outToPeer.writeBytes(message);
 		} catch (IOException e) {
-			e.printStackTrace();
+
 		}
 	}
-	
+
+	public synchronized String getMessage(){
+		if(socket==null){
+			startSocket();
+		}
+		String response = null;
+		try {
+			response = inputStream.readLine();
+		} catch (IOException e) {
+
+		}
+		return response;
+	}
+
 	public synchronized String marshallerThis(){
 		String player_s = null;
 		try {
@@ -167,7 +184,7 @@ public class Player {
 		}
 		return player_s;
 	}
-	
+
 	public static Player unmarshallThat(StringReader player_s){
 		Player gen_play = null;
 		try {
@@ -190,4 +207,6 @@ public class Player {
 			return true;
 		return false;
 	}
+
+
 }

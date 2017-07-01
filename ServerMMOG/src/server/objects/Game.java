@@ -84,12 +84,16 @@ public class Game {
 		return null;
 	}
 	
+	public synchronized ArrayList<Player> getPlayersCopy(){
+		return new ArrayList<Player>(players);
+	}
+	
 	// metodo per l'aggiunta di un giocatore alla parita
 	public synchronized boolean addPlayer(Player pl){
 		if(player_names.contains(pl.getName()))
-		{
 			return false;
-		}
+		if(players.size()==size_x*size_x)
+			return false;
 		player_names.add(pl.getName());
 		players.add(pl);
 		return true;
@@ -97,9 +101,8 @@ public class Game {
 	
 	// metodo per la rimozione di un giocatore di nome pl_name dalla partita
 	public synchronized boolean removePlayer(String pl_name) {
-		if(!player_names.contains(pl_name)){
+		if(!player_names.contains(pl_name))
 			return false;
-		}
 		player_names.remove(pl_name);
 		int i = 0;
 		for(Player pl: players){
@@ -132,9 +135,8 @@ public class Game {
 	}
 
 	public synchronized Player getFirstPlayer() {
-		if(players.size()>0){
+		if(players.size()>0)
 			return players.get(0);
-		}
 		return null;
 	}
 	
@@ -253,7 +255,7 @@ public class Game {
 				return pos;
 			case "gialla":
 				a.setPos_x(size_x/2);
-				a.setPos_y(size_x/2-1);
+				a.setPos_y(size_x/2);
 				b.setPos_x(size_x-1);
 				b.setPos_y(size_x-1);
 				return pos;
