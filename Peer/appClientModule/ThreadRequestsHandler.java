@@ -135,9 +135,9 @@ public class ThreadRequestsHandler extends Thread{
 
 
 	private void checkIfImDead() {
-		if(player.isDead() && player.getActiveBombs()==0){
+		if(player.isDead() && player.getActiveBombs()==0){ // ho finito tutto quello che devo fare
 			deletePlayer();
-		}else if(player.isDead()){
+		}else if(player.isDead()){ // ho ancora bombe da far esplodere, ma sono morto
 			forwardToken();
 		}
 	}
@@ -402,7 +402,8 @@ public class ThreadRequestsHandler extends Thread{
 		target.path("deleteplayer").path(game.getGame_name()).path(player_name).request().delete();
 		sendRequestToAll("deleteplayer", new boolean[1], player);
 		System.out.println("[INFO] Fine partita.");
-		forwardToken();
+		if(!player.getMy_next().equals(player_name))
+			forwardToken();
 		System.exit(0);
 	}
 
