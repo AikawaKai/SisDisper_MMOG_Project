@@ -46,11 +46,6 @@ public class ThreadPlayingGame extends Thread {
 		}else{
 			//altrimenti provo ad entrare
 			//comeInNewPlayer();
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 			ArrayList<Boolean> checkin_status = new ArrayList<Boolean>();
 			sendRequestToAll("checkin", new boolean[1], checkin_status);
 			WebTarget target = SingletonFactory.getWebTargetSingleton();
