@@ -202,6 +202,7 @@ public class ThreadRequestsHandler extends Thread{
 		synchronized(playersToAdd){
 			playersToAdd.add(toAdd);
 		}
+		socketHandlerWriter("ok\n");
 	}
 
 	//funzione che si occupa di generare una nuova posizione random per il nuovo giocatore

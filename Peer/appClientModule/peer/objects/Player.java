@@ -139,7 +139,7 @@ public class Player {
 		if(socket!=null){
 			try {
 				socket.close();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -152,7 +152,7 @@ public class Player {
 		try {
 			DataOutputStream outToPeer = new DataOutputStream(socket.getOutputStream());
 			outToPeer.writeBytes(message);
-		} catch (IOException e) {
+		} catch (Exception e) {
 
 		}
 	}
@@ -164,7 +164,7 @@ public class Player {
 		String response = null;
 		try {
 			response = inputStream.readLine();
-		} catch (IOException e) {
+		} catch (Exception e) {
 
 		}
 		return response;

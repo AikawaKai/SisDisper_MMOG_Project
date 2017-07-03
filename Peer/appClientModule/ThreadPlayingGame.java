@@ -3,6 +3,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import javax.ws.rs.client.WebTarget;
+
 import peer.objects.Game;
 import peer.objects.Player;
 import peer.objects.SingletonFactory;
@@ -44,7 +46,19 @@ public class ThreadPlayingGame extends Thread {
 		}else{
 			//altrimenti provo ad entrare
 			//comeInNewPlayer();
-			sendRequestToAll("checkin", new boolean[1], player);
+			try {
+				Thread.sleep(10000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			ArrayList<Boolean> checkin_status = new ArrayList<Boolean>();
+			sendRequestToAll("checkin", new boolean[1], checkin_status);
+			WebTarget target = SingletonFactory.getWebTargetSingleton();
+			if(checkin_status.size()==0){
+				System.out.println("[INFO] La partita è già finita. Mi spiace.");
+				target.path("deletegame").path(game.getGame_name()).request().delete();
+				System.exit(0);
+			}
 		}
 		ThreadSensorHandler sensorHl = new ThreadSensorHandler(0.7, 37);
 		ThreadBufferMovesWriter bufferWriter = new ThreadBufferMovesWriter();

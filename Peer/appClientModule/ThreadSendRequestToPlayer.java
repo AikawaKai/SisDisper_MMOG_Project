@@ -71,7 +71,14 @@ public class ThreadSendRequestToPlayer extends Thread {
 
 	// sto dicendo che voglio entrare
 	private void checkIn() {
-		player_i.sendMessage("checkin CONTENT:"+player.marshallerThis()+"\n");
+		String response = null;
+		synchronized(result){
+			player_i.sendMessage("checkin CONTENT:"+player.marshallerThis()+"\n");
+			response = player_i.getMessage();
+			if(response!=null)
+				((ArrayList<Boolean>)result).add(true);
+		}
+		
 	}
 
 	// provo ad aggiungermi come giocatore. Viene controllata la posizione
